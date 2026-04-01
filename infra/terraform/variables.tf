@@ -31,17 +31,6 @@ variable "bigquery_location" {
   default     = "US"
 }
 
-variable "dataset_id_prefix" {
-  description = "Optional prefix for BigQuery dataset IDs, for example prod_bronze. Leave empty to keep dataset IDs as bronze, silver, and gold."
-  type        = string
-  default     = ""
-
-  validation {
-    condition     = var.dataset_id_prefix == "" || can(regex("^[A-Za-z_][A-Za-z0-9_]*$", var.dataset_id_prefix))
-    error_message = "dataset_id_prefix must be empty or contain only letters, numbers, and underscores, starting with a letter or underscore."
-  }
-}
-
 variable "labels" {
   description = "Optional additional labels to apply where supported."
   type        = map(string)
