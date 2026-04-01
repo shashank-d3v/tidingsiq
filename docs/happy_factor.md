@@ -1,169 +1,109 @@
-# Happy Factor Definition v1
+# Happy Factor
 
 ## Purpose
 
-The Happy Factor is the core application score used by TidingsIQ to rank and filter global news for positive sentiment.
+`happy_factor` is the application score used to filter and sort positive news in TidingsIQ. It is a practical ranking feature, not a claim of objective emotional truth.
 
-Its purpose is not to provide a perfect emotional truth about an article. Instead, it acts as a practical, explainable, and tunable positivity-oriented score derived from GDELT signals.
+The score must be:
+- inexpensive to compute in BigQuery
+- easy to explain in a portfolio setting
+- stable enough for filtering
+- versioned so the formula can evolve without breaking the app contract
 
-The Streamlit application will allow users to set a minimum Happy Factor threshold and view only records that meet or exceed that value.
+## Output Contract
 
----
+- scale: `0` to `100`
+- higher values indicate more positive or uplifting article signals
+- persisted in `gold.positive_news_feed`
+- accompanied by `happy_factor_version`
 
-## Design Goals
+## Inputs
 
-The Happy Factor should be:
+Planned candidate inputs:
 
-- simple enough to explain
-- grounded in available GDELT fields
-- cheap to compute in BigQuery
-- stable enough for filtering and ranking
-- flexible enough to improve later without breaking the app model
-
----
-
-## Initial Inputs
-
-The Happy Factor will be derived from available GDELT article-level signals, subject to final field validation during implementation.
-
-### Candidate Inputs
-
-| Input | Description | Expected Role |
+| Input | Status | Purpose |
 |---|---|---|
-| tone_score | Overall tone-related score from GDELT | Primary positivity or negativity indicator |
-| positive_signal_score | Derived score from positive emotional indicators in GCAM-related fields | Reinforces positive content |
-| negative_signal_score | Derived score from negative emotional indicators if retained | Used as downward adjustment |
-| source_quality_weight | Optional future weighting by source reliability or relevance | Not in v1 |
-| duplicate_penalty | Optional adjustment for duplicate-like records | Not in v1 core formula |
+| `tone_score` | Expected in v1 | Primary positivity signal after normalization |
+| `positive_signal_score` | Pending GDELT validation | Reinforces explicitly positive emotional content |
+| `negative_signal_score` | Pending GDELT validation | Optional downward adjustment |
 
----
+Important constraint:
 
-## Initial Scoring Philosophy
+The exact upstream GDELT field mappings for positive and negative emotional signals are not yet confirmed. The first implementation must not invent them.
 
-The first version of the Happy Factor should use a transparent formula that combines:
+## Recommended v1 Strategy
 
-1. normalized tone
-2. positive emotional signals
-3. optional negative offset if required
+Ship the scoring model in two possible stages, depending on what is validated during source integration.
 
-The score should then be normalized into a user-friendly range.
+### Option A: `v1_tone_only`
 
-Recommended target range for v1:
+Use this if only the tone mapping is validated reliably.
 
-- **0 to 100**
-- higher score means more positive or uplifting news
-- the UI slider should filter on this scale
-
----
-
-## Proposed v1 Formula
-
-### Conceptual Formula
-
-Happy Factor is a weighted score based on normalized tone and positive signal strength.
-
-### Example Placeholder Formula
+Concept:
 
 ```sql
-happy_factor =
-  (0.7 * normalized_tone_score) +
-  (0.3 * normalized_positive_signal_score)
-````
-
-Then map the result into a 0 to 100 scale.
-
-### Optional Extended Formula
-
-If negative signals are retained:
-
-```sql
-happy_factor =
-  (0.6 * normalized_tone_score) +
-  (0.3 * normalized_positive_signal_score) -
-  (0.1 * normalized_negative_signal_score)
+happy_factor = 100 * normalized_tone_score
 ```
 
----
+This is the safest initial release because it keeps the scoring logic fully grounded in confirmed inputs.
 
-## Normalization Strategy
+### Option B: `v1_tone_plus_signal`
 
-Because raw upstream values may not be directly suitable for filtering, each input should be normalized before combination.
+Use this only if positive-signal mappings are validated against real GDELT samples.
 
-### Example Approach
+Concept:
 
-* map each input into a 0 to 1 scale
-* compute weighted score
-* multiply by 100
-* round to a practical precision for display and filtering
+```sql
+happy_factor =
+  100 * (
+    0.7 * normalized_tone_score +
+    0.3 * normalized_positive_signal_score
+  )
+```
 
-### Example Output Interpretation
+If a reliable negative signal is later retained, it can be introduced in a new version rather than modifying an existing one silently.
 
-| Happy Factor Range | Interpretation                      |
-| ------------------ | ----------------------------------- |
-| 0 to 20            | strongly negative or low positivity |
-| 21 to 40           | weak positivity                     |
-| 41 to 60           | mixed or moderate positivity        |
-| 61 to 80           | clearly positive                    |
-| 81 to 100          | strongly positive or uplifting      |
+## Normalization Rules
 
----
+The formula should only combine normalized inputs. For v1:
 
-## v1 Constraints
+- normalize each component to a `0` to `1` range
+- clamp out-of-range values before scoring
+- multiply the weighted result by `100`
+- round to a practical precision for display and filtering
 
-For the first implementation:
+The exact normalization rule for `tone_score` depends on the raw GDELT value distribution and must be validated during implementation.
 
-* avoid overly complex sentiment logic
-* avoid custom machine learning
-* avoid fuzzy heuristics that are hard to explain
-* prefer deterministic SQL-friendly transformations
+## UI Usage
 
-The Happy Factor must remain explainable in a README, demo, and interview setting.
+The Streamlit app should:
+- expose a minimum `happy_factor` threshold
+- default to a sensible but not overly restrictive threshold
+- sort by descending `happy_factor` unless the user chooses otherwise
 
----
-
-## Planned Usage in the App
-
-The Streamlit app will:
-
-* expose a Happy Factor slider
-* apply the threshold in a parameterized query against `gold.positive_news_feed`
-* optionally sort results by descending Happy Factor
-
-Example user interaction:
-
-* slider set to 70
-* app returns only articles with `happy_factor >= 70`
-
----
+The UI should not need to know the internal formula. It should only depend on the persisted score and version.
 
 ## Validation Plan
 
-The Happy Factor should be validated through sample review before being treated as stable.
+Before treating the score as stable:
 
-### Initial validation steps
+1. Review a sample of high-scoring records.
+2. Review a sample of low-scoring records.
+3. Check whether obviously neutral or negative articles are leaking into high-score results.
+4. Adjust normalization or weights only after inspecting real examples.
 
-1. inspect a sample of high-scoring articles
-2. inspect a sample of low-scoring articles
-3. confirm whether the score aligns with intuitive expectations
-4. adjust weights if obviously misleading patterns appear
+## Non-Goals
 
----
+For v1, `happy_factor` should not attempt to:
+- summarize article meaning with custom NLP
+- infer topic importance
+- score source credibility
+- remove all false positives
 
-## Open Questions
+## Decision Rule
 
-1. Which exact GDELT fields will be used to derive positive and negative signals?
-2. Is tone alone sufficient for v1, with emotional signals added later?
-3. Should duplicate-like records affect score or only visibility?
-4. Should the app filter only by threshold, or also rank by score?
-5. What default slider value should be used in the first app version?
+If GDELT emotional-signal mappings are still ambiguous at implementation time, the project should launch with:
 
----
+- `happy_factor_version = 'v1_tone_only'`
 
-## Current v1 Recommendation
-
-Use a simple weighted score based on:
-
-* normalized tone score
-* one derived positive signal score
-
-Keep the formula transparent and easy to revise after reviewing real sample outputs.
+This is preferable to shipping a more complex but weakly justified formula.

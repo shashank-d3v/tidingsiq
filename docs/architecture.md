@@ -1,54 +1,126 @@
 # TidingsIQ Architecture
 
-## Overview
+## Purpose
 
-TidingsIQ is a low-cost, cloud-native ELT pipeline that ingests global news metadata from GDELT, stores and transforms it in BigQuery through Bruin-managed assets, and serves sentiment-filtered results through a Streamlit application.
+TidingsIQ is designed as a small but credible ELT system for global news intelligence. The project demonstrates how to build a warehouse-centric pipeline that ingests external news metadata, standardizes it in BigQuery, and serves a filtered analytical experience through a simple frontend.
 
-The pipeline is designed to demonstrate practical data engineering skills across infrastructure provisioning, ingestion, transformation, data quality, idempotent processing, and lightweight analytical serving.
+The architecture is intentionally batch-oriented and minimal. The goal is a clear, reviewable design that can be implemented incrementally without introducing unnecessary services.
 
-## Core Components
+## System Boundary
 
-### 1. Infrastructure Layer
-Terraform provisions the required Google Cloud Platform resources, including:
+In scope:
+- GDELT as the upstream news metadata source
+- GCP infrastructure provisioned with Terraform
+- BigQuery datasets for Bronze, Silver, and Gold models
+- Bruin-managed ingestion, transformation, orchestration, and data quality checks
+- Streamlit as the consumer-facing application
+
+Out of scope for v1:
+- event streaming
+- custom ML sentiment models
+- complex source reputation scoring
+- multi-tenant application concerns
+
+## Component Responsibilities
+
+### 1. Terraform
+
+Terraform owns reproducible cloud setup. The first version should provision only what the pipeline requires to run:
 - BigQuery datasets
 - service accounts
 - IAM bindings
+- any minimal supporting configuration needed for local-to-cloud execution
 
-### 2. Source Layer
-The upstream source is the GDELT Global Knowledge Graph, which provides frequently updated global news metadata along with tone and emotional signals.
+Terraform should not contain speculative resources in the first pass.
 
-### 3. Ingestion Layer
-Bruin Python assets are responsible for:
-- fetching GDELT data
-- applying retry and backoff logic
-- minimizing unnecessary fields before storage
-- loading the result into BigQuery Bronze tables
+### 2. GDELT Source
 
-### 4. Transformation Layer
-Bruin SQL assets running on BigQuery will model the data through three layers:
+GDELT is the upstream source of article-level or document-level news metadata used by the pipeline.
 
-- **Bronze**: raw ingested records
-- **Silver**: cleaned, normalized, deduplicated records
-- **Gold**: sentiment-enriched, UI-ready positive news feed
+Assumption:
+- v1 will use a GDELT feed that exposes article metadata plus tone and related sentiment indicators.
 
-### 5. Serving Layer
-A Streamlit application will query the Gold layer in BigQuery and allow users to filter results using a configurable Happy Factor threshold.
+Pending validation:
+- the exact GDELT product, file format, and field names used in implementation
+- whether all required positivity inputs are available directly or must be derived from a subset of fields
 
-## Architectural Principles
+Until validated, the internal contract should stay stable while upstream mappings remain explicitly marked as pending.
 
-- low-cost by design
-- cloud-native and reproducible
-- idempotent pipeline behavior
-- quality checks close to transformation logic
-- clear separation between raw, refined, and serving models
+### 3. Bruin Ingestion Layer
 
-## Initial Data Flow
+Bruin Python assets will:
+- fetch a bounded GDELT input window
+- parse only the fields needed for downstream modeling
+- attach ingestion metadata
+- load an append-oriented Bronze table
 
-GDELT → Bruin Python Asset → BigQuery Bronze → Bruin SQL Assets → BigQuery Gold → Streamlit UI
+The ingestion step should be idempotent at the batch level. Replay should be controlled through ingestion window parameters, not by manual table cleanup.
 
-## Planned Repository Mapping
+### 4. BigQuery Transformation Layer
 
-- `infra/terraform/` for infrastructure provisioning
-- `pipeline/bruin/` for ingestion and transformation assets
-- `app/streamlit/` for the frontend
-- `docs/` for design and implementation documentation
+Bruin SQL assets will materialize three logical layers:
+
+- `bronze`: landed source records plus ingestion metadata
+- `silver`: cleaned, normalized, and deduplicated article records
+- `gold`: application-facing records with `happy_factor`
+
+BigQuery is both the storage layer and the compute layer. No separate processing engine is required for v1.
+
+### 5. Data Quality Layer
+
+Checks should run as close to the transformations as possible. Initial checks should focus on:
+- required fields not null in Silver and Gold
+- uniqueness of primary identifiers
+- valid score ranges for `happy_factor`
+- duplicate rate visibility after Silver deduplication
+
+### 6. Streamlit Serving Layer
+
+The Streamlit app should query only the Gold model in v1. It is not responsible for business logic beyond query parameterization and presentation.
+
+Expected UI controls:
+- `happy_factor` minimum threshold
+- optional date filters
+- optional source or language filters if the Gold schema supports them cleanly
+
+## End-to-End Flow
+
+1. Terraform provisions the minimum GCP and BigQuery footprint.
+2. Bruin ingestion fetches a bounded GDELT window and lands data in `bronze.gdelt_news_raw`.
+3. Bruin SQL transforms Bronze data into `silver.gdelt_news_refined`.
+4. Bruin SQL builds `gold.positive_news_feed`, including `happy_factor`.
+5. Streamlit queries Gold and returns filtered results to the user.
+
+## Data Model Strategy
+
+### Bronze
+
+Bronze is append-oriented and traceable. It should preserve the source record shape closely enough to debug parsing and replay issues.
+
+### Silver
+
+Silver is the normalization boundary. URL cleanup, title cleanup, timestamp normalization, and deterministic deduplication belong here.
+
+### Gold
+
+Gold is the stable consumer contract. It should contain only fields needed by the app and enough metadata to explain the scoring logic.
+
+## Operational Principles
+
+- Prefer scheduled batch processing over frequent small loads.
+- Keep the ingestion window bounded to control cost and replay behavior.
+- Make transformations deterministic so reruns do not create duplicate Gold records.
+- Treat uncertain GDELT mappings as explicit implementation decisions, not hidden assumptions.
+
+## Known Decisions
+
+- BigQuery is the only warehouse and compute platform.
+- Bruin is the orchestrator and transformation framework.
+- The app will depend on one canonical serving table: `gold.positive_news_feed`.
+- The first release uses a configurable threshold, not a complex ranking product.
+
+## Open Items
+
+- Confirm the exact GDELT source feed and extraction method.
+- Confirm which upstream fields map to tone and any positive or negative emotional indicators.
+- Confirm whether Gold should be partitioned by `published_at` or `ingested_at` based on actual query patterns.

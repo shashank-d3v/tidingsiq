@@ -1,227 +1,165 @@
-# TidingsIQ Implementation Plan v1
+# TidingsIQ Implementation Plan
 
 ## Objective
 
-Implement TidingsIQ as a low-cost, cloud-native ELT portfolio project that ingests global news from GDELT, transforms it in BigQuery through Bruin, and serves positivity-filtered results through Streamlit.
+Deliver a portfolio-ready ELT project that ingests bounded GDELT news metadata, models it in BigQuery with Bruin, and serves a filtered positive-news feed through Streamlit.
 
-The project should be developed in small, reviewable phases so that architecture, data contract, and implementation remain aligned.
+The plan favors small phases with clear exit criteria so the project can be built and demonstrated incrementally.
 
----
+## Current Status
 
-## Phase 1. Foundation and Documentation
+Documentation scaffold complete.
 
-### Goal
-Establish the project identity, architecture, and data contract before writing implementation code.
-
-### Deliverables
-- README completed at a starter level
-- architecture documentation
-- data contract documentation
-- Happy Factor definition
+Completed in the current phase:
+- project framing and scope
+- architecture definition
+- warehouse data contract
+- initial `happy_factor` strategy
 - phased implementation plan
 
-### Status
-Completed
-
----
-
-## Phase 2. Infrastructure Skeleton
+## Phase 1: Terraform Foundation
 
 ### Goal
-Provision the minimum required GCP resources through Terraform.
 
-### Scope
-- configure GCP provider
-- create BigQuery datasets:
-  - bronze
-  - silver
-  - gold
-- create service accounts for:
-  - pipeline execution
-  - app access
-- define variables and outputs
-- document required environment inputs
+Provision the minimum GCP footprint required to support development.
 
 ### Deliverables
-- `infra/terraform/main.tf`
-- `infra/terraform/variables.tf`
-- `infra/terraform/outputs.tf`
-- `infra/terraform/README.md`
 
-### Notes
-Keep the first version minimal. Avoid overbuilding IAM and optional resources early.
+- Terraform provider configuration
+- BigQuery datasets for `bronze`, `silver`, and `gold`
+- service accounts and minimum IAM bindings
+- variables and outputs for project configuration
 
----
+### Exit criteria
 
-## Phase 3. Bruin Project Scaffold
+- `terraform plan` is clean against the target project
+- required datasets exist with the expected names
+- pipeline and app identities are separated cleanly
+
+## Phase 2: Bruin Project Scaffold
 
 ### Goal
-Create the initial Bruin project structure for ingestion and transformation.
 
-### Scope
-- create one Python ingestion asset
-- create one Silver SQL asset
-- create one Gold SQL asset
-- add placeholder checks for `not_null` and `unique`
+Establish the pipeline project structure without overbuilding it.
 
 ### Deliverables
+
 - Bruin project configuration
-- ingestion asset stub for GDELT
-- SQL asset stubs for Silver and Gold
-- quality check placeholders
+- one ingestion asset placeholder
+- one Silver SQL asset placeholder
+- one Gold SQL asset placeholder
+- initial data quality checks wired into the asset layout
 
-### Notes
-At this stage, focus on structure and contracts, not full implementation depth.
+### Exit criteria
 
----
+- project structure supports local development
+- dataset and table naming matches the documented contract
+- checks can be added without redesigning the layout
 
-## Phase 4. Bronze Ingestion
-
-### Goal
-Implement the first working ingestion path from GDELT into BigQuery Bronze.
-
-### Scope
-- fetch a bounded GDELT time window
-- parse and normalize selected fields
-- add ingestion metadata
-- minimize unnecessary payload
-- materialize into `bronze.gdelt_gkg_raw`
-
-### Deliverables
-- working Python asset
-- Bronze schema aligned to data contract
-- sample loaded records in BigQuery
-
-### Validation
-- successful local execution
-- successful warehouse load
-- schema matches documented contract
-
----
-
-## Phase 5. Silver Transformation
+## Phase 3: Bronze Ingestion
 
 ### Goal
-Normalize Bronze records into a cleaned, article-level Silver model.
 
-### Scope
-- clean core fields
-- normalize titles and URLs
-- derive source domain
-- normalize tone score
-- implement deterministic deduplication
-- mark candidate near-duplicates
+Land a bounded GDELT window into BigQuery Bronze with traceability.
 
 ### Deliverables
+
+- working ingestion asset for a controlled source window
+- Bronze schema aligned to `docs/data_contract.md`
+- replay-safe ingestion metadata
+
+### Exit criteria
+
+- a rerun of the same window does not break traceability
+- landed fields match the documented Bronze contract
+- uncertain GDELT mappings are still marked explicitly in code and docs
+
+## Phase 4: Silver Normalization and Deduplication
+
+### Goal
+
+Convert landed records into clean article-level rows suitable for downstream consumption.
+
+### Deliverables
+
+- normalized timestamps, titles, and URLs
+- derived source domain
+- deterministic deduplication logic
 - `silver.gdelt_news_refined`
-- deterministic dedup logic
-- candidate near-duplicate flag
 
-### Validation
-- row counts make sense relative to Bronze
-- duplicates are reduced
-- key fields are normalized as expected
+### Exit criteria
 
----
+- `article_id` is unique
+- duplicate handling is reproducible across reruns
+- row-level assumptions are documented where source ambiguity remains
 
-## Phase 6. Gold Serving Model
+## Phase 5: Gold Scoring Model
 
 ### Goal
-Build the canonical application-facing model.
 
-### Scope
-- compute `happy_factor`
-- expose only app-relevant fields
-- finalize the serving schema
-- ensure idempotent refresh behavior
+Create the canonical serving model used by the app.
 
 ### Deliverables
+
 - `gold.positive_news_feed`
-- documented scoring logic reflected in SQL
-- initial quality checks
+- `happy_factor`
+- `happy_factor_version`
+- core Gold quality checks
 
-### Validation
-- records are filterable by Happy Factor
-- schema matches data contract
-- app can depend on this table only
+### Exit criteria
 
----
+- Gold schema matches the documented contract
+- `happy_factor` stays within `0` to `100`
+- the model can support a threshold-only app without querying lower layers
 
-## Phase 7. Streamlit Application
-
-### Goal
-Create a simple but portfolio-ready frontend over the Gold model.
-
-### Scope
-- title and project description
-- Happy Factor slider
-- date filters
-- query function against BigQuery
-- result list or article cards
-- caching to reduce repeated scans
-
-### Deliverables
-- minimal Streamlit app
-- parameterized query path
-- secrets-based configuration placeholder
-
-### Validation
-- app loads successfully
-- filtering works
-- repeated interactions behave efficiently
-
----
-
-## Phase 8. Quality, Replay, and Polish
+## Phase 6: Streamlit Application
 
 ### Goal
-Make the project more robust and portfolio-ready.
 
-### Scope
-- tighten quality checks
-- document replay and idempotency behavior
-- improve README
-- add sample screenshots
-- refine query patterns
-- add developer notes and local run instructions
+Provide a simple frontend that makes the warehouse output usable.
 
 ### Deliverables
-- better documentation
-- improved checks
-- cleaner project presentation
 
----
+- Streamlit app scaffold
+- `happy_factor` threshold control
+- query path against BigQuery Gold
+- lightweight result presentation
 
-## Phase 9. Optional Near-Duplicate Enhancement
+### Exit criteria
+
+- the app queries only Gold
+- filtering works as expected
+- repeated interaction does not require schema changes to the pipeline
+
+## Phase 7: Hardening and Presentation
 
 ### Goal
-Add a second-pass similarity-based deduplication enhancement if justified by observed duplicate volume.
 
-### Scope
-- identify likely duplicate candidate groups
-- test similarity-based comparison logic
-- optionally introduce MinHash-style or comparable probabilistic methods
-- keep this logic modular and non-blocking for the main pipeline
+Make the project easier to review, demo, and maintain.
 
 ### Deliverables
-- experimental or optional fuzzy dedup module
-- comparison notes against deterministic dedup
 
-### Notes
-This phase is explicitly optional for the first end-to-end release.
+- stronger data quality checks
+- better local run instructions
+- architecture and implementation docs updated to match reality
+- screenshots or demo notes if helpful
 
----
+### Exit criteria
 
-## Execution Principles
+- documentation matches implementation
+- failure modes and replay behavior are documented
+- the project is coherent enough to discuss end-to-end in a portfolio review
 
-### Build one bounded slice at a time
-Each phase should be independently reviewable.
+## Key Risks
 
-### Prefer correctness over premature complexity
-Start with deterministic implementations where possible.
+- GDELT field mappings may differ from assumptions in the current docs.
+- Source data quality may require more normalization than expected.
+- Deduplication quality may depend heavily on URL completeness.
+- `happy_factor` may need to launch as tone-only if richer sentiment inputs are not validated quickly.
 
-### Keep assumptions explicit
-If an upstream field mapping or formula is uncertain, mark it clearly.
+## Working Rules
 
-### Make the Gold model the anchor
-The application should depend on one canonical serving model.
+- Do not add complexity before the previous phase is stable.
+- Keep BigQuery as the center of gravity for storage and compute.
+- Prefer deterministic SQL-friendly logic over speculative heuristics.
+- Update the docs when implementation decisions invalidate an earlier assumption.
