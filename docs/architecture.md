@@ -37,22 +37,22 @@ Terraform should not contain speculative resources in the first pass.
 
 GDELT is the upstream source of article-level or document-level news metadata used by the pipeline.
 
-Assumption:
-- v1 will use a GDELT feed that exposes article metadata plus tone and related sentiment indicators.
+Current implementation choice:
+- Phase 3 uses GDELT GKG 2.1 15-minute export files as the Bronze ingestion source.
 
-Pending validation:
-- the exact GDELT product, file format, and field names used in implementation
-- whether all required positivity inputs are available directly or must be derived from a subset of fields
+Still pending validation:
+- whether positive and negative emotional signals should be mapped directly from GKG fields or derived later
+- whether language should be treated as optional in Bronze or normalized more aggressively in Silver
 
-Until validated, the internal contract should stay stable while upstream mappings remain explicitly marked as pending.
+The internal contract remains stable even where some upstream mappings are still intentionally nullable.
 
 ### 3. Bruin Ingestion Layer
 
 Bruin Python assets will:
-- fetch a bounded GDELT input window
+- fetch a bounded GDELT GKG input window
 - parse only the fields needed for downstream modeling
 - attach ingestion metadata
-- load an append-oriented Bronze table
+- load an idempotent Bronze table keyed by the GKG record identifier
 
 The ingestion step should be idempotent at the batch level. Replay should be controlled through ingestion window parameters, not by manual table cleanup.
 
@@ -121,6 +121,5 @@ Gold is the stable consumer contract. It should contain only fields needed by th
 
 ## Open Items
 
-- Confirm the exact GDELT source feed and extraction method.
 - Confirm which upstream fields map to tone and any positive or negative emotional indicators.
 - Confirm whether Gold should be partitioned by `published_at` or `ingested_at` based on actual query patterns.

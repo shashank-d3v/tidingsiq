@@ -8,7 +8,7 @@ The plan favors small phases with clear exit criteria so the project can be buil
 
 ## Current Status
 
-Documentation scaffold complete. Terraform foundation is applied and a Bruin scaffold is committed under `pipeline/bruin/`.
+Documentation scaffold complete. Terraform foundation is applied, Phase 2 scaffold is committed, and Phase 3 Bronze ingestion is implemented.
 
 Completed in the current phase:
 - project framing and scope
@@ -18,6 +18,7 @@ Completed in the current phase:
 - phased implementation plan
 - Terraform provider, dataset, service account, and IAM scaffold
 - Bruin pipeline, dependency, and placeholder asset scaffold
+- bounded Bronze ingestion from GDELT GKG into BigQuery
 
 ## Phase 1: Terraform Foundation
 
@@ -76,6 +77,10 @@ Phase 2 is complete.
 
 ## Phase 3: Bronze Ingestion
 
+### Status
+
+Implemented in repository using bounded GDELT GKG ingestion with replay-safe row keys.
+
 ### Goal
 
 Land a bounded GDELT window into BigQuery Bronze with traceability.
@@ -91,6 +96,10 @@ Land a bounded GDELT window into BigQuery Bronze with traceability.
 - a rerun of the same window does not break traceability
 - landed fields match the documented Bronze contract
 - uncertain GDELT mappings are still marked explicitly in code and docs
+
+### Result
+
+Phase 3 is complete.
 
 ## Phase 4: Silver Normalization and Deduplication
 

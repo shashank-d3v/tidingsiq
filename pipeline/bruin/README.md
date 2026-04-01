@@ -5,14 +5,13 @@ This directory contains the Bruin project scaffold for TidingsIQ. It is intentio
 ## Included
 
 - `pipeline.yml` with minimal pipeline metadata
-- one Python Bronze placeholder asset
+- one Python Bronze ingestion asset
 - one SQL Silver placeholder asset
 - one SQL Gold placeholder asset
 - `pyproject.toml` for Python asset dependencies
 
 ## Not Included Yet
 
-- real GDELT ingestion logic
 - production-ready BigQuery SQL transformations
 - local or CI execution wiring
 - committed `.bruin.yml` credentials configuration
@@ -43,9 +42,41 @@ environments:
 
 ## Expected Asset Progression
 
-- `bronze.gdelt_news_raw`: replace the empty DataFrame placeholder with bounded GDELT ingestion logic
+- `bronze.gdelt_news_raw`: implemented as a bounded GDELT GKG 2.1 ingestion step
 - `silver.gdelt_news_refined`: replace the empty schema query with normalization and deterministic deduplication
 - `gold.positive_news_feed`: replace the empty schema query with final scoring and serving logic
+
+## Bronze Runtime Notes
+
+The Bronze asset reads GDELT GKG 2.1 15-minute export files directly and lands article metadata into BigQuery.
+
+Important runtime defaults:
+
+- it uses the Bruin interval to decide which GKG files are eligible
+- it fetches only the most recent `GDELT_MAX_FILES` files in that interval
+- default `GDELT_MAX_FILES` is `4` to keep Phase 3 bounded and inexpensive
+
+Optional environment variables:
+
+- `GDELT_MAX_FILES`: override the per-run file cap
+- `GDELT_TIMEOUT_SECONDS`: HTTP timeout for downloading GDELT files
+- `GDELT_DISABLE_SSL_VERIFY=true`: disable SSL verification if your local certificate chain blocks the download
+
+Current validated mappings:
+
+- `source_record_id`: GKG record identifier
+- `document_identifier`: GKG document identifier
+- `source_url`: document identifier when the source collection is open-web
+- `source_name`: GKG source common name
+- `title`: extracted from `Extras` via `<PAGE_TITLE>`
+- `published_at`: GKG publication timestamp
+- `tone_raw`: first component of `V2Tone`
+
+Still intentionally unresolved in Phase 3:
+
+- `positive_signal_raw`
+- `negative_signal_raw`
+- a guaranteed language value for every record
 
 ## Validation
 
@@ -53,7 +84,7 @@ Once Bruin is installed locally and `.bruin.yml` exists, the expected first chec
 
 ```bash
 bruin validate pipeline/bruin/pipeline.yml
-bruin run pipeline/bruin/pipeline.yml --asset bronze.gdelt_news_raw
+bruin run pipeline/bruin/assets/bronze/gdelt_news_raw.py
 ```
 
-The placeholder assets are scaffolding only. They exist to lock in names, dependencies, and quality checks before the real implementation lands.
+The Bronze asset now ingests real metadata. Silver and Gold remain schema placeholders until later phases.

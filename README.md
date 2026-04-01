@@ -6,7 +6,7 @@ The core product is a queryable feed of recent articles ranked by a configurable
 
 ## Scope
 
-This repository now includes the first infrastructure scaffold, a Bruin pipeline scaffold, and the core design docs. It defines the target architecture, data contract, scoring approach, and implementation sequence before real ingestion logic or application code are added.
+This repository now includes the first infrastructure scaffold, a working Bronze Bruin ingestion asset, and the core design docs. It defines the target architecture, data contract, scoring approach, and implementation sequence before the Silver, Gold, and application layers are implemented.
 
 Included in scope:
 - GCP infrastructure managed with Terraform
@@ -74,11 +74,10 @@ Primary user control:
 
 ## Current Status
 
-The repository has an applied Terraform foundation, a committed Bruin scaffold, and the supporting design docs. The Streamlit app has not been added yet.
+The repository has an applied Terraform foundation, a working Bronze ingestion slice in Bruin, and the supporting design docs. Silver and Gold remain placeholders, and the Streamlit app has not been added yet.
 
 ## Next Build Order
 
-1. Implement the bounded Bronze ingestion path from GDELT.
-2. Implement Silver normalization and deterministic deduplication.
-3. Compute `happy_factor` in Gold and expose the feed through Streamlit.
-4. Harden checks, replay behavior, and project presentation.
+1. Implement Silver normalization and deterministic deduplication.
+2. Compute `happy_factor` in Gold and expose the feed through Streamlit.
+3. Harden checks, replay behavior, and project presentation.

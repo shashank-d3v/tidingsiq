@@ -50,23 +50,23 @@ One ingested source record per row.
 | ingested_at | TIMESTAMP | Yes | Internal | Warehouse load timestamp |
 | source_window_start | TIMESTAMP | No | Internal | Lower bound of the fetched source window |
 | source_window_end | TIMESTAMP | No | Internal | Upper bound of the fetched source window |
-| source_record_id | STRING | No | Pending GDELT validation | Upstream record identifier if exposed consistently |
-| document_identifier | STRING | No | Pending GDELT validation | Document or article identifier from source data |
-| source_url | STRING | No | Pending GDELT validation | Source article URL if available |
-| source_name | STRING | No | Pending GDELT validation | Publisher or source name if available |
-| title | STRING | No | Pending GDELT validation | Raw article title or headline if available |
-| language | STRING | No | Pending GDELT validation | Language code if available |
-| published_at | TIMESTAMP | No | Pending GDELT validation | Best available publication timestamp |
-| tone_raw | FLOAT64 | No | Pending GDELT validation | Raw tone-related numeric signal before normalization |
+| source_record_id | STRING | No | Validated from GKG | Mapped from `GKGRECORDID` |
+| document_identifier | STRING | No | Validated from GKG | Mapped from `V2DOCUMENTIDENTIFIER` |
+| source_url | STRING | No | Partially validated from GKG | Set when `V2SOURCECOLLECTIONIDENTIFIER = 1` and the document identifier is a URL |
+| source_name | STRING | No | Validated from GKG | Mapped from `V2SOURCECOMMONNAME` |
+| title | STRING | No | Partially validated from GKG | Extracted from the `Extras` field via `<PAGE_TITLE>` when present |
+| language | STRING | No | Partially validated from GKG | Extracted from `TranslationInfo` when a source-language code is present |
+| published_at | TIMESTAMP | No | Validated from GKG | Mapped from the GKG publication timestamp field |
+| tone_raw | FLOAT64 | No | Validated from GKG | First component of `V2Tone` before normalization |
 | positive_signal_raw | FLOAT64 | No | Pending GDELT validation | Optional raw positive signal if a reliable source field exists |
 | negative_signal_raw | FLOAT64 | No | Pending GDELT validation | Optional raw negative signal if retained |
-| raw_payload | JSON | No | Internal | Parsed raw payload retained for audit and debugging |
+| raw_payload | STRING | No | Internal | JSON-encoded payload retained for audit and debugging |
 
 ### Bronze quality expectations
 
 - `ingestion_id` and `ingested_at` must always be populated
 - the same replay window should be safe to rerun without losing traceability
-- `raw_payload` retention should be reviewed against cost once the source shape is confirmed
+- `raw_payload` currently stores selected raw GKG fields rather than the entire original row to keep Bronze practical and debuggable without retaining unnecessary volume
 
 ## Silver Contract
 
@@ -177,7 +177,5 @@ This should be decided after the first realistic query patterns are tested in Bi
 
 ## Open Validation Items
 
-- Confirm the exact GDELT field that maps to `source_record_id`.
-- Confirm whether `title`, `source_name`, and `published_at` are directly available or need derivation.
 - Confirm whether positive and negative signals come from validated GDELT fields or whether v1 should ship as tone-only.
 - Confirm whether `source_country` is reliable enough to expose in Gold.
