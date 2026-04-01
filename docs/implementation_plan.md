@@ -8,7 +8,7 @@ The plan favors small phases with clear exit criteria so the project can be buil
 
 ## Current Status
 
-Documentation scaffold complete.
+Documentation scaffold complete. Terraform foundation added under `infra/terraform/` and applied in the target GCP project.
 
 Completed in the current phase:
 - project framing and scope
@@ -16,8 +16,13 @@ Completed in the current phase:
 - warehouse data contract
 - initial `happy_factor` strategy
 - phased implementation plan
+- Terraform provider, dataset, service account, and IAM scaffold
 
 ## Phase 1: Terraform Foundation
+
+### Status
+
+Implemented in repository and applied to the target GCP project.
 
 ### Goal
 
@@ -35,6 +40,10 @@ Provision the minimum GCP footprint required to support development.
 - `terraform plan` is clean against the target project
 - required datasets exist with the expected names
 - pipeline and app identities are separated cleanly
+
+### Result
+
+Phase 1 is complete.
 
 ## Phase 2: Bruin Project Scaffold
 

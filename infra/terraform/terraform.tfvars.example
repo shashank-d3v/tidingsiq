@@ -1,0 +1,8 @@
+project_id        = "your-gcp-project-id"
+environment       = "dev"
+region            = "asia-south1"
+bigquery_location = "asia-south1"
+
+labels = {
+  owner = "shanky-mac"
+}
