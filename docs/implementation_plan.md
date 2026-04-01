@@ -8,7 +8,7 @@ The plan favors small phases with clear exit criteria so the project can be buil
 
 ## Current Status
 
-Documentation scaffold complete. Terraform foundation added under `infra/terraform/` and applied in the target GCP project.
+Documentation scaffold complete. Terraform foundation is applied and a Bruin scaffold is committed under `pipeline/bruin/`.
 
 Completed in the current phase:
 - project framing and scope
@@ -17,6 +17,7 @@ Completed in the current phase:
 - initial `happy_factor` strategy
 - phased implementation plan
 - Terraform provider, dataset, service account, and IAM scaffold
+- Bruin pipeline, dependency, and placeholder asset scaffold
 
 ## Phase 1: Terraform Foundation
 
@@ -47,6 +48,10 @@ Phase 1 is complete.
 
 ## Phase 2: Bruin Project Scaffold
 
+### Status
+
+Implemented in repository as a placeholder scaffold. Real ingestion and transformation logic are still pending.
+
 ### Goal
 
 Establish the pipeline project structure without overbuilding it.
@@ -64,6 +69,10 @@ Establish the pipeline project structure without overbuilding it.
 - project structure supports local development
 - dataset and table naming matches the documented contract
 - checks can be added without redesigning the layout
+
+### Result
+
+Phase 2 is complete.
 
 ## Phase 3: Bronze Ingestion
 

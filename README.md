@@ -6,7 +6,7 @@ The core product is a queryable feed of recent articles ranked by a configurable
 
 ## Scope
 
-This repository now includes the first infrastructure scaffold plus the core design docs. It defines the target architecture, data contract, scoring approach, and implementation sequence before ingestion assets or application code are added.
+This repository now includes the first infrastructure scaffold, a Bruin pipeline scaffold, and the core design docs. It defines the target architecture, data contract, scoring approach, and implementation sequence before real ingestion logic or application code are added.
 
 Included in scope:
 - GCP infrastructure managed with Terraform
@@ -48,10 +48,12 @@ Primary user control:
 │   └── terraform/
 ├── pipeline/
 │   └── bruin/
+│       ├── pipeline.yml
+│       └── assets/
 └── scripts/
 ```
 
-`infra/terraform/` now contains the first implementation slice. The remaining top-level directories are still placeholders for later phases.
+`infra/terraform/` and `pipeline/bruin/` now contain the first implementation slices. `app/streamlit/` and `scripts/` remain placeholders for later phases.
 
 ## Documentation Index
 
@@ -60,6 +62,7 @@ Primary user control:
 - [Happy Factor](docs/happy_factor.md): initial scoring approach and validation rules
 - [Implementation Plan](docs/implementation_plan.md): phased build sequence and exit criteria
 - [Terraform Foundation](infra/terraform/README.md): initial GCP and BigQuery infrastructure scaffold
+- [Bruin Scaffold](pipeline/bruin/README.md): local setup notes and placeholder asset layout
 
 ## Design Principles
 
@@ -71,11 +74,11 @@ Primary user control:
 
 ## Current Status
 
-The repository has an applied Terraform foundation for GCP and BigQuery plus the supporting design docs. Bruin assets and the Streamlit app have not been added yet.
+The repository has an applied Terraform foundation, a committed Bruin scaffold, and the supporting design docs. The Streamlit app has not been added yet.
 
 ## Next Build Order
 
-1. Scaffold the Bruin project and a bounded Bronze ingestion path from GDELT.
+1. Implement the bounded Bronze ingestion path from GDELT.
 2. Implement Silver normalization and deterministic deduplication.
 3. Compute `happy_factor` in Gold and expose the feed through Streamlit.
 4. Harden checks, replay behavior, and project presentation.

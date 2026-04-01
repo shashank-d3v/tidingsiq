@@ -1,0 +1,13 @@
+name: tidingsiq_positive_news
+
+default_connections:
+  google_cloud_platform: "bigquery-default"
+
+tags: ["portfolio", "news-intelligence", "bigquery"]
+domains: ["media-intelligence"]
+
+meta:
+  project: "tidingsiq"
+  owner: "portfolio"
+
+concurrency: 1

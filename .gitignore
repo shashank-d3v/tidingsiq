@@ -201,6 +201,7 @@ cython_debug/
 
 # Terraform local configuration
 *.tfvars
+.bruin.yml
 .cursorignore
 .cursorindexingignore
 
@@ -228,3 +229,7 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+
+logs/runs
+logs/*.log
+*.py[cod]
