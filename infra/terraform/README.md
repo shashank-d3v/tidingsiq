@@ -16,6 +16,8 @@ This directory contains the first infrastructure slice for TidingsIQ. It provisi
 
 This scaffold does not enable project APIs automatically. That is intentional to keep the first version small and permission-conscious.
 
+If Bronze archival to GCS is added later, Cloud Storage must also be enabled in the target project.
+
 ## Files
 
 - `versions.tf`: Terraform and provider constraints
@@ -67,6 +69,20 @@ This is the minimum working split for the planned architecture:
 - the pipeline can create and update warehouse objects
 - the app can run query jobs but only read the serving dataset
 
+Additional permissions likely needed for the planned retention and archive phase:
+
+Pipeline service account:
+- bucket-level role on the Bronze archive bucket: `roles/storage.objectAdmin` on a dedicated bucket is the practical first version
+- existing BigQuery roles are likely sufficient for export jobs because the pipeline already has `roles/bigquery.jobUser` and dataset access
+
+Terraform operator or CI identity:
+- permission to create and manage the archive bucket and lifecycle rules
+- permission to manage bucket IAM bindings
+
+Why `roles/storage.objectAdmin` first:
+- it supports writing archive files and handling replay-safe reruns without forcing append-only object naming
+- it can be tightened later if the archive path is guaranteed to be write-once
+
 ## Notes
 
 - This repository currently targets a single active environment.
@@ -74,3 +90,5 @@ This is the minimum working split for the planned architecture:
 - `delete_contents_on_destroy` is disabled to avoid accidental dataset deletion behavior.
 - If stricter IAM boundaries are required later, move from dataset-wide editor access to more specific table or routine permissions after the first end-to-end slice is working.
 - If you revisit a multi-environment setup later, see `future_multi_environment.md`.
+- Planned retention targets are Bronze 45 days with GCS archive, Silver 90 days, and Gold 180 days.
+- Planned archive lifecycle is to retain Bronze archive objects in GCS for 365 days and then delete them automatically.

@@ -38,9 +38,10 @@ One ingested source record per row.
 
 ### Required behavior
 
-- append-oriented loads
+- replay-safe landed loads keyed by the source record identifier
 - batch traceability
 - enough raw fidelity for replay and parsing diagnostics
+- 45-day query retention in BigQuery before archive and cleanup
 
 ### Fields
 
@@ -67,6 +68,8 @@ One ingested source record per row.
 - `ingestion_id` and `ingested_at` must always be populated
 - the same replay window should be safe to rerun without losing traceability
 - `raw_payload` currently stores selected raw GKG fields rather than the entire original row to keep Bronze practical and debuggable without retaining unnecessary volume
+- Bronze rows older than 45 days should be exportable to GCS without losing row-level traceability
+- archived Bronze objects should be retained for 365 days before deletion
 
 ## Silver Contract
 
@@ -113,6 +116,7 @@ One normalized article candidate per row before Gold filtering.
 - `is_duplicate` must always be populated
 - canonical rows should have stable dedup behavior across reruns
 - fuzzy or probabilistic deduplication is not required in v1
+- Silver should retain 90 days of queryable history in BigQuery
 
 ## Gold Contract
 
@@ -154,6 +158,7 @@ One app-ready article record per retained article.
 - `happy_factor` must be between 0 and 100
 - `happy_factor_version` must always be populated
 - the app should not depend on nullable upstream-derived signals being present in every release
+- Gold should retain 180 days of queryable history in BigQuery
 
 ## Deduplication Policy
 
@@ -166,7 +171,7 @@ v1 deduplication should be deterministic and implemented in Silver. The preferre
 
 Near-duplicate detection beyond deterministic rules is optional future work and must not block the first end-to-end release.
 
-## Partitioning and Refresh
+## Partitioning, Retention, and Archive
 
 The final partition strategy is still open. The likely choices are:
 
@@ -174,6 +179,19 @@ The final partition strategy is still open. The likely choices are:
 - partition by `DATE(published_at)` to align with UI filtering
 
 This should be decided after the first realistic query patterns are tested in BigQuery.
+
+Current retention targets:
+
+- Bronze: retain 45 days in BigQuery, then archive older partitions to GCS for 365 days before deletion
+- Silver: retain 90 days in BigQuery
+- Gold: retain 180 days in BigQuery
+
+Archive expectations for Bronze:
+
+- archive objects should be partitionable by export date or source date
+- archived files should preserve enough columns to support replay or audit
+- cleanup of BigQuery Bronze data must happen only after archive success is confirmed
+- the archive bucket should enforce object deletion after 365 days through lifecycle policy
 
 ## Open Validation Items
 

@@ -76,8 +76,15 @@ Primary user control:
 
 The repository has an applied Terraform foundation, a working Bronze ingestion slice in Bruin, and the supporting design docs. Silver and Gold remain placeholders, and the Streamlit app has not been added yet.
 
+The intended retention posture is:
+- Bronze retained in BigQuery for 45 days, then archived to GCS for 365 days before deletion
+- Silver retained in BigQuery for 90 days
+- Gold retained in BigQuery for 180 days
+
 ## Next Build Order
 
 1. Implement Silver normalization and deterministic deduplication.
 2. Compute `happy_factor` in Gold and expose the feed through Streamlit.
-3. Harden checks, replay behavior, and project presentation.
+3. Add retention and archive mechanics for Bronze, Silver, and Gold.
+4. Harden checks, replay behavior, and project presentation.
+5. Polish the top-level GitHub-facing documentation and repo presentation for evaluation.

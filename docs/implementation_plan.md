@@ -113,6 +113,7 @@ Convert landed records into clean article-level rows suitable for downstream con
 - derived source domain
 - deterministic deduplication logic
 - `silver.gdelt_news_refined`
+- 90-day Silver retention policy captured in implementation and docs
 
 ### Exit criteria
 
@@ -132,6 +133,7 @@ Create the canonical serving model used by the app.
 - `happy_factor`
 - `happy_factor_version`
 - core Gold quality checks
+- 180-day Gold retention policy captured in implementation and docs
 
 ### Exit criteria
 
@@ -158,7 +160,28 @@ Provide a simple frontend that makes the warehouse output usable.
 - filtering works as expected
 - repeated interaction does not require schema changes to the pipeline
 
-## Phase 7: Hardening and Presentation
+## Phase 7: Retention and Archive Operations
+
+### Goal
+
+Put explicit lifecycle controls around the warehouse so the project stays inexpensive and operationally credible.
+
+### Deliverables
+
+- Bronze partitioning and 45-day retention policy
+- Bronze export path to GCS before BigQuery cleanup
+- Bronze archive lifecycle set to delete archived objects after 365 days
+- Silver 90-day retention policy
+- Gold 180-day retention policy
+- IAM and operational notes for archive execution
+
+### Exit criteria
+
+- Bronze data older than 45 days has a documented and testable archive path
+- Silver and Gold retention behavior is defined and implementable
+- required GCS permissions and lifecycle assumptions are documented before infra changes are applied
+
+## Phase 8: Hardening and Presentation
 
 ### Goal
 
@@ -177,12 +200,32 @@ Make the project easier to review, demo, and maintain.
 - failure modes and replay behavior are documented
 - the project is coherent enough to discuss end-to-end in a portfolio review
 
+## Phase 9: Audience Readiness and GitHub Presentation
+
+### Goal
+
+Make the repository easier to evaluate quickly by hiring managers, interviewers, and technical reviewers.
+
+### Deliverables
+
+- a stronger top-level `README.md` with clearer outcomes and demo path
+- cleaner repo navigation for first-time reviewers
+- polished screenshots, architecture image, or demo notes if they materially improve evaluation
+- final wording pass for public-facing technical documentation
+
+### Exit criteria
+
+- a reviewer can understand the project shape from the repository root in a few minutes
+- the main GitHub landing page feels intentional rather than purely internal
+- portfolio-facing documentation stays consistent with the actual implementation
+
 ## Key Risks
 
 - GDELT field mappings may differ from assumptions in the current docs.
 - Source data quality may require more normalization than expected.
 - Deduplication quality may depend heavily on URL completeness.
 - `happy_factor` may need to launch as tone-only if richer sentiment inputs are not validated quickly.
+- retention and archive mechanics add storage IAM and operational complexity beyond the initial BigQuery-only slice
 
 ## Working Rules
 

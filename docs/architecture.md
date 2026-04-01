@@ -27,6 +27,7 @@ Out of scope for v1:
 
 Terraform owns reproducible cloud setup. The first version should provision only what the pipeline requires to run:
 - BigQuery datasets
+- a GCS bucket for Bronze archive once retention is implemented
 - service accounts
 - IAM bindings
 - any minimal supporting configuration needed for local-to-cloud execution
@@ -65,6 +66,13 @@ Bruin SQL assets will materialize three logical layers:
 - `gold`: application-facing records with `happy_factor`
 
 BigQuery is both the storage layer and the compute layer. No separate processing engine is required for v1.
+
+Retention targets for the current design:
+- Bronze stays queryable in BigQuery for 45 days
+- Silver stays queryable in BigQuery for 90 days
+- Gold stays queryable in BigQuery for 180 days
+- Bronze records older than 45 days should be archived to GCS before BigQuery cleanup
+- Bronze archive objects should be retained in GCS for 365 days and then deleted by lifecycle policy
 
 ### 5. Data Quality Layer
 
@@ -111,6 +119,8 @@ Gold is the stable consumer contract. It should contain only fields needed by th
 - Keep the ingestion window bounded to control cost and replay behavior.
 - Make transformations deterministic so reruns do not create duplicate Gold records.
 - Treat uncertain GDELT mappings as explicit implementation decisions, not hidden assumptions.
+- Keep the active BigQuery footprint intentionally small through explicit retention windows.
+- Archive Bronze before deletion so replay and audit remain possible without keeping all history in BigQuery.
 
 ## Known Decisions
 
@@ -118,8 +128,12 @@ Gold is the stable consumer contract. It should contain only fields needed by th
 - Bruin is the orchestrator and transformation framework.
 - The app will depend on one canonical serving table: `gold.positive_news_feed`.
 - The first release uses a configurable threshold, not a complex ranking product.
+- Retention targets are Bronze 45 days, Silver 90 days, and Gold 180 days.
+- Bronze archive should land in GCS rather than remain indefinitely in BigQuery.
+- Archived Bronze objects should expire after 365 days in GCS.
 
 ## Open Items
 
 - Confirm which upstream fields map to tone and any positive or negative emotional indicators.
 - Confirm whether Gold should be partitioned by `published_at` or `ingested_at` based on actual query patterns.
+- Decide whether Bronze archival is implemented as a Bruin-driven export step, a scheduled BigQuery export job, or an external batch script.
