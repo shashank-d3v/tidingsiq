@@ -15,12 +15,15 @@ locals {
 
   datasets = {
     bronze = {
+      dataset_id   = var.dataset_id_prefix == "" ? "bronze" : "${var.dataset_id_prefix}_bronze"
       description = "Raw landed GDELT records and ingestion metadata."
     }
     silver = {
+      dataset_id   = var.dataset_id_prefix == "" ? "silver" : "${var.dataset_id_prefix}_silver"
       description = "Normalized and deduplicated article-level models."
     }
     gold = {
+      dataset_id   = var.dataset_id_prefix == "" ? "gold" : "${var.dataset_id_prefix}_gold"
       description = "Application-facing positive news feed and serving models."
     }
   }
@@ -30,7 +33,7 @@ resource "google_bigquery_dataset" "datasets" {
   for_each = local.datasets
 
   project                    = var.project_id
-  dataset_id                 = each.key
+  dataset_id                 = each.value.dataset_id
   location                   = var.bigquery_location
   description                = each.value.description
   delete_contents_on_destroy = false

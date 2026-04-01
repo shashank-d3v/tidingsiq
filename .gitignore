@@ -214,10 +214,15 @@ __marimo__/
 
 # Terraform
 .terraform/
-.terraform.lock.hcl
 *.tfstate
 *.tfstate.*
 *.tfplan
+*.tfstate.backup
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfplan
+**/*.tfstate.backup
 crash.log
 override.tf
 override.tf.json

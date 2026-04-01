@@ -16,6 +16,8 @@ This directory contains the first infrastructure slice for TidingsIQ. It provisi
 
 This scaffold does not enable project APIs automatically. That is intentional to keep the first version small and permission-conscious.
 
+The current default keeps dataset IDs as `bronze`, `silver`, and `gold` to match the existing single-environment setup. If a future environment needs to share the same GCP project, set `dataset_id_prefix` to isolate dataset names such as `prod_bronze`, `prod_silver`, and `prod_gold`.
+
 ## Files
 
 - `versions.tf`: Terraform and provider constraints
@@ -50,6 +52,7 @@ terraform apply
 | `environment` | No | `dev` | Environment label and service account suffix |
 | `region` | No | `us-central1` | Provider region |
 | `bigquery_location` | No | `US` | BigQuery dataset location |
+| `dataset_id_prefix` | No | `""` | Optional prefix for dataset IDs when multiple environments share one project |
 | `labels` | No | `{}` | Extra labels for supported resources |
 
 ## Provisioned Access Model
@@ -68,6 +71,8 @@ This is the minimum working split for the planned architecture:
 
 ## Notes
 
-- The current scaffold uses shared dataset names across environments. If multiple environments will coexist in the same GCP project, dataset naming should be revisited before apply.
+- The current single-environment setup intentionally uses plain dataset IDs: `bronze`, `silver`, and `gold`.
+- For a future shared-project multi-environment setup, set `dataset_id_prefix` so dataset names do not collide.
+- If each environment gets its own GCP project, `dataset_id_prefix` can remain empty.
 - `delete_contents_on_destroy` is disabled to avoid accidental dataset deletion behavior.
 - If stricter IAM boundaries are required later, move from dataset-wide editor access to more specific table or routine permissions after the first end-to-end slice is working.
