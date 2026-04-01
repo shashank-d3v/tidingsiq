@@ -134,6 +134,6 @@ Gold is the stable consumer contract. It should contain only fields needed by th
 
 ## Open Items
 
-- Confirm which upstream fields map to tone and any positive or negative emotional indicators.
+- Confirm which upstream fields map to positive and negative emotional indicators beyond `V2Tone`.
 - Confirm whether Gold should be partitioned by `published_at` or `ingested_at` based on actual query patterns.
 - Decide whether Bronze archival is implemented as a Bruin-driven export step, a scheduled BigQuery export job, or an external batch script.

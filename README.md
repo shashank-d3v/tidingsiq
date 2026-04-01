@@ -76,10 +76,7 @@ Primary user control:
 
 The repository has an applied Terraform foundation, a working Bronze ingestion slice in Bruin, and the supporting design docs. Silver and Gold remain placeholders, and the Streamlit app has not been added yet.
 
-The intended retention posture is:
-- Bronze retained in BigQuery for 45 days, then archived to GCS for 365 days before deletion
-- Silver retained in BigQuery for 90 days
-- Gold retained in BigQuery for 180 days
+Planned retention and archival policy is documented, but not yet implemented in infrastructure or pipeline operations.
 
 ## Next Build Order
 
