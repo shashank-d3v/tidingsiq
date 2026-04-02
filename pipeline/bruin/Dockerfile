@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PATH="/root/.local/bin:${PATH}"
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl ca-certificates \
+    && apt-get install -y --no-install-recommends curl ca-certificates git \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -LsSf https://getbruin.com/install/cli | sh
@@ -21,8 +21,9 @@ COPY pipeline ./pipeline
 COPY scripts ./scripts
 COPY pipeline/bruin/container-entrypoint.sh /usr/local/bin/container-entrypoint.sh
 
-RUN chmod +x /usr/local/bin/container-entrypoint.sh
+RUN chmod +x /usr/local/bin/container-entrypoint.sh \
+    && git init /workspace \
+    && git config --global --add safe.directory /workspace
 
 ENTRYPOINT ["/usr/local/bin/container-entrypoint.sh"]
 CMD ["run", "pipeline/bruin/pipeline.yml"]
-

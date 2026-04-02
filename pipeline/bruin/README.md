@@ -134,3 +134,5 @@ run pipeline/bruin/pipeline.yml
 ```
 
 The entrypoint writes a local `.bruin.yml` inside the container from environment variables and uses Application Default Credentials. This is designed to map cleanly to a future Cloud Run Job where the runtime identity comes from the attached service account.
+
+The image now initializes its own minimal git repository at build time so Bruin can resolve the workspace root without requiring the host repository to be bind-mounted at runtime.
