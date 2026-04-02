@@ -5,6 +5,14 @@ bigquery_location = "asia-south1"
 # archive_bucket_location = "asia-south1"
 # bronze_archive_bucket_name = "your-project-id-tidingsiq-bronze-archive"
 # bronze_archive_retention_days = 365
+# enable_pipeline_automation = true
+# automation_region = "asia-south1"
+# artifact_registry_location = "asia-south1"
+# pipeline_artifact_repository_id = "tidingsiq-pipeline"
+# pipeline_container_image = "asia-south1-docker.pkg.dev/your-gcp-project-id/tidingsiq-pipeline/tidingsiq-bruin:latest"
+# pipeline_job_name = "tidingsiq-pipeline"
+# pipeline_schedule = "0 */6 * * *"
+# pipeline_schedule_paused = true
 
 labels = {
   owner = "your-name"

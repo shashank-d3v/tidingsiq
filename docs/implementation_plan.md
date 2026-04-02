@@ -25,6 +25,7 @@ Completed in the current phase:
 - Terraform-managed Bronze archive bucket and manual Bronze archive runbook
 - Silver 90-day and Gold 180-day retention filters
 - pipeline container path for future Cloud Run Job execution
+- Terraform automation slice for Artifact Registry, Cloud Run Job, and Cloud Scheduler
 
 ## Phase 1: Terraform Foundation
 
@@ -236,7 +237,8 @@ Move pipeline execution from local runs to scheduled GCP batch execution without
 Current repository state:
 
 - the pipeline container image definition is in place
-- the remaining work is publishing it and wiring it into Cloud Run Jobs and Cloud Scheduler
+- the Terraform automation resources are in place behind `enable_pipeline_automation = false`
+- the remaining work is publishing the image and enabling/applying the automation resources
 
 Related future app hosting notes are captured in `docs/deployment_plan.md`.
 

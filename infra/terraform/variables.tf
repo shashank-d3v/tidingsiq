@@ -59,3 +59,93 @@ variable "labels" {
   type        = map(string)
   default     = {}
 }
+
+variable "enable_pipeline_automation" {
+  description = "When true, provisions Artifact Registry, a Cloud Run Job, and a Cloud Scheduler trigger for the Bruin pipeline."
+  type        = bool
+  default     = false
+}
+
+variable "automation_region" {
+  description = "Region for Cloud Run Jobs and Cloud Scheduler. Defaults to region when null."
+  type        = string
+  default     = null
+}
+
+variable "artifact_registry_location" {
+  description = "Location for the Artifact Registry repository. Defaults to automation_region."
+  type        = string
+  default     = null
+}
+
+variable "pipeline_artifact_repository_id" {
+  description = "Artifact Registry repository ID for the Bruin pipeline image."
+  type        = string
+  default     = "tidingsiq-pipeline"
+}
+
+variable "pipeline_container_image" {
+  description = "Full container image URI for the pipeline job. Leave empty to use the conventional Artifact Registry path."
+  type        = string
+  default     = ""
+}
+
+variable "pipeline_job_name" {
+  description = "Cloud Run Job name for the TidingsIQ pipeline."
+  type        = string
+  default     = "tidingsiq-pipeline"
+}
+
+variable "pipeline_job_timeout" {
+  description = "Per-task timeout for the Cloud Run Job."
+  type        = string
+  default     = "3600s"
+}
+
+variable "pipeline_job_max_retries" {
+  description = "Maximum retries per Cloud Run Job task."
+  type        = number
+  default     = 1
+}
+
+variable "pipeline_job_task_count" {
+  description = "Task count for the Cloud Run Job execution."
+  type        = number
+  default     = 1
+}
+
+variable "pipeline_job_parallelism" {
+  description = "Parallelism for the Cloud Run Job execution."
+  type        = number
+  default     = 1
+}
+
+variable "pipeline_gdelt_max_files" {
+  description = "Default GDELT file cap injected into the Cloud Run Job environment."
+  type        = number
+  default     = 4
+}
+
+variable "pipeline_scheduler_name" {
+  description = "Cloud Scheduler job name for pipeline execution."
+  type        = string
+  default     = "tidingsiq-pipeline-schedule"
+}
+
+variable "pipeline_schedule" {
+  description = "Cron schedule for the pipeline automation."
+  type        = string
+  default     = "0 */6 * * *"
+}
+
+variable "pipeline_schedule_time_zone" {
+  description = "Time zone for the Cloud Scheduler cron expression."
+  type        = string
+  default     = "UTC"
+}
+
+variable "pipeline_schedule_paused" {
+  description = "When true, creates the Cloud Scheduler job in a paused state."
+  type        = bool
+  default     = true
+}

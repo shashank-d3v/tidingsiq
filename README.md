@@ -80,11 +80,12 @@ Primary user control:
 
 The repository has an applied Terraform foundation, a working Bronze ingestion slice in Bruin, a deterministic Silver normalization layer, a versioned Gold scoring model, a Streamlit app that queries Gold only, and an initial retention/archive operations slice.
 The repository also includes a pipeline container path for future Cloud Run Job execution.
+The next GCP automation slice is now scaffolded in Terraform behind an explicit feature flag.
 
 Planned retention and archival policy is documented, but not yet implemented in infrastructure or pipeline operations.
 
 ## Next Build Order
 
-1. Keep the GCP automation path on deck: wire the existing Bruin pipeline container into Cloud Run Jobs and Cloud Scheduler.
+1. Push the pipeline image and enable the Terraform automation slice for Artifact Registry, Cloud Run Jobs, and Cloud Scheduler.
 2. Harden checks, replay behavior, and project presentation.
 3. Polish the top-level GitHub-facing documentation and repo presentation for evaluation.

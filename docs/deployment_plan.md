@@ -19,10 +19,11 @@ Implemented now:
 - Bruin pipeline running locally against BigQuery
 - Streamlit app running locally against `gold.positive_news_feed`
 - pipeline container path for future Cloud Run Job execution
+- Terraform automation slice for Artifact Registry, Cloud Run Job, and Cloud Scheduler
 
 Not implemented yet:
 
-- scheduled cloud execution for the pipeline
+- applied scheduled cloud execution for the pipeline
 - hosted cloud deployment for the Streamlit app
 - container build and release flow in GCP
 
@@ -69,6 +70,12 @@ Current prep work already in the repo:
 - a pipeline Dockerfile
 - a container entrypoint that writes `.bruin.yml` from environment variables
 - a default container command that runs `bruin run pipeline/bruin/pipeline.yml`
+- Terraform resources for the Artifact Registry repository, Cloud Run Job, and Cloud Scheduler trigger
+
+Current rollout boundary:
+
+- the automation Terraform is disabled by default
+- you still need to push the pipeline image and then opt in by setting `enable_pipeline_automation = true`
 
 ### 2. Application Runtime
 
@@ -132,7 +139,7 @@ Do not add these resources until the local execution paths are stable enough to 
 ## Suggested Delivery Order
 
 1. Retention and archive operations for Bronze, Silver, and Gold
-2. Pipeline Cloud Run Job execution using the existing container path
+2. Push the pipeline image to Artifact Registry and apply the Cloud Run Job and Cloud Scheduler resources
 3. App containerization and Cloud Run service deployment
 4. CI or release workflow for image build and deployment
 
