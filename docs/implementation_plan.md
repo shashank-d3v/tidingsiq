@@ -8,7 +8,7 @@ The plan favors small phases with clear exit criteria so the project can be buil
 
 ## Current Status
 
-Documentation scaffold complete. Terraform foundation is applied, Bronze ingestion is implemented, Silver normalization is implemented, and Gold scoring is implemented.
+Documentation scaffold complete. Terraform foundation is applied, Bronze ingestion is implemented, Silver normalization is implemented, Gold scoring is implemented, and the Streamlit app is implemented.
 
 Completed in the current phase:
 - project framing and scope
@@ -21,6 +21,7 @@ Completed in the current phase:
 - bounded Bronze ingestion from GDELT GKG into BigQuery
 - deterministic Silver normalization and deduplication
 - Gold `happy_factor` scoring with `v1_tone_only`
+- Streamlit frontend querying `gold.positive_news_feed`
 
 ## Phase 1: Terraform Foundation
 
@@ -161,6 +162,10 @@ Phase 5 is complete.
 
 ## Phase 6: Streamlit Application
 
+### Status
+
+Implemented in repository as a Gold-only frontend.
+
 ### Goal
 
 Provide a simple frontend that makes the warehouse output usable.
@@ -177,6 +182,10 @@ Provide a simple frontend that makes the warehouse output usable.
 - the app queries only Gold
 - filtering works as expected
 - repeated interaction does not require schema changes to the pipeline
+
+### Result
+
+Phase 6 is complete.
 
 ## Phase 7: Retention and Archive Operations
 
@@ -198,6 +207,22 @@ Put explicit lifecycle controls around the warehouse so the project stays inexpe
 - Bronze data older than 45 days has a documented and testable archive path
 - Silver and Gold retention behavior is defined and implementable
 - required GCS permissions and lifecycle assumptions are documented before infra changes are applied
+
+## Operational Horizon: GCP Automation
+
+### Goal
+
+Move pipeline execution from local runs to scheduled GCP batch execution without changing the warehouse contract.
+
+### Likely Shape
+
+- package the Bruin runner and pipeline code into a container image
+- publish the image to Artifact Registry
+- execute the pipeline as a Cloud Run Job
+- trigger scheduled runs with Cloud Scheduler
+- keep service-account access and runtime config managed by Terraform
+
+Related future app hosting notes are captured in `docs/deployment_plan.md`.
 
 ## Phase 8: Hardening and Presentation
 

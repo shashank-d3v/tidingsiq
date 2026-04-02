@@ -86,12 +86,15 @@ Checks should run as close to the transformations as possible. Initial checks sh
 
 ### 6. Streamlit Serving Layer
 
-The Streamlit app should query only the Gold model in v1. It is not responsible for business logic beyond query parameterization and presentation.
+The Streamlit app queries only the Gold model in v1. It is not responsible for business logic beyond query parameterization and presentation.
 
-Expected UI controls:
+Current UI controls:
 - `happy_factor` minimum threshold
-- optional date filters
-- optional source or language filters if the Gold schema supports them cleanly
+- lookback window in days
+- optional language filter
+- result limit
+
+The app should remain thin. Any future scheduled execution of the Bruin pipeline belongs in GCP batch infrastructure rather than the Streamlit runtime.
 
 ## End-to-End Flow
 
@@ -100,6 +103,7 @@ Expected UI controls:
 3. Bruin SQL transforms Bronze data into `silver.gdelt_news_refined`.
 4. Bruin SQL builds `gold.positive_news_feed`, including `happy_factor`.
 5. Streamlit queries Gold and returns filtered results to the user.
+6. A future scheduled path can run the Bruin pipeline through Cloud Run Jobs triggered by Cloud Scheduler.
 
 ## Data Model Strategy
 

@@ -6,7 +6,7 @@ The core product is a queryable feed of recent articles ranked by a configurable
 
 ## Scope
 
-This repository now includes the applied infrastructure foundation, a working Bronze Bruin ingestion asset, the Silver normalization layer, the Gold scoring layer, and the core design docs.
+This repository now includes the applied infrastructure foundation, a working Bronze Bruin ingestion asset, the Silver normalization layer, the Gold scoring layer, the initial Streamlit app, and the core design docs.
 
 Included in scope:
 - GCP infrastructure managed with Terraform
@@ -53,7 +53,7 @@ Primary user control:
 └── scripts/
 ```
 
-`infra/terraform/` and `pipeline/bruin/` now contain the first implementation slices. `app/streamlit/` and `scripts/` remain placeholders for later phases.
+`infra/terraform/`, `pipeline/bruin/`, and `app/streamlit/` now contain working implementation slices. `scripts/` remains available for later operational helpers.
 
 ## Documentation Index
 
@@ -61,8 +61,10 @@ Primary user control:
 - [Data Contract](docs/data_contract.md): planned Bronze, Silver, and Gold schemas
 - [Happy Factor](docs/happy_factor.md): initial scoring approach and validation rules
 - [Implementation Plan](docs/implementation_plan.md): phased build sequence and exit criteria
+- [Deployment Plan](docs/deployment_plan.md): future GCP hosting path for the pipeline and app
 - [Terraform Foundation](infra/terraform/README.md): initial GCP and BigQuery infrastructure scaffold
 - [Bruin Pipeline](pipeline/bruin/README.md): local setup notes, asset behavior, and validation workflow
+- [Streamlit App](app/streamlit/README.md): local UI run instructions and Gold query contract
 
 ## Design Principles
 
@@ -74,13 +76,13 @@ Primary user control:
 
 ## Current Status
 
-The repository has an applied Terraform foundation, a working Bronze ingestion slice in Bruin, a deterministic Silver normalization layer, and a versioned Gold scoring model. The Streamlit app has not been added yet.
+The repository has an applied Terraform foundation, a working Bronze ingestion slice in Bruin, a deterministic Silver normalization layer, a versioned Gold scoring model, and a Streamlit app that queries Gold only.
 
 Planned retention and archival policy is documented, but not yet implemented in infrastructure or pipeline operations.
 
 ## Next Build Order
 
-1. Build the Streamlit app against `gold.positive_news_feed`.
-2. Add retention and archive mechanics for Bronze, Silver, and Gold.
+1. Add retention and archive mechanics for Bronze, Silver, and Gold.
+2. Keep the GCP automation path on deck: package the Bruin runner for scheduled execution with Cloud Run Jobs and Cloud Scheduler.
 3. Harden checks, replay behavior, and project presentation.
 4. Polish the top-level GitHub-facing documentation and repo presentation for evaluation.
