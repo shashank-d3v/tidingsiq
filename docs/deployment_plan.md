@@ -18,12 +18,13 @@ Implemented now:
 - Terraform-managed GCP foundation
 - Bruin pipeline running locally against BigQuery
 - Streamlit app running locally against `gold.positive_news_feed`
+- pipeline container path for future Cloud Run Job execution
 
 Not implemented yet:
 
 - scheduled cloud execution for the pipeline
 - hosted cloud deployment for the Streamlit app
-- container build and release flow
+- container build and release flow in GCP
 
 ## Deployment Targets
 
@@ -62,6 +63,12 @@ Pipeline service account responsibilities:
 - read and write the `bronze`, `silver`, and `gold` datasets
 - read any required runtime secrets
 - write logs to Cloud Logging
+
+Current prep work already in the repo:
+
+- a pipeline Dockerfile
+- a container entrypoint that writes `.bruin.yml` from environment variables
+- a default container command that runs `bruin run pipeline/bruin/pipeline.yml`
 
 ### 2. Application Runtime
 
@@ -125,7 +132,7 @@ Do not add these resources until the local execution paths are stable enough to 
 ## Suggested Delivery Order
 
 1. Retention and archive operations for Bronze, Silver, and Gold
-2. Pipeline containerization and Cloud Run Job execution
+2. Pipeline Cloud Run Job execution using the existing container path
 3. App containerization and Cloud Run service deployment
 4. CI or release workflow for image build and deployment
 

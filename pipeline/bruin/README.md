@@ -102,3 +102,35 @@ Current implementation notes:
 - Positive and negative signal columns remain nullable until their GDELT mappings are validated.
 - Silver retains the most recent 90 days in-model.
 - Gold retains the most recent 180 days in-model.
+
+## Container Runtime
+
+The pipeline now includes a container path for future Cloud Run Job execution:
+
+- [Dockerfile](/Volumes/SWE/repos/DE%202026/tidingsiq/pipeline/bruin/Dockerfile)
+- [container-entrypoint.sh](/Volumes/SWE/repos/DE%202026/tidingsiq/pipeline/bruin/container-entrypoint.sh)
+
+Build from the repository root:
+
+```bash
+docker build -f pipeline/bruin/Dockerfile -t tidingsiq-bruin:local .
+```
+
+Run locally with ADC mounted or otherwise available to the container runtime:
+
+```bash
+docker run --rm \
+  -e BRUIN_PROJECT_ID=tidingsiq-dev \
+  -e BRUIN_BIGQUERY_LOCATION=asia-south1 \
+  -v "$HOME/.config/gcloud:/root/.config/gcloud:ro" \
+  tidingsiq-bruin:local \
+  validate pipeline/bruin/pipeline.yml
+```
+
+Default container command:
+
+```bash
+run pipeline/bruin/pipeline.yml
+```
+
+The entrypoint writes a local `.bruin.yml` inside the container from environment variables and uses Application Default Credentials. This is designed to map cleanly to a future Cloud Run Job where the runtime identity comes from the attached service account.

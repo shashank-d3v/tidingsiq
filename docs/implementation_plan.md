@@ -24,6 +24,7 @@ Completed in the current phase:
 - Streamlit frontend querying `gold.positive_news_feed`
 - Terraform-managed Bronze archive bucket and manual Bronze archive runbook
 - Silver 90-day and Gold 180-day retention filters
+- pipeline container path for future Cloud Run Job execution
 
 ## Phase 1: Terraform Foundation
 
@@ -231,6 +232,11 @@ Move pipeline execution from local runs to scheduled GCP batch execution without
 - execute the pipeline as a Cloud Run Job
 - trigger scheduled runs with Cloud Scheduler
 - keep service-account access and runtime config managed by Terraform
+
+Current repository state:
+
+- the pipeline container image definition is in place
+- the remaining work is publishing it and wiring it into Cloud Run Jobs and Cloud Scheduler
 
 Related future app hosting notes are captured in `docs/deployment_plan.md`.
 
