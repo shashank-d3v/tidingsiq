@@ -2,6 +2,9 @@ project_id        = "your-gcp-project-id"
 environment       = "dev"
 region            = "asia-south1"
 bigquery_location = "asia-south1"
+# archive_bucket_location = "asia-south1"
+# bronze_archive_bucket_name = "your-project-id-tidingsiq-bronze-archive"
+# bronze_archive_retention_days = 365
 
 labels = {
   owner = "your-name"

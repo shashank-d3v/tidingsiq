@@ -3,6 +3,7 @@
 This directory contains the first infrastructure slice for TidingsIQ. It provisions the minimum GCP resources needed to support the data pipeline and app:
 
 - BigQuery datasets: `bronze`, `silver`, `gold`
+- Bronze archive bucket with lifecycle deletion after the retention window
 - pipeline service account for Bruin workloads
 - app service account for Streamlit reads
 - minimum BigQuery IAM bindings for both identities
@@ -16,7 +17,7 @@ This directory contains the first infrastructure slice for TidingsIQ. It provisi
 
 This scaffold does not enable project APIs automatically. That is intentional to keep the first version small and permission-conscious.
 
-If Bronze archival to GCS is added later, Cloud Storage must also be enabled in the target project.
+Cloud Storage must also be enabled in the target project because Bronze archival is now provisioned in Terraform.
 
 ## Files
 
@@ -53,6 +54,9 @@ terraform apply
 | `environment` | No | `dev` | Environment label and service account suffix |
 | `region` | No | `us-central1` | Provider region |
 | `bigquery_location` | No | `US` | BigQuery dataset location |
+| `archive_bucket_location` | No | `null` | Bronze archive bucket location; falls back to `bigquery_location` |
+| `bronze_archive_bucket_name` | No | derived | Explicit Bronze archive bucket name |
+| `bronze_archive_retention_days` | No | `365` | GCS lifecycle retention for archived Bronze objects |
 | `labels` | No | `{}` | Extra labels for supported resources |
 
 ## Provisioned Access Model
@@ -60,6 +64,7 @@ terraform apply
 Pipeline service account:
 - project role: `roles/bigquery.jobUser`
 - dataset role on `bronze`, `silver`, `gold`: `roles/bigquery.dataEditor`
+- bucket role on Bronze archive bucket: `roles/storage.objectAdmin`
 
 App service account:
 - project role: `roles/bigquery.jobUser`
@@ -69,19 +74,7 @@ This is the minimum working split for the planned architecture:
 - the pipeline can create and update warehouse objects
 - the app can run query jobs but only read the serving dataset
 
-Additional permissions likely needed for the planned retention and archive phase:
-
-Pipeline service account:
-- bucket-level role on the Bronze archive bucket: `roles/storage.objectAdmin` on a dedicated bucket is the practical first version
-- existing BigQuery roles are likely sufficient for export jobs because the pipeline already has `roles/bigquery.jobUser` and dataset access
-
-Terraform operator or CI identity:
-- permission to create and manage the archive bucket and lifecycle rules
-- permission to manage bucket IAM bindings
-
-Why `roles/storage.objectAdmin` first:
-- it supports writing archive files and handling replay-safe reruns without forcing append-only object naming
-- it can be tightened later if the archive path is guaranteed to be write-once
+Terraform operator or CI identity still needs permission to create and manage the archive bucket and lifecycle rules.
 
 ## Notes
 
@@ -90,5 +83,5 @@ Why `roles/storage.objectAdmin` first:
 - `delete_contents_on_destroy` is disabled to avoid accidental dataset deletion behavior.
 - If stricter IAM boundaries are required later, move from dataset-wide editor access to more specific table or routine permissions after the first end-to-end slice is working.
 - If you revisit a multi-environment setup later, see `future_multi_environment.md`.
-- Planned retention targets are Bronze 45 days with GCS archive, Silver 90 days, and Gold 180 days.
-- Planned archive lifecycle is to retain Bronze archive objects in GCS for 365 days and then delete them automatically.
+- Current retention targets are Bronze 45 days with GCS archive, Silver 90 days, and Gold 180 days.
+- The Bronze archive bucket is now part of Terraform. Export and cleanup operations are still run separately from the pipeline.

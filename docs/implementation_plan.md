@@ -8,7 +8,7 @@ The plan favors small phases with clear exit criteria so the project can be buil
 
 ## Current Status
 
-Documentation scaffold complete. Terraform foundation is applied, Bronze ingestion is implemented, Silver normalization is implemented, Gold scoring is implemented, and the Streamlit app is implemented.
+Documentation scaffold complete. Terraform foundation is applied, Bronze ingestion is implemented, Silver normalization is implemented, Gold scoring is implemented, the Streamlit app is implemented, and the initial retention/archive slice is implemented.
 
 Completed in the current phase:
 - project framing and scope
@@ -22,6 +22,8 @@ Completed in the current phase:
 - deterministic Silver normalization and deduplication
 - Gold `happy_factor` scoring with `v1_tone_only`
 - Streamlit frontend querying `gold.positive_news_feed`
+- Terraform-managed Bronze archive bucket and manual Bronze archive runbook
+- Silver 90-day and Gold 180-day retention filters
 
 ## Phase 1: Terraform Foundation
 
@@ -189,6 +191,10 @@ Phase 6 is complete.
 
 ## Phase 7: Retention and Archive Operations
 
+### Status
+
+Initial retention and archive slice is implemented in repository with a Terraform-managed Bronze archive bucket, manual Bronze export/delete tooling, and in-model Silver/Gold retention windows.
+
 ### Goal
 
 Put explicit lifecycle controls around the warehouse so the project stays inexpensive and operationally credible.
@@ -207,6 +213,10 @@ Put explicit lifecycle controls around the warehouse so the project stays inexpe
 - Bronze data older than 45 days has a documented and testable archive path
 - Silver and Gold retention behavior is defined and implementable
 - required GCS permissions and lifecycle assumptions are documented before infra changes are applied
+
+### Result
+
+The first retention and archive slice is complete. Fully scheduled archive execution and any partition-specific refinements remain future work.
 
 ## Operational Horizon: GCP Automation
 

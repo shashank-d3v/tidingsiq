@@ -180,3 +180,4 @@ select
   dedup_rank > 1 as is_duplicate,
   normalized_title is not null and normalized_title_day_count > 1 as is_near_duplicate_candidate
 from scored
+where coalesce(published_at, ingested_at) >= timestamp_sub(current_timestamp(), interval 90 day)

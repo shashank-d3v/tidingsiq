@@ -74,7 +74,11 @@ Retention targets for the current design:
 - Bronze records older than 45 days should be archived to GCS before BigQuery cleanup
 - Bronze archive objects should be retained in GCS for 365 days and then deleted by lifecycle policy
 
-These retention and archive behaviors are design targets for later phases. They are documented now but not yet implemented in Terraform or pipeline operations.
+Current implementation state:
+- the Bronze archive bucket and its 365-day lifecycle are provisioned in Terraform
+- Silver filters itself to the most recent 90 days
+- Gold filters itself to the most recent 180 days
+- Bronze archive and cleanup runs remain manual through an operations script today
 
 ### 5. Data Quality Layer
 
@@ -143,6 +147,7 @@ Current implementation choice:
 - Retention targets are Bronze 45 days, Silver 90 days, and Gold 180 days.
 - Bronze archive should land in GCS rather than remain indefinitely in BigQuery.
 - Archived Bronze objects should expire after 365 days in GCS.
+- Bronze export and cleanup currently run as a manual operation rather than a scheduled job.
 
 ## Open Items
 

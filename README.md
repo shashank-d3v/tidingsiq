@@ -54,6 +54,7 @@ Primary user control:
 ```
 
 `infra/terraform/`, `pipeline/bruin/`, and `app/streamlit/` now contain working implementation slices. `scripts/` remains available for later operational helpers.
+`infra/terraform/`, `pipeline/bruin/`, `app/streamlit/`, and `scripts/` now contain working implementation slices.
 
 ## Documentation Index
 
@@ -65,6 +66,7 @@ Primary user control:
 - [Terraform Foundation](infra/terraform/README.md): initial GCP and BigQuery infrastructure scaffold
 - [Bruin Pipeline](pipeline/bruin/README.md): local setup notes, asset behavior, and validation workflow
 - [Streamlit App](app/streamlit/README.md): local UI run instructions and Gold query contract
+- [Operations Scripts](scripts/README.md): manual archive and retention helpers
 
 ## Design Principles
 
@@ -76,13 +78,12 @@ Primary user control:
 
 ## Current Status
 
-The repository has an applied Terraform foundation, a working Bronze ingestion slice in Bruin, a deterministic Silver normalization layer, a versioned Gold scoring model, and a Streamlit app that queries Gold only.
+The repository has an applied Terraform foundation, a working Bronze ingestion slice in Bruin, a deterministic Silver normalization layer, a versioned Gold scoring model, a Streamlit app that queries Gold only, and an initial retention/archive operations slice.
 
 Planned retention and archival policy is documented, but not yet implemented in infrastructure or pipeline operations.
 
 ## Next Build Order
 
-1. Add retention and archive mechanics for Bronze, Silver, and Gold.
-2. Keep the GCP automation path on deck: package the Bruin runner for scheduled execution with Cloud Run Jobs and Cloud Scheduler.
-3. Harden checks, replay behavior, and project presentation.
-4. Polish the top-level GitHub-facing documentation and repo presentation for evaluation.
+1. Keep the GCP automation path on deck: package the Bruin runner for scheduled execution with Cloud Run Jobs and Cloud Scheduler.
+2. Harden checks, replay behavior, and project presentation.
+3. Polish the top-level GitHub-facing documentation and repo presentation for evaluation.

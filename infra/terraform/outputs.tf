@@ -14,3 +14,8 @@ output "app_service_account_email" {
   description = "Service account email for the Streamlit app."
   value       = google_service_account.app.email
 }
+
+output "bronze_archive_bucket_name" {
+  description = "GCS bucket name for archived Bronze exports."
+  value       = google_storage_bucket.bronze_archive.name
+}

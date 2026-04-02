@@ -70,6 +70,7 @@ One ingested source record per row.
 - `raw_payload` currently stores selected raw GKG fields rather than the entire original row to keep Bronze practical and debuggable without retaining unnecessary volume
 - Bronze rows older than 45 days should be exportable to GCS without losing row-level traceability
 - archived Bronze objects should be retained for 365 days before deletion
+- current implementation uses a manual archive script plus a Terraform-managed archive bucket
 
 ## Silver Contract
 
@@ -118,6 +119,7 @@ One normalized article candidate per row before Gold filtering.
 - fuzzy or probabilistic deduplication is not required in v1
 - Silver should retain 90 days of queryable history in BigQuery
 - current implementation uses normalized URL first, then title plus source plus hour bucket as the deterministic dedup fallback
+- current implementation enforces the 90-day retention window in the Silver model itself
 
 ## Gold Contract
 
@@ -161,6 +163,7 @@ One app-ready article record per retained article.
 - the app should not depend on nullable upstream-derived signals being present in every release
 - Gold should retain 180 days of queryable history in BigQuery
 - current implementation keeps only canonical Silver rows where `is_duplicate = false`
+- current implementation enforces the 180-day retention window in the Gold model itself
 
 ## Deduplication Policy
 
@@ -188,7 +191,11 @@ Current retention targets:
 - Silver: retain 90 days in BigQuery
 - Gold: retain 180 days in BigQuery
 
-These are documented design targets and are not yet implemented as active lifecycle controls.
+Current implementation status:
+
+- Bronze archive bucket and object lifecycle are provisioned in Terraform
+- Bronze export and delete are executed manually through an operations script
+- Silver and Gold retention are enforced in-model today
 
 Archive expectations for Bronze:
 

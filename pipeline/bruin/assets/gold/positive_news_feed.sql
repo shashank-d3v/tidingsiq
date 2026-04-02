@@ -104,3 +104,4 @@ select
   happy_factor_version,
   ingested_at
 from scored
+where coalesce(published_at, ingested_at) >= timestamp_sub(current_timestamp(), interval 180 day)

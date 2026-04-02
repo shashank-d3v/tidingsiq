@@ -4,6 +4,9 @@ provider "google" {
 }
 
 locals {
+  bronze_archive_bucket_name = trimspace(var.bronze_archive_bucket_name) != "" ? trimspace(var.bronze_archive_bucket_name) : "${var.project_id}-tidingsiq-bronze-archive"
+  archive_bucket_location    = coalesce(var.archive_bucket_location, var.bigquery_location)
+
   common_labels = merge(
     {
       app         = "tidingsiq"
@@ -35,6 +38,25 @@ resource "google_bigquery_dataset" "datasets" {
   description                = each.value.description
   delete_contents_on_destroy = false
   labels                     = local.common_labels
+}
+
+resource "google_storage_bucket" "bronze_archive" {
+  project                     = var.project_id
+  name                        = local.bronze_archive_bucket_name
+  location                    = local.archive_bucket_location
+  storage_class               = "STANDARD"
+  uniform_bucket_level_access = true
+  labels                      = local.common_labels
+
+  lifecycle_rule {
+    condition {
+      age = var.bronze_archive_retention_days
+    }
+
+    action {
+      type = "Delete"
+    }
+  }
 }
 
 resource "google_service_account" "pipeline" {
@@ -75,4 +97,10 @@ resource "google_bigquery_dataset_iam_member" "app_gold_viewer" {
   dataset_id = google_bigquery_dataset.datasets["gold"].dataset_id
   role       = "roles/bigquery.dataViewer"
   member     = "serviceAccount:${google_service_account.app.email}"
+}
+
+resource "google_storage_bucket_iam_member" "pipeline_bronze_archive_object_admin" {
+  bucket = google_storage_bucket.bronze_archive.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.pipeline.email}"
 }

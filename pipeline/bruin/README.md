@@ -100,3 +100,5 @@ Current implementation notes:
 - Silver keeps deterministic duplicate flags so Gold can expose only canonical rows.
 - Gold computes `happy_factor_version = 'v1_tone_only'`.
 - Positive and negative signal columns remain nullable until their GDELT mappings are validated.
+- Silver retains the most recent 90 days in-model.
+- Gold retains the most recent 180 days in-model.
