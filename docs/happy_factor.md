@@ -31,48 +31,43 @@ Important constraint:
 
 The exact upstream GDELT field mappings for positive and negative emotional signals are not yet confirmed. The first implementation must not invent them.
 
-## Recommended v1 Strategy
+## Implemented v1 Strategy
 
-Ship the scoring model in two possible stages, depending on what is validated during source integration.
+The current repository implementation uses:
 
-### Option A: `v1_tone_only`
+- `happy_factor_version = 'v1_tone_only'`
 
-Use this if only the tone mapping is validated reliably.
+This is the safest initial release because the tone mapping is validated and the positive and negative signal mappings are still intentionally unresolved.
+
+### Implemented formula
 
 Concept:
 
 ```sql
+normalized_tone_score = clamp((tone_score + 10) / 20, 0, 1)
 happy_factor = 100 * normalized_tone_score
 ```
 
-This is the safest initial release because it keeps the scoring logic fully grounded in confirmed inputs.
+The current SQL implementation rounds `happy_factor` to two decimal places for display and filtering stability.
 
-### Option B: `v1_tone_plus_signal`
+### Why this normalization
 
-Use this only if positive-signal mappings are validated against real GDELT samples.
+The current Bronze and Silver sample shows `tone_score` concentrated near neutral, with observed values roughly between `-16.2` and `14.4`. GDELT's documented API examples also treat values around `5` as fairly positive and `-5` as fairly negative. Using `-10` to `10` as the primary scoring band gives a simple, explainable first release:
 
-Concept:
-
-```sql
-happy_factor =
-  100 * (
-    0.7 * normalized_tone_score +
-    0.3 * normalized_positive_signal_score
-  )
-```
-
-If a reliable negative signal is later retained, it can be introduced in a new version rather than modifying an existing one silently.
+- `tone_score <= -10` maps to `0`
+- `tone_score = 0` maps to `50`
+- `tone_score >= 10` maps to `100`
 
 ## Normalization Rules
 
-The formula should only combine normalized inputs. For v1:
+The formula should only combine normalized inputs. For the current implementation:
 
 - normalize each component to a `0` to `1` range
 - clamp out-of-range values before scoring
 - multiply the weighted result by `100`
 - round to a practical precision for display and filtering
 
-The exact normalization rule for `tone_score` depends on the raw GDELT value distribution and must be validated during implementation.
+Future versions can replace this normalization only by changing `happy_factor_version`, not by silently redefining `v1_tone_only`.
 
 ## UI Usage
 
@@ -100,10 +95,10 @@ For v1, `happy_factor` should not attempt to:
 - score source credibility
 - remove all false positives
 
-## Decision Rule
+## Future Extension Rule
 
-If GDELT emotional-signal mappings are still ambiguous at implementation time, the project should launch with:
+If validated positive or negative signal mappings are added later, they should ship as a new version such as:
 
-- `happy_factor_version = 'v1_tone_only'`
+- `happy_factor_version = 'v2_tone_plus_signal'`
 
-This is preferable to shipping a more complex but weakly justified formula.
+The current implementation should remain frozen and explainable for portfolio review.

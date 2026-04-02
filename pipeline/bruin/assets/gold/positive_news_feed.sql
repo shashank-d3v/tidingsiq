@@ -51,21 +51,56 @@ columns:
       - name: not_null
 @bruin */
 
--- Placeholder scaffold only.
--- Phase 5 will replace this empty schema projection with final scoring logic.
+with canonical_articles as (
+  select
+    article_id,
+    published_at,
+    source_name,
+    source_country,
+    language,
+    title,
+    url,
+    tone_score,
+    positive_signal_score,
+    negative_signal_score,
+    ingested_at
+  from silver.gdelt_news_refined
+  where is_duplicate = false
+),
+
+scored as (
+  select
+    article_id,
+    published_at,
+    source_name,
+    source_country,
+    language,
+    title,
+    url,
+    tone_score,
+    positive_signal_score,
+    negative_signal_score,
+    round(
+      100 * greatest(0.0, least(1.0, safe_divide(tone_score + 10.0, 20.0))),
+      2
+    ) as happy_factor,
+    'v1_tone_only' as happy_factor_version,
+    ingested_at
+  from canonical_articles
+)
+
 select
-  cast(null as string) as article_id,
-  cast(null as timestamp) as published_at,
-  cast(null as string) as source_name,
-  cast(null as string) as source_country,
-  cast(null as string) as language,
-  cast(null as string) as title,
-  cast(null as string) as url,
-  cast(null as float64) as tone_score,
-  cast(null as float64) as positive_signal_score,
-  cast(null as float64) as negative_signal_score,
-  cast(null as float64) as happy_factor,
-  cast(null as string) as happy_factor_version,
-  cast(null as timestamp) as ingested_at
-from (select 1 as placeholder_row)
-where 1 = 0
+  article_id,
+  published_at,
+  source_name,
+  source_country,
+  language,
+  title,
+  url,
+  tone_score,
+  positive_signal_score,
+  negative_signal_score,
+  happy_factor,
+  happy_factor_version,
+  ingested_at
+from scored

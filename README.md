@@ -6,7 +6,7 @@ The core product is a queryable feed of recent articles ranked by a configurable
 
 ## Scope
 
-This repository now includes the first infrastructure scaffold, a working Bronze Bruin ingestion asset, and the core design docs. It defines the target architecture, data contract, scoring approach, and implementation sequence before the Silver, Gold, and application layers are implemented.
+This repository now includes the applied infrastructure foundation, a working Bronze Bruin ingestion asset, the Silver normalization layer, the Gold scoring layer, and the core design docs.
 
 Included in scope:
 - GCP infrastructure managed with Terraform
@@ -62,7 +62,7 @@ Primary user control:
 - [Happy Factor](docs/happy_factor.md): initial scoring approach and validation rules
 - [Implementation Plan](docs/implementation_plan.md): phased build sequence and exit criteria
 - [Terraform Foundation](infra/terraform/README.md): initial GCP and BigQuery infrastructure scaffold
-- [Bruin Scaffold](pipeline/bruin/README.md): local setup notes and placeholder asset layout
+- [Bruin Pipeline](pipeline/bruin/README.md): local setup notes, asset behavior, and validation workflow
 
 ## Design Principles
 
@@ -74,14 +74,13 @@ Primary user control:
 
 ## Current Status
 
-The repository has an applied Terraform foundation, a working Bronze ingestion slice in Bruin, and the supporting design docs. Silver and Gold remain placeholders, and the Streamlit app has not been added yet.
+The repository has an applied Terraform foundation, a working Bronze ingestion slice in Bruin, a deterministic Silver normalization layer, and a versioned Gold scoring model. The Streamlit app has not been added yet.
 
 Planned retention and archival policy is documented, but not yet implemented in infrastructure or pipeline operations.
 
 ## Next Build Order
 
-1. Implement Silver normalization and deterministic deduplication.
-2. Compute `happy_factor` in Gold and expose the feed through Streamlit.
-3. Add retention and archive mechanics for Bronze, Silver, and Gold.
-4. Harden checks, replay behavior, and project presentation.
-5. Polish the top-level GitHub-facing documentation and repo presentation for evaluation.
+1. Build the Streamlit app against `gold.positive_news_feed`.
+2. Add retention and archive mechanics for Bronze, Silver, and Gold.
+3. Harden checks, replay behavior, and project presentation.
+4. Polish the top-level GitHub-facing documentation and repo presentation for evaluation.

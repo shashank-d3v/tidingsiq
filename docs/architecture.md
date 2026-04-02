@@ -74,6 +74,8 @@ Retention targets for the current design:
 - Bronze records older than 45 days should be archived to GCS before BigQuery cleanup
 - Bronze archive objects should be retained in GCS for 365 days and then deleted by lifecycle policy
 
+These retention and archive behaviors are design targets for later phases. They are documented now but not yet implemented in Terraform or pipeline operations.
+
 ### 5. Data Quality Layer
 
 Checks should run as close to the transformations as possible. Initial checks should focus on:
@@ -113,6 +115,11 @@ Silver is the normalization boundary. URL cleanup, title cleanup, timestamp norm
 
 Gold is the stable consumer contract. It should contain only fields needed by the app and enough metadata to explain the scoring logic.
 
+Current implementation choice:
+- Gold keeps only canonical Silver rows where `is_duplicate = false`
+- `happy_factor_version = 'v1_tone_only'`
+- `happy_factor` is derived from `tone_score` only until richer GDELT signal mappings are validated
+
 ## Operational Principles
 
 - Prefer scheduled batch processing over frequent small loads.
@@ -128,6 +135,7 @@ Gold is the stable consumer contract. It should contain only fields needed by th
 - Bruin is the orchestrator and transformation framework.
 - The app will depend on one canonical serving table: `gold.positive_news_feed`.
 - The first release uses a configurable threshold, not a complex ranking product.
+- Phase 5 uses a tone-only Gold scoring model rather than unvalidated emotional-signal fields.
 - Retention targets are Bronze 45 days, Silver 90 days, and Gold 180 days.
 - Bronze archive should land in GCS rather than remain indefinitely in BigQuery.
 - Archived Bronze objects should expire after 365 days in GCS.

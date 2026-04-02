@@ -103,9 +103,9 @@ One normalized article candidate per row before Gold filtering.
 | normalized_title | STRING | No | Derived | Lowercased and normalized title for matching |
 | url | STRING | No | Bronze normalized | Canonical article URL |
 | normalized_url | STRING | No | Derived | URL normalized for deduplication |
-| tone_score | FLOAT64 | No | Derived | Tone normalized to a consistent internal scale |
-| positive_signal_score | FLOAT64 | No | Derived | Derived positive signal, if upstream mapping is validated |
-| negative_signal_score | FLOAT64 | No | Derived | Derived negative signal, if retained |
+| tone_score | FLOAT64 | No | Bronze carried forward | Raw GDELT tone component retained for deterministic downstream scoring |
+| positive_signal_score | FLOAT64 | No | Derived | Nullable placeholder until an upstream mapping is validated |
+| negative_signal_score | FLOAT64 | No | Derived | Nullable placeholder until an upstream mapping is validated |
 | dedup_key | STRING | No | Derived | Deterministic key used for duplicate grouping |
 | is_duplicate | BOOL | Yes | Derived | True when the row is not the canonical retained record |
 | is_near_duplicate_candidate | BOOL | Yes | Derived | Optional candidate flag for future fuzzy dedup work |
@@ -117,6 +117,7 @@ One normalized article candidate per row before Gold filtering.
 - canonical rows should have stable dedup behavior across reruns
 - fuzzy or probabilistic deduplication is not required in v1
 - Silver should retain 90 days of queryable history in BigQuery
+- current implementation uses normalized URL first, then title plus source plus hour bucket as the deterministic dedup fallback
 
 ## Gold Contract
 
@@ -149,7 +150,7 @@ One app-ready article record per retained article.
 | positive_signal_score | FLOAT64 | No | Silver | Nullable if v1 launches before this mapping is confirmed |
 | negative_signal_score | FLOAT64 | No | Silver | Nullable if not used in v1 |
 | happy_factor | FLOAT64 | Yes | Derived | Positivity-oriented score on a 0 to 100 scale |
-| happy_factor_version | STRING | Yes | Derived | Formula version, for example `v1_tone_only` or `v1_tone_plus_signal` |
+| happy_factor_version | STRING | Yes | Derived | Current implementation is `v1_tone_only` |
 | ingested_at | TIMESTAMP | Yes | Silver | Freshness marker for the record |
 
 ### Gold quality expectations
@@ -159,6 +160,7 @@ One app-ready article record per retained article.
 - `happy_factor_version` must always be populated
 - the app should not depend on nullable upstream-derived signals being present in every release
 - Gold should retain 180 days of queryable history in BigQuery
+- current implementation keeps only canonical Silver rows where `is_duplicate = false`
 
 ## Deduplication Policy
 
@@ -186,6 +188,8 @@ Current retention targets:
 - Silver: retain 90 days in BigQuery
 - Gold: retain 180 days in BigQuery
 
+These are documented design targets and are not yet implemented as active lifecycle controls.
+
 Archive expectations for Bronze:
 
 - archive objects should be partitionable by export date or source date
@@ -195,5 +199,5 @@ Archive expectations for Bronze:
 
 ## Open Validation Items
 
-- Confirm whether positive and negative signals come from validated GDELT fields or whether v1 should ship as tone-only.
+- Confirm whether positive and negative signals come from validated GDELT fields or whether a later Gold version should extend beyond `v1_tone_only`.
 - Confirm whether `source_country` is reliable enough to expose in Gold.

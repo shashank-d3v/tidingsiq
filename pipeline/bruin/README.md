@@ -1,20 +1,20 @@
 # Bruin Scaffold
 
-This directory contains the Bruin project scaffold for TidingsIQ. It is intentionally limited to pipeline structure, placeholder assets, and quality-check wiring.
+This directory contains the Bruin pipeline for TidingsIQ, including the working Bronze, Silver, and Gold layers.
 
 ## Included
 
 - `pipeline.yml` with minimal pipeline metadata
 - one Python Bronze ingestion asset
-- one SQL Silver placeholder asset
-- one SQL Gold placeholder asset
+- one SQL Silver normalization and deduplication asset
+- one SQL Gold scoring asset
 - `pyproject.toml` for Python asset dependencies
 
 ## Not Included Yet
 
-- production-ready BigQuery SQL transformations
-- local or CI execution wiring
 - committed `.bruin.yml` credentials configuration
+- CI execution wiring
+- retention and archive operations
 
 ## Local Bruin Configuration
 
@@ -43,8 +43,8 @@ environments:
 ## Expected Asset Progression
 
 - `bronze.gdelt_news_raw`: implemented as a bounded GDELT GKG 2.1 ingestion step
-- `silver.gdelt_news_refined`: replace the empty schema query with normalization and deterministic deduplication
-- `gold.positive_news_feed`: replace the empty schema query with final scoring and serving logic
+- `silver.gdelt_news_refined`: implemented with normalization and deterministic deduplication
+- `gold.positive_news_feed`: implemented with canonical-row selection and `v1_tone_only` scoring
 
 ## Bronze Runtime Notes
 
@@ -85,6 +85,18 @@ Once Bruin is installed locally and `.bruin.yml` exists, the expected first chec
 ```bash
 bruin validate pipeline/bruin/pipeline.yml
 bruin run pipeline/bruin/assets/bronze/gdelt_news_raw.py
+bruin run pipeline/bruin/assets/silver/gdelt_news_refined.sql
+bruin run pipeline/bruin/assets/gold/positive_news_feed.sql
 ```
 
-The Bronze asset now ingests real metadata. Silver and Gold remain schema placeholders until later phases.
+Expected warehouse outputs after a successful end-to-end run:
+
+- `bronze.gdelt_news_raw`
+- `silver.gdelt_news_refined`
+- `gold.positive_news_feed`
+
+Current implementation notes:
+
+- Silver keeps deterministic duplicate flags so Gold can expose only canonical rows.
+- Gold computes `happy_factor_version = 'v1_tone_only'`.
+- Positive and negative signal columns remain nullable until their GDELT mappings are validated.

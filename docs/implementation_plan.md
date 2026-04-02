@@ -8,7 +8,7 @@ The plan favors small phases with clear exit criteria so the project can be buil
 
 ## Current Status
 
-Documentation scaffold complete. Terraform foundation is applied, Phase 2 scaffold is committed, and Phase 3 Bronze ingestion is implemented.
+Documentation scaffold complete. Terraform foundation is applied, Bronze ingestion is implemented, Silver normalization is implemented, and Gold scoring is implemented.
 
 Completed in the current phase:
 - project framing and scope
@@ -19,6 +19,8 @@ Completed in the current phase:
 - Terraform provider, dataset, service account, and IAM scaffold
 - Bruin pipeline, dependency, and placeholder asset scaffold
 - bounded Bronze ingestion from GDELT GKG into BigQuery
+- deterministic Silver normalization and deduplication
+- Gold `happy_factor` scoring with `v1_tone_only`
 
 ## Phase 1: Terraform Foundation
 
@@ -103,6 +105,10 @@ Phase 3 is complete.
 
 ## Phase 4: Silver Normalization and Deduplication
 
+### Status
+
+Implemented in repository with deterministic URL-first deduplication and a title-source-time fallback.
+
 ### Goal
 
 Convert landed records into clean article-level rows suitable for downstream consumption.
@@ -121,7 +127,15 @@ Convert landed records into clean article-level rows suitable for downstream con
 - duplicate handling is reproducible across reruns
 - row-level assumptions are documented where source ambiguity remains
 
+### Result
+
+Phase 4 is complete.
+
 ## Phase 5: Gold Scoring Model
+
+### Status
+
+Implemented in repository using a versioned tone-only scoring model.
 
 ### Goal
 
@@ -140,6 +154,10 @@ Create the canonical serving model used by the app.
 - Gold schema matches the documented contract
 - `happy_factor` stays within `0` to `100`
 - the model can support a threshold-only app without querying lower layers
+
+### Result
+
+Phase 5 is complete.
 
 ## Phase 6: Streamlit Application
 

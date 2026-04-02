@@ -59,26 +59,124 @@ columns:
       - name: not_null
 @bruin */
 
--- Placeholder scaffold only.
--- Phase 4 will replace this empty schema projection with normalization and dedup logic.
+with bronze_base as (
+  select
+    source_record_id,
+    ingestion_id,
+    ingested_at,
+    published_at,
+    nullif(trim(source_name), '') as source_name,
+    nullif(trim(source_url), '') as source_url,
+    nullif(regexp_replace(trim(title), r'\s+', ' '), '') as cleaned_title,
+    nullif(lower(trim(language)), '') as cleaned_language,
+    tone_raw
+  from bronze.gdelt_news_raw
+),
+
+normalized as (
+  select
+    source_record_id,
+    ingestion_id,
+    ingested_at,
+    published_at,
+    source_name,
+    cleaned_title as title,
+    lower(cleaned_title) as normalized_title,
+    source_url as url,
+    case
+      when source_url is null then null
+      else nullif(
+        regexp_replace(
+          regexp_replace(
+            regexp_replace(lower(source_url), r'^https?://', ''),
+            r'[?#].*$',
+            ''
+          ),
+          r'/$', ''
+        ),
+        ''
+      )
+    end as normalized_url,
+    case
+      when source_url is not null then
+        nullif(regexp_replace(lower(net.host(source_url)), r'^www\.', ''), '')
+      when source_name is not null then
+        nullif(regexp_replace(lower(source_name), r'^www\.', ''), '')
+      else null
+    end as source_domain,
+    cast(null as string) as source_country,
+    cleaned_language as language,
+    tone_raw as tone_score,
+    cast(null as float64) as positive_signal_score,
+    cast(null as float64) as negative_signal_score
+  from bronze_base
+),
+
+keyed as (
+  select
+    to_hex(sha256(source_record_id)) as article_id,
+    ingestion_id,
+    ingested_at,
+    published_at,
+    source_name,
+    source_domain,
+    source_country,
+    language,
+    title,
+    normalized_title,
+    url,
+    normalized_url,
+    tone_score,
+    positive_signal_score,
+    negative_signal_score,
+    case
+      when normalized_url is not null then concat('url:', normalized_url)
+      else concat(
+        'title:',
+        coalesce(normalized_title, ''),
+        '|source:',
+        coalesce(source_domain, source_name, ''),
+        '|bucket:',
+        format_timestamp(
+          '%Y%m%d%H',
+          coalesce(published_at, ingested_at)
+        )
+      )
+    end as dedup_key,
+    date(coalesce(published_at, ingested_at)) as dedup_date
+  from normalized
+),
+
+scored as (
+  select
+    *,
+    row_number() over (
+      partition by dedup_key
+      order by published_at desc nulls last, ingested_at desc, article_id desc
+    ) as dedup_rank,
+    count(*) over (
+      partition by normalized_title, dedup_date
+    ) as normalized_title_day_count
+  from keyed
+)
+
 select
-  cast(null as string) as article_id,
-  cast(null as string) as ingestion_id,
-  cast(null as timestamp) as ingested_at,
-  cast(null as timestamp) as published_at,
-  cast(null as string) as source_name,
-  cast(null as string) as source_domain,
-  cast(null as string) as source_country,
-  cast(null as string) as language,
-  cast(null as string) as title,
-  cast(null as string) as normalized_title,
-  cast(null as string) as url,
-  cast(null as string) as normalized_url,
-  cast(null as float64) as tone_score,
-  cast(null as float64) as positive_signal_score,
-  cast(null as float64) as negative_signal_score,
-  cast(null as string) as dedup_key,
-  cast(null as bool) as is_duplicate,
-  cast(null as bool) as is_near_duplicate_candidate
-from (select 1 as placeholder_row)
-where 1 = 0
+  article_id,
+  ingestion_id,
+  ingested_at,
+  published_at,
+  source_name,
+  source_domain,
+  source_country,
+  language,
+  title,
+  normalized_title,
+  url,
+  normalized_url,
+  tone_score,
+  positive_signal_score,
+  negative_signal_score,
+  dedup_key,
+  dedup_rank > 1 as is_duplicate,
+  normalized_title is not null and normalized_title_day_count > 1 as is_near_duplicate_candidate
+from scored
