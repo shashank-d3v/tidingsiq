@@ -18,12 +18,13 @@ Implemented now:
 - Terraform-managed GCP foundation
 - Bruin pipeline running locally against BigQuery
 - Streamlit app running locally against `gold.positive_news_feed`
-- pipeline container path for future Cloud Run Job execution
-- Terraform automation slice for Artifact Registry, Cloud Run Job, and Cloud Scheduler
+- pipeline container path for Cloud Run Job execution
+- applied Terraform automation for Artifact Registry, Cloud Run Job, and Cloud Scheduler
+- scheduler intentionally left paused until manual cloud runs are stable
 
 Not implemented yet:
 
-- applied scheduled cloud execution for the pipeline
+- unpaused scheduled cloud execution for the pipeline
 - hosted cloud deployment for the Streamlit app
 - container build and release flow in GCP
 
@@ -71,11 +72,13 @@ Current prep work already in the repo:
 - a container entrypoint that writes `.bruin.yml` from environment variables
 - a default container command that runs `bruin run pipeline/bruin/pipeline.yml`
 - Terraform resources for the Artifact Registry repository, Cloud Run Job, and Cloud Scheduler trigger
+- an applied Cloud Run Job and a paused Cloud Scheduler job in the current project
 
 Current rollout boundary:
 
-- the automation Terraform is disabled by default
-- you still need to push the pipeline image and then opt in by setting `enable_pipeline_automation = true`
+- the scheduler is still paused by design
+- manual Cloud Run execution should stay the first smoke check after image changes
+- the current cloud runtime may need `GDELT_DISABLE_SSL_VERIFY=true` as a temporary workaround for upstream certificate validation failures
 
 ### 2. Application Runtime
 
@@ -139,7 +142,7 @@ Do not add these resources until the local execution paths are stable enough to 
 ## Suggested Delivery Order
 
 1. Retention and archive operations for Bronze, Silver, and Gold
-2. Push the pipeline image to Artifact Registry and apply the Cloud Run Job and Cloud Scheduler resources
+2. Unpause the Cloud Scheduler job only after repeated manual Cloud Run executions are clean
 3. App containerization and Cloud Run service deployment
 4. CI or release workflow for image build and deployment
 

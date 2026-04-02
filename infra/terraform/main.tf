@@ -20,6 +20,9 @@ locals {
     bronze = {
       description = "Raw landed GDELT records and ingestion metadata."
     }
+    bronze_staging = {
+      description = "Operational staging dataset used by the Bronze load path during merge writes."
+    }
     silver = {
       description = "Normalized and deduplicated article-level models."
     }

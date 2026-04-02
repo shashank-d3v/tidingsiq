@@ -8,7 +8,7 @@ The plan favors small phases with clear exit criteria so the project can be buil
 
 ## Current Status
 
-Documentation scaffold complete. Terraform foundation is applied, Bronze ingestion is implemented, Silver normalization is implemented, Gold scoring is implemented, the Streamlit app is implemented, and the initial retention/archive slice is implemented.
+Documentation scaffold complete. Terraform foundation is applied, Bronze ingestion is implemented, Silver normalization is implemented, Gold scoring is implemented, the Streamlit app is implemented, the initial retention/archive slice is implemented, and the first GCP automation slice is applied with the scheduler paused.
 
 Completed in the current phase:
 - project framing and scope
@@ -17,6 +17,7 @@ Completed in the current phase:
 - initial `happy_factor` strategy
 - phased implementation plan
 - Terraform provider, dataset, service account, and IAM scaffold
+- operational `bronze_staging` dataset for Bronze merge loads
 - Bruin pipeline, dependency, and placeholder asset scaffold
 - bounded Bronze ingestion from GDELT GKG into BigQuery
 - deterministic Silver normalization and deduplication
@@ -24,8 +25,8 @@ Completed in the current phase:
 - Streamlit frontend querying `gold.positive_news_feed`
 - Terraform-managed Bronze archive bucket and manual Bronze archive runbook
 - Silver 90-day and Gold 180-day retention filters
-- pipeline container path for future Cloud Run Job execution
-- Terraform automation slice for Artifact Registry, Cloud Run Job, and Cloud Scheduler
+- pipeline container path for Cloud Run Job execution
+- Terraform automation for Artifact Registry, Cloud Run Job, and Cloud Scheduler
 
 ## Phase 1: Terraform Foundation
 
@@ -237,8 +238,10 @@ Move pipeline execution from local runs to scheduled GCP batch execution without
 Current repository state:
 
 - the pipeline container image definition is in place
-- the Terraform automation resources are in place behind `enable_pipeline_automation = false`
-- the remaining work is publishing the image and enabling/applying the automation resources
+- the Terraform automation resources are applied in the target project
+- the Cloud Run Job can be executed manually
+- the Cloud Scheduler job remains paused until manual cloud execution is stable
+- the remaining work is hardening the cloud runtime and then unpausing the schedule
 
 Related future app hosting notes are captured in `docs/deployment_plan.md`.
 

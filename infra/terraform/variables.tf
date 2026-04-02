@@ -120,10 +120,22 @@ variable "pipeline_job_parallelism" {
   default     = 1
 }
 
+variable "pipeline_job_memory_limit" {
+  description = "Memory limit for the Cloud Run Job container."
+  type        = string
+  default     = "2Gi"
+}
+
 variable "pipeline_gdelt_max_files" {
   description = "Default GDELT file cap injected into the Cloud Run Job environment."
   type        = number
   default     = 4
+}
+
+variable "pipeline_gdelt_disable_ssl_verify" {
+  description = "When true, sets GDELT_DISABLE_SSL_VERIFY in the Cloud Run Job as a compatibility workaround for upstream certificate validation failures."
+  type        = bool
+  default     = false
 }
 
 variable "pipeline_scheduler_name" {

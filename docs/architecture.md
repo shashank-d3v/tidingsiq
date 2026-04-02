@@ -27,6 +27,7 @@ Out of scope for v1:
 
 Terraform owns reproducible cloud setup. The first version should provision only what the pipeline requires to run:
 - BigQuery datasets
+- an operational Bronze staging dataset for merge loads
 - a GCS bucket for Bronze archive once retention is implemented
 - service accounts
 - IAM bindings
@@ -64,6 +65,8 @@ Bruin SQL assets will materialize three logical layers:
 - `bronze`: landed source records plus ingestion metadata
 - `silver`: cleaned, normalized, and deduplicated article records
 - `gold`: application-facing records with `happy_factor`
+
+Supporting infrastructure also includes `bronze_staging`, which is an operational dataset used by the Bronze load path and is not part of the consumer-facing warehouse contract.
 
 BigQuery is both the storage layer and the compute layer. No separate processing engine is required for v1.
 
@@ -107,7 +110,7 @@ The app should remain thin. Any future scheduled execution of the Bruin pipeline
 3. Bruin SQL transforms Bronze data into `silver.gdelt_news_refined`.
 4. Bruin SQL builds `gold.positive_news_feed`, including `happy_factor`.
 5. Streamlit queries Gold and returns filtered results to the user.
-6. A future scheduled path can run the Bruin pipeline through Cloud Run Jobs triggered by Cloud Scheduler.
+6. The pipeline can run locally or through the deployed Cloud Run Job, with Cloud Scheduler kept paused until the cloud execution path is stable.
 
 ## Data Model Strategy
 

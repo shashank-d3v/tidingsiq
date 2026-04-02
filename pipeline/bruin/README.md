@@ -14,7 +14,7 @@ This directory contains the Bruin pipeline for TidingsIQ, including the working 
 
 - committed `.bruin.yml` credentials configuration
 - CI execution wiring
-- retention and archive operations
+- fully automated archive scheduling
 
 ## Local Bruin Configuration
 
@@ -105,7 +105,7 @@ Current implementation notes:
 
 ## Container Runtime
 
-The pipeline now includes a container path for future Cloud Run Job execution:
+The pipeline now includes the container path used by the deployed Cloud Run Job:
 
 - [Dockerfile](/Volumes/SWE/repos/DE%202026/tidingsiq/pipeline/bruin/Dockerfile)
 - [container-entrypoint.sh](/Volumes/SWE/repos/DE%202026/tidingsiq/pipeline/bruin/container-entrypoint.sh)
@@ -133,6 +133,10 @@ Default container command:
 run pipeline/bruin/pipeline.yml
 ```
 
-The entrypoint writes a local `.bruin.yml` inside the container from environment variables and uses Application Default Credentials. This is designed to map cleanly to a future Cloud Run Job where the runtime identity comes from the attached service account.
+The entrypoint writes a local `.bruin.yml` inside the container from environment variables and uses Application Default Credentials. This matches the current Cloud Run Job deployment model, where the runtime identity comes from the attached service account.
 
 The image now initializes its own minimal git repository at build time so Bruin can resolve the workspace root without requiring the host repository to be bind-mounted at runtime.
+
+Current cloud runtime note:
+
+- if GDELT download fails in Cloud Run with certificate verification errors, set `pipeline_gdelt_disable_ssl_verify = true` in Terraform as a temporary workaround

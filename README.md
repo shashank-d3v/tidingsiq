@@ -53,7 +53,6 @@ Primary user control:
 └── scripts/
 ```
 
-`infra/terraform/`, `pipeline/bruin/`, and `app/streamlit/` now contain working implementation slices. `scripts/` remains available for later operational helpers.
 `infra/terraform/`, `pipeline/bruin/`, `app/streamlit/`, and `scripts/` now contain working implementation slices.
 
 ## Documentation Index
@@ -78,14 +77,13 @@ Primary user control:
 
 ## Current Status
 
-The repository has an applied Terraform foundation, a working Bronze ingestion slice in Bruin, a deterministic Silver normalization layer, a versioned Gold scoring model, a Streamlit app that queries Gold only, and an initial retention/archive operations slice.
-The repository also includes a pipeline container path for future Cloud Run Job execution.
-The next GCP automation slice is now scaffolded in Terraform behind an explicit feature flag.
+The repository has an applied Terraform foundation, a working Bronze ingestion slice in Bruin, a deterministic Silver normalization layer, a versioned Gold scoring model, a Streamlit app that queries Gold only, an initial retention/archive operations slice, and an applied GCP automation path for the pipeline.
 
-Planned retention and archival policy is documented, but not yet implemented in infrastructure or pipeline operations.
+The Cloud Run Job, Artifact Registry repository, and paused Cloud Scheduler trigger are now provisioned in the target GCP project. App hosting in GCP remains future work.
+The infrastructure also includes an operational `bronze_staging` dataset used only by the Bronze merge load path.
 
 ## Next Build Order
 
-1. Push the pipeline image and enable the Terraform automation slice for Artifact Registry, Cloud Run Jobs, and Cloud Scheduler.
-2. Harden checks, replay behavior, and project presentation.
-3. Polish the top-level GitHub-facing documentation and repo presentation for evaluation.
+1. Stabilize manual Cloud Run Job execution, then unpause the Cloud Scheduler trigger.
+2. Add hosted deployment for the Streamlit app.
+3. Harden checks, replay behavior, and project presentation.
