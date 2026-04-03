@@ -9,6 +9,7 @@ This directory contains the first infrastructure slice for TidingsIQ. It provisi
 - app service account for Streamlit reads
 - minimum BigQuery IAM bindings for both identities
 - applied pipeline automation resources for Artifact Registry, Cloud Run Jobs, and Cloud Scheduler
+- optional app hosting resources for Artifact Registry and a Cloud Run service
 
 ## Prerequisites
 
@@ -35,7 +36,8 @@ If you enable the pipeline automation slice, the following APIs must also alread
 - `outputs.tf`: useful resource outputs
 - `terraform.tfvars.example`: starter local variable file
 - `future_multi_environment.md`: reference notes for a possible future multi-environment setup
-- `automation.tf`: optional pipeline automation resources
+- `automation.tf`: pipeline automation resources
+- `app_hosting.tf`: optional Streamlit app hosting resources
 
 ## Usage
 
@@ -76,6 +78,12 @@ terraform apply
 | `pipeline_gdelt_disable_ssl_verify` | No | `false` | Sets `GDELT_DISABLE_SSL_VERIFY` in Cloud Run as a temporary GDELT compatibility workaround |
 | `pipeline_schedule` | No | `0 */6 * * *` | Cloud Scheduler cron for the pipeline |
 | `pipeline_schedule_paused` | No | `true` | Creates the scheduler job paused by default |
+| `enable_app_hosting` | No | `false` | Enables Artifact Registry and a Cloud Run service for the Streamlit app |
+| `app_artifact_repository_id` | No | `tidingsiq-app` | Artifact Registry repository ID for the app image |
+| `app_container_image` | No | derived | Full image URI for the Streamlit app container |
+| `app_service_name` | No | `tidingsiq-app` | Cloud Run service name for the Streamlit app |
+| `app_memory_limit` | No | `1Gi` | Memory limit for the Streamlit Cloud Run container |
+| `app_allow_unauthenticated` | No | `true` | Grants public invoke access to the Streamlit Cloud Run service |
 | `labels` | No | `{}` | Extra labels for supported resources |
 
 ## Provisioned Access Model
@@ -104,6 +112,12 @@ If pipeline automation is enabled, Terraform also provisions:
 - a scheduler service account with `roles/run.invoker` on the Cloud Run Job
 - a Cloud Scheduler HTTP job that calls the Cloud Run Jobs API with OAuth
 
+If app hosting is enabled, Terraform also provisions:
+
+- an Artifact Registry Docker repository for the app image
+- a Cloud Run service for the Streamlit frontend
+- optional unauthenticated public invoke access on that Cloud Run service
+
 Current applied automation state in this project:
 
 - Artifact Registry repository is created
@@ -111,6 +125,9 @@ Current applied automation state in this project:
 - Cloud Scheduler trigger is created in a paused state
 - the pipeline image must already exist in Artifact Registry before apply
 - some GDELT fetch environments may require `pipeline_gdelt_disable_ssl_verify = true` until the upstream certificate validation issue is resolved cleanly
+- the Streamlit app Artifact Registry repository is created
+- the hosted Streamlit Cloud Run service is created when `enable_app_hosting = true`
+- in the current environment, app hosting can be kept disabled while the UI and security posture are still being finalized
 
 ## Notes
 
@@ -124,3 +141,4 @@ Current applied automation state in this project:
 - The Bronze archive bucket is now part of Terraform. Export and cleanup operations are still run separately from the pipeline.
 - Pipeline automation remains opt-in in code through `enable_pipeline_automation`, but it is already applied in the current project.
 - Keep the scheduler paused until a manual `gcloud run jobs execute ... --wait` succeeds against the deployed image.
+- App hosting is also opt-in in code through `enable_app_hosting`, and is now applied in the current project.

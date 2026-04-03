@@ -43,7 +43,7 @@ Primary user control:
 │   ├── architecture.md
 │   ├── data_contract.md
 │   ├── happy_factor.md
-│   └── implementation_plan.md
+│   └── roadmap.md
 ├── infra/
 │   └── terraform/
 ├── pipeline/
@@ -60,7 +60,7 @@ Primary user control:
 - [Architecture](docs/architecture.md): system boundaries, responsibilities, and runtime flow
 - [Data Contract](docs/data_contract.md): planned Bronze, Silver, and Gold schemas
 - [Happy Factor](docs/happy_factor.md): initial scoring approach and validation rules
-- [Implementation Plan](docs/implementation_plan.md): phased build sequence and exit criteria
+- [Roadmap](docs/roadmap.md): public build status and next-step summary
 - [Deployment Plan](docs/deployment_plan.md): future GCP hosting path for the pipeline and app
 - [Terraform Foundation](infra/terraform/README.md): initial GCP and BigQuery infrastructure scaffold
 - [Bruin Pipeline](pipeline/bruin/README.md): local setup notes, asset behavior, and validation workflow
@@ -79,11 +79,11 @@ Primary user control:
 
 The repository has an applied Terraform foundation, a working Bronze ingestion slice in Bruin, a deterministic Silver normalization layer, a versioned Gold scoring model, a Streamlit app that queries Gold only, an initial retention/archive operations slice, and an applied GCP automation path for the pipeline.
 
-The Cloud Run Job, Artifact Registry repository, and paused Cloud Scheduler trigger are now provisioned in the target GCP project. App hosting in GCP remains future work.
+The Cloud Run job path and app hosting path are both implemented in the repo. In the current environment, scheduled pipeline runs remain paused and the hosted Streamlit service is intentionally disabled until reactivated.
 The infrastructure also includes an operational `bronze_staging` dataset used only by the Bronze merge load path.
 
 ## Next Build Order
 
-1. Stabilize manual Cloud Run Job execution, then unpause the Cloud Scheduler trigger.
-2. Add hosted deployment for the Streamlit app.
-3. Harden checks, replay behavior, and project presentation.
+1. Decide when to unpause the Cloud Scheduler trigger for automatic pipeline runs.
+2. Finalize the transformation layer and supporting checks.
+3. Harden security, replay behavior, and project presentation.

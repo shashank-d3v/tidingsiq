@@ -16,6 +16,24 @@ python3 -m pip install -r app/streamlit/requirements.txt
 streamlit run app/streamlit/app.py
 ```
 
+## Container Runtime
+
+Build from the repository root:
+
+```bash
+docker build -f app/streamlit/Dockerfile -t tidingsiq-streamlit:local .
+```
+
+Run locally:
+
+```bash
+docker run --rm -p 8501:8080 \
+  -e TIDINGSIQ_GCP_PROJECT=tidingsiq-dev \
+  -e TIDINGSIQ_GOLD_TABLE=tidingsiq-dev.gold.positive_news_feed \
+  -v "$HOME/.config/gcloud:/root/.config/gcloud:ro" \
+  tidingsiq-streamlit:local
+```
+
 ## Stop The App
 
 If the app is running in your terminal, stop it with:
@@ -68,8 +86,7 @@ Current expected columns:
 
 ## Future Operations Horizon
 
-When the project moves from local execution to scheduled cloud execution, the likely next operational step is:
+The app hosting path is intentionally separate from the scheduled pipeline path:
 
-- Cloud Scheduler triggering a Cloud Run Job that runs the Bruin pipeline on GCP
-
-That automation path is intentionally separate from the Streamlit app scope.
+- pipeline automation: Cloud Scheduler -> Cloud Run Job -> Bruin -> BigQuery
+- app hosting: Cloud Run service -> Streamlit -> BigQuery Gold

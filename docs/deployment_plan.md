@@ -21,11 +21,13 @@ Implemented now:
 - pipeline container path for Cloud Run Job execution
 - applied Terraform automation for Artifact Registry, Cloud Run Job, and Cloud Scheduler
 - scheduler intentionally left paused until manual cloud runs are stable
+- Streamlit app container and Terraform hosting scaffold for Cloud Run service
+- app hosting path validated once in Cloud Run and then disabled again in the active environment
 
 Not implemented yet:
 
 - unpaused scheduled cloud execution for the pipeline
-- hosted cloud deployment for the Streamlit app
+- active hosted cloud deployment for the Streamlit app
 - container build and release flow in GCP
 
 ## Deployment Targets
@@ -137,13 +139,13 @@ When cloud deployment work starts, Terraform should likely add:
 - service-account IAM for both runtimes
 - Secret Manager bindings if secrets are introduced
 
-Do not add these resources until the local execution paths are stable enough to package.
+The app hosting slice is implemented and can be reactivated quickly, but it is intentionally disabled in the current environment until the UI and security posture are finalized.
 
 ## Suggested Delivery Order
 
 1. Retention and archive operations for Bronze, Silver, and Gold
 2. Unpause the Cloud Scheduler job only after repeated manual Cloud Run executions are clean
-3. App containerization and Cloud Run service deployment
+3. Review whether the hosted Streamlit app should stay public or gain an auth layer
 4. CI or release workflow for image build and deployment
 
 ## Open Questions

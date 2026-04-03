@@ -44,3 +44,23 @@ output "pipeline_scheduler_service_account_email" {
   description = "Service account email used by Cloud Scheduler to invoke the Cloud Run Job when automation is enabled."
   value       = var.enable_pipeline_automation ? google_service_account.scheduler[0].email : null
 }
+
+output "app_artifact_repository_name" {
+  description = "Artifact Registry repository name for the Streamlit app image when app hosting is enabled."
+  value       = var.enable_app_hosting ? google_artifact_registry_repository.app[0].name : null
+}
+
+output "app_container_image" {
+  description = "Recommended or configured container image URI for the Streamlit app hosting path."
+  value       = var.enable_app_hosting ? local.app_container_image : null
+}
+
+output "app_cloud_run_service_name" {
+  description = "Cloud Run service name for the Streamlit app when app hosting is enabled."
+  value       = var.enable_app_hosting ? google_cloud_run_v2_service.app[0].name : null
+}
+
+output "app_cloud_run_service_uri" {
+  description = "Cloud Run service URI for the Streamlit app when app hosting is enabled."
+  value       = var.enable_app_hosting ? google_cloud_run_v2_service.app[0].uri : null
+}

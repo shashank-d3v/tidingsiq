@@ -15,6 +15,12 @@ bigquery_location = "asia-south1"
 # pipeline_gdelt_disable_ssl_verify = true
 # pipeline_schedule = "0 */6 * * *"
 # pipeline_schedule_paused = true
+# enable_app_hosting = true
+# app_artifact_repository_id = "tidingsiq-app"
+# app_container_image = "asia-south1-docker.pkg.dev/your-gcp-project-id/tidingsiq-app/tidingsiq-streamlit:latest"
+# app_service_name = "tidingsiq-app"
+# app_memory_limit = "1Gi"
+# app_allow_unauthenticated = true
 
 labels = {
   owner = "your-name"

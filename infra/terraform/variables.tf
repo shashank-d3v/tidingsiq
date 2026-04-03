@@ -161,3 +161,57 @@ variable "pipeline_schedule_paused" {
   type        = bool
   default     = true
 }
+
+variable "enable_app_hosting" {
+  description = "When true, provisions Artifact Registry and a Cloud Run service for the Streamlit app."
+  type        = bool
+  default     = false
+}
+
+variable "app_artifact_repository_id" {
+  description = "Artifact Registry repository ID for the Streamlit app image."
+  type        = string
+  default     = "tidingsiq-app"
+}
+
+variable "app_container_image" {
+  description = "Full container image URI for the Streamlit app service. Leave empty to use the conventional Artifact Registry path."
+  type        = string
+  default     = ""
+}
+
+variable "app_service_name" {
+  description = "Cloud Run service name for the TidingsIQ Streamlit app."
+  type        = string
+  default     = "tidingsiq-app"
+}
+
+variable "app_gold_table" {
+  description = "Fully qualified BigQuery table used by the hosted Streamlit app. Defaults to the Gold feed table in the current project."
+  type        = string
+  default     = ""
+}
+
+variable "app_memory_limit" {
+  description = "Memory limit for the Cloud Run Streamlit app container."
+  type        = string
+  default     = "1Gi"
+}
+
+variable "app_min_instance_count" {
+  description = "Minimum instance count for the Cloud Run Streamlit app."
+  type        = number
+  default     = 0
+}
+
+variable "app_max_instance_count" {
+  description = "Maximum instance count for the Cloud Run Streamlit app."
+  type        = number
+  default     = 2
+}
+
+variable "app_allow_unauthenticated" {
+  description = "When true, grants public unauthenticated invoke access to the Cloud Run Streamlit app."
+  type        = bool
+  default     = true
+}
