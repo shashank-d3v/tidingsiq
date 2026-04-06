@@ -9,7 +9,6 @@ class FeedQueryConfig:
     table_fqn: str
     min_happy_factor: float = 70.0
     lookback_days: int = 7
-    language: str | None = None
     row_limit: int = 25
 
 
@@ -35,10 +34,9 @@ def build_feed_query(
     sql = f"""
 select
   article_id,
+  serving_date,
   published_at,
   source_name,
-  source_country,
-  language,
   title,
   url,
   tone_score,
@@ -47,7 +45,7 @@ select
   ingested_at
 from `{config.table_fqn}`
 where happy_factor >= @min_happy_factor
-  and coalesce(published_at, ingested_at) >= @published_after
+  and serving_date >= date(@published_after)
 """
 
     parameters: list[tuple[str, str, object]] = [
@@ -56,28 +54,12 @@ where happy_factor >= @min_happy_factor
         ("row_limit", "INT64", row_limit),
     ]
 
-    language = (config.language or "").strip().lower()
-    if language and language != "all":
-        sql += "  and lower(language) = @language\n"
-        parameters.append(("language", "STRING", language))
-
     sql += """
 order by happy_factor desc, coalesce(published_at, ingested_at) desc, article_id desc
 limit @row_limit
 """
 
     return sql.strip(), parameters
-
-
-def build_language_query(table_fqn: str) -> str:
-    return f"""
-select language
-from `{table_fqn}`
-where language is not null
-  and trim(language) != ''
-group by language
-order by count(*) desc, language asc
-""".strip()
 
 
 def summarize_feed(rows: list[dict[str, object]]) -> dict[str, float | int]:
@@ -108,4 +90,3 @@ def summarize_feed(rows: list[dict[str, object]]) -> dict[str, float | int]:
         "max_happy_factor": round(max(happy_factors), 2) if happy_factors else 0.0,
         "source_count": len(source_names),
     }
-

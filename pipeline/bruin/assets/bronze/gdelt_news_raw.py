@@ -58,7 +58,6 @@ import json
 import math
 import os
 import re
-import ssl
 import urllib.error
 import urllib.request
 import uuid
@@ -69,7 +68,7 @@ from typing import Any
 import pandas as pd
 
 
-GDELT_GKG_URL_TEMPLATE = "https://data.gdeltproject.org/gdeltv2/{timestamp}.gkg.csv.zip"
+DEFAULT_GDELT_BASE_URL = "http://data.gdeltproject.org/gdeltv2"
 GDELT_FILE_GRANULARITY_MINUTES = 15
 DEFAULT_LOOKBACK_MINUTES = 60
 DEFAULT_MAX_FILES = 4
@@ -82,7 +81,15 @@ GKG_PUBLISHED_AT = 1
 GKG_SOURCE_COLLECTION_IDENTIFIER = 2
 GKG_SOURCE_NAME = 3
 GKG_DOCUMENT_IDENTIFIER = 4
+GKG_V2_COUNTS = 6
+GKG_V2_THEMES = 8
+GKG_V2_LOCATIONS = 10
+GKG_V2_PERSONS = 12
+GKG_V2_ORGANIZATIONS = 14
 GKG_TONE = 15
+GKG_GCAM = 17
+GKG_ALL_NAMES = 23
+GKG_AMOUNTS = 24
 GKG_TRANSLATION_INFO = 25
 GKG_EXTRAS = 26
 
@@ -191,7 +198,7 @@ def _fetch_batch_rows(
     source_window_start: datetime,
     source_window_end: datetime,
 ) -> list[dict[str, Any]]:
-    url = GDELT_GKG_URL_TEMPLATE.format(timestamp=batch_time.strftime("%Y%m%d%H%M%S"))
+    url = _build_gkg_batch_url(batch_time)
     try:
         response_bytes = _download_bytes(url)
     except urllib.error.HTTPError as exc:
@@ -223,17 +230,18 @@ def _fetch_batch_rows(
     return records
 
 
+def _build_gkg_batch_url(batch_time: datetime) -> str:
+    base_url = os.environ.get("GDELT_BASE_URL", DEFAULT_GDELT_BASE_URL).rstrip("/")
+    return f"{base_url}/{batch_time:%Y%m%d%H%M%S}.gkg.csv.zip"
+
+
 def _download_bytes(url: str) -> bytes:
     request = urllib.request.Request(
         url,
         headers={"User-Agent": "TidingsIQ/0.1 Bronze Ingestion"},
     )
     timeout = int(os.environ.get("GDELT_TIMEOUT_SECONDS", str(DEFAULT_TIMEOUT_SECONDS)))
-    context = None
-    if os.environ.get("GDELT_DISABLE_SSL_VERIFY", "").lower() in {"1", "true", "yes"}:
-        context = ssl._create_unverified_context()
-
-    with urllib.request.urlopen(request, timeout=timeout, context=context) as response:
+    with urllib.request.urlopen(request, timeout=timeout) as response:
         return response.read()
 
 
@@ -261,7 +269,15 @@ def _parse_gkg_row(
         "gkg_source_collection_identifier": source_collection_identifier,
         "gkg_source_common_name": _none_if_empty(row[GKG_SOURCE_NAME]),
         "gkg_document_identifier": document_identifier,
+        "gkg_v2_counts": _none_if_empty(row[GKG_V2_COUNTS]),
+        "gkg_v2_themes": _none_if_empty(row[GKG_V2_THEMES]),
+        "gkg_v2_locations": _none_if_empty(row[GKG_V2_LOCATIONS]),
+        "gkg_v2_persons": _none_if_empty(row[GKG_V2_PERSONS]),
+        "gkg_v2_organizations": _none_if_empty(row[GKG_V2_ORGANIZATIONS]),
         "gkg_v2_tone": _none_if_empty(row[GKG_TONE]),
+        "gkg_gcam": _none_if_empty(row[GKG_GCAM]),
+        "gkg_all_names": _none_if_empty(row[GKG_ALL_NAMES]),
+        "gkg_amounts": _none_if_empty(row[GKG_AMOUNTS]),
         "gkg_translation_info": translation_info,
         "gkg_extras": _none_if_empty(row[GKG_EXTRAS]),
     }

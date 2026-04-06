@@ -9,7 +9,6 @@ from google.cloud import bigquery
 from query_builder import (
     FeedQueryConfig,
     build_feed_query,
-    build_language_query,
     summarize_feed,
 )
 
@@ -39,13 +38,6 @@ def _to_query_parameters(
         bigquery.ScalarQueryParameter(name, type_name, value)
         for name, type_name, value in parameters
     ]
-
-
-@st.cache_data(ttl=300, show_spinner=False)
-def load_language_options(project_id: str, table_fqn: str) -> list[str]:
-    client = get_bigquery_client(project_id)
-    rows = client.query(build_language_query(table_fqn)).result()
-    return ["All", *[str(row["language"]) for row in rows]]
 
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -105,19 +97,10 @@ def main() -> None:
             step=5,
         )
 
-        try:
-            language_options = load_language_options(project_id, table_fqn)
-        except Exception as exc:  # pragma: no cover - UI fallback
-            st.warning(f"Could not load language options from BigQuery: {exc}")
-            language_options = ["All"]
-
-        selected_language = st.selectbox("Language", options=language_options, index=0)
-
     config = FeedQueryConfig(
         table_fqn=table_fqn,
         min_happy_factor=min_happy_factor,
         lookback_days=lookback_days,
-        language=selected_language,
         row_limit=row_limit,
     )
 
@@ -142,7 +125,6 @@ def main() -> None:
             title = str(row.get("title") or "Untitled article")
             url = row.get("url")
             source_name = row.get("source_name") or "Unknown source"
-            language = row.get("language") or "Unknown"
             published_at = _format_timestamp(row.get("published_at") or row.get("ingested_at"))
             happy_factor = row.get("happy_factor")
             tone_score = row.get("tone_score")
@@ -153,7 +135,7 @@ def main() -> None:
                 st.markdown(f"### {title}")
 
             st.caption(
-                f"{published_at}  |  {source_name}  |  language={language}  |  "
+                f"{published_at}  |  {source_name}  |  "
                 f"happy_factor={happy_factor}  |  tone_score={tone_score}"
             )
 
@@ -165,7 +147,6 @@ def main() -> None:
                 "table_fqn": table_fqn,
                 "min_happy_factor": min_happy_factor,
                 "lookback_days": lookback_days,
-                "language": selected_language,
                 "row_limit": row_limit,
             }
         )

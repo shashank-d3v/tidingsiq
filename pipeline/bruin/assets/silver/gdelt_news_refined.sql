@@ -8,8 +8,36 @@ depends:
 
 materialization:
   type: table
+  partition_by: date(ingested_at)
+  cluster_by:
+    - dedup_key
+    - source_domain
+    - language
+
+custom_checks:
+  - name: normalized_url_shape_when_present
+    description: Normalized URLs should look like a hostname with an optional path.
+    query: |
+      select countif(
+        normalized_url is not null
+        and not regexp_contains(normalized_url, r'^[a-z0-9.-]+(?::[0-9]+)?(/.*)?$')
+      )
+      from silver.gdelt_news_refined
+  - name: latest_silver_ingestion_is_recent
+    description: Silver should reflect a recent ingestion window.
+    query: |
+      select if(
+        max(ingested_at) >= timestamp_sub(current_timestamp(), interval 48 hour),
+        0,
+        1
+      )
+      from silver.gdelt_news_refined
 
 columns:
+  - name: source_record_id
+    type: string
+    checks:
+      - name: not_null
   - name: article_id
     type: string
     checks:
@@ -43,12 +71,19 @@ columns:
     type: string
   - name: tone_score
     type: float
+    checks:
+      - name: min
+        value: -100
+      - name: max
+        value: 100
   - name: positive_signal_score
     type: float
   - name: negative_signal_score
     type: float
   - name: dedup_key
     type: string
+    checks:
+      - name: not_null
   - name: is_duplicate
     type: boolean
     checks:
@@ -114,6 +149,7 @@ normalized as (
 
 keyed as (
   select
+    source_record_id,
     to_hex(sha256(source_record_id)) as article_id,
     ingestion_id,
     ingested_at,
@@ -161,6 +197,7 @@ scored as (
 )
 
 select
+  source_record_id,
   article_id,
   ingestion_id,
   ingested_at,

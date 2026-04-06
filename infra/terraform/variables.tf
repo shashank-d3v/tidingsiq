@@ -132,12 +132,6 @@ variable "pipeline_gdelt_max_files" {
   default     = 4
 }
 
-variable "pipeline_gdelt_disable_ssl_verify" {
-  description = "When true, sets GDELT_DISABLE_SSL_VERIFY in the Cloud Run Job as a compatibility workaround for upstream certificate validation failures."
-  type        = bool
-  default     = false
-}
-
 variable "pipeline_scheduler_name" {
   description = "Cloud Scheduler job name for pipeline execution."
   type        = string

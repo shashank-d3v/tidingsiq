@@ -44,7 +44,7 @@ Current implementation choice:
 
 Still pending validation:
 - whether positive and negative emotional signals should be mapped directly from GKG fields or derived later
-- whether language should be treated as optional in Bronze or normalized more aggressively in Silver
+- whether `TranslationInfo` will ever be reliable enough to support downstream language use
 
 The internal contract remains stable even where some upstream mappings are still intentionally nullable.
 
@@ -98,7 +98,6 @@ The Streamlit app queries only the Gold model in v1. It is not responsible for b
 Current UI controls:
 - `happy_factor` minimum threshold
 - lookback window in days
-- optional language filter
 - result limit
 
 The app should remain thin. Any future scheduled execution of the Bruin pipeline belongs in GCP batch infrastructure rather than the Streamlit runtime.
@@ -155,5 +154,4 @@ Current implementation choice:
 ## Open Items
 
 - Confirm which upstream fields map to positive and negative emotional indicators beyond `V2Tone`.
-- Confirm whether Gold should be partitioned by `published_at` or `ingested_at` based on actual query patterns.
 - Decide whether Bronze archival is implemented as a Bruin-driven export step, a scheduled BigQuery export job, or an external batch script.

@@ -42,6 +42,7 @@ Primary user control:
 ├── docs/
 │   ├── architecture.md
 │   ├── data_contract.md
+│   ├── gdelt_findings.md
 │   ├── happy_factor.md
 │   └── roadmap.md
 ├── infra/
@@ -59,6 +60,7 @@ Primary user control:
 
 - [Architecture](docs/architecture.md): system boundaries, responsibilities, and runtime flow
 - [Data Contract](docs/data_contract.md): planned Bronze, Silver, and Gold schemas
+- [GDELT Findings](docs/gdelt_findings.md): verified upstream GKG column layout, current mappings, and source-quality findings
 - [Happy Factor](docs/happy_factor.md): initial scoring approach and validation rules
 - [Roadmap](docs/roadmap.md): public build status and next-step summary
 - [Deployment Plan](docs/deployment_plan.md): future GCP hosting path for the pipeline and app
@@ -81,9 +83,10 @@ The repository has an applied Terraform foundation, a working Bronze ingestion s
 
 The Cloud Run job path and app hosting path are both implemented in the repo. In the current environment, scheduled pipeline runs remain paused and the hosted Streamlit service is intentionally disabled until reactivated.
 The infrastructure also includes an operational `bronze_staging` dataset used only by the Bronze merge load path.
+The current Gold serving contract is being tightened around fields that are actually reliable from the upstream GKG source, while Bronze and Silver retain additional nullable internal metadata for evaluation.
 
 ## Next Build Order
 
-1. Decide when to unpause the Cloud Scheduler trigger for automatic pipeline runs.
-2. Finalize the transformation layer and supporting checks.
-3. Harden security, replay behavior, and project presentation.
+1. Harden security, replay behavior, and public-release posture.
+2. Integrate the final Streamlit UI design on top of the stabilized Gold contract.
+3. Finalize architecture and deployment documentation.

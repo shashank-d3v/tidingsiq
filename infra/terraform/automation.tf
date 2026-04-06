@@ -77,11 +77,6 @@ resource "google_cloud_run_v2_job" "pipeline" {
           value = tostring(var.pipeline_gdelt_max_files)
         }
 
-        env {
-          name  = "GDELT_DISABLE_SSL_VERIFY"
-          value = var.pipeline_gdelt_disable_ssl_verify ? "true" : "false"
-        }
-
         resources {
           limits = {
             cpu    = "1"

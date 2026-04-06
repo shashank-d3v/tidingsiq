@@ -6,19 +6,17 @@ from datetime import datetime, timezone
 from app.streamlit.query_builder import (
     FeedQueryConfig,
     build_feed_query,
-    build_language_query,
     summarize_feed,
 )
 
 
 class QueryBuilderTest(unittest.TestCase):
-    def test_build_feed_query_clamps_and_adds_language_filter(self) -> None:
+    def test_build_feed_query_clamps_without_language_filter(self) -> None:
         sql, parameters = build_feed_query(
             FeedQueryConfig(
                 table_fqn="tidingsiq-dev.gold.positive_news_feed",
                 min_happy_factor=130,
                 lookback_days=90,
-                language="EN",
                 row_limit=500,
             ),
             now_utc=datetime(2026, 4, 2, 0, 0, tzinfo=timezone.utc),
@@ -26,32 +24,23 @@ class QueryBuilderTest(unittest.TestCase):
 
         parameter_map = {name: value for name, _, value in parameters}
 
-        self.assertIn("lower(language) = @language", sql)
+        self.assertIn("serving_date >= date(@published_after)", sql)
         self.assertEqual(parameter_map["min_happy_factor"], 100.0)
         self.assertEqual(parameter_map["row_limit"], 100)
-        self.assertEqual(parameter_map["language"], "en")
         self.assertEqual(
             parameter_map["published_after"],
             datetime(2026, 3, 3, 0, 0, tzinfo=timezone.utc),
         )
 
-    def test_build_feed_query_skips_language_filter_for_all(self) -> None:
+    def test_build_feed_query_has_no_language_parameter(self) -> None:
         sql, parameters = build_feed_query(
-            FeedQueryConfig(
-                table_fqn="tidingsiq-dev.gold.positive_news_feed",
-                language="All",
-            )
+            FeedQueryConfig(table_fqn="tidingsiq-dev.gold.positive_news_feed")
         )
 
         parameter_names = [name for name, _, _ in parameters]
 
-        self.assertNotIn("lower(language) = @language", sql)
+        self.assertNotIn("language", sql.lower())
         self.assertNotIn("language", parameter_names)
-
-    def test_build_language_query_points_to_gold_table(self) -> None:
-        sql = build_language_query("tidingsiq-dev.gold.positive_news_feed")
-
-        self.assertIn("from `tidingsiq-dev.gold.positive_news_feed`", sql.lower())
 
     def test_summarize_feed_returns_expected_metrics(self) -> None:
         summary = summarize_feed(

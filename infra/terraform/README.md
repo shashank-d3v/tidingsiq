@@ -75,7 +75,6 @@ terraform apply
 | `pipeline_container_image` | No | derived | Full image URI for the pipeline container |
 | `pipeline_job_name` | No | `tidingsiq-pipeline` | Cloud Run Job name |
 | `pipeline_job_memory_limit` | No | `2Gi` | Memory limit for the Cloud Run Job container |
-| `pipeline_gdelt_disable_ssl_verify` | No | `false` | Sets `GDELT_DISABLE_SSL_VERIFY` in Cloud Run as a temporary GDELT compatibility workaround |
 | `pipeline_schedule` | No | `0 */6 * * *` | Cloud Scheduler cron for the pipeline |
 | `pipeline_schedule_paused` | No | `true` | Creates the scheduler job paused by default |
 | `enable_app_hosting` | No | `false` | Enables Artifact Registry and a Cloud Run service for the Streamlit app |
@@ -124,7 +123,6 @@ Current applied automation state in this project:
 - Cloud Run Job is created
 - Cloud Scheduler trigger is created in a paused state
 - the pipeline image must already exist in Artifact Registry before apply
-- some GDELT fetch environments may require `pipeline_gdelt_disable_ssl_verify = true` until the upstream certificate validation issue is resolved cleanly
 - the Streamlit app Artifact Registry repository is created
 - the hosted Streamlit Cloud Run service is created when `enable_app_hosting = true`
 - in the current environment, app hosting can be kept disabled while the UI and security posture are still being finalized

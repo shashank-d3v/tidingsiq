@@ -11,6 +11,9 @@ Completed:
 - Bronze GDELT ingestion into BigQuery
 - Silver normalization and deterministic deduplication
 - Gold `happy_factor` scoring with `v1_tone_only`
+- finalized GDELT source findings and Bronze field-mapping evidence
+- Gold serving contract no longer depends on `language`
+- Gold run-metrics history for operational visibility
 - Streamlit app querying Gold only
 - Bronze archive bucket plus initial retention controls
 - pipeline containerization for Cloud Run Jobs
@@ -21,14 +24,17 @@ Operational notes:
 - `bronze_staging` is a supporting operational dataset for the Bronze merge load path
 - the pipeline Cloud Run Job currently uses `2Gi` memory
 - the scheduler remains paused until automation is explicitly enabled for recurring runs
+- a manual Cloud Run execution succeeded on `2026-04-06` after redeploying the updated pipeline image
 - hosted app deployment is currently disabled in the active environment
+- the latest source finding is that `TranslationInfo` is empty in the sampled landed GKG rows, so `language` remains internal and unresolved rather than part of the serving contract
 
 ## Next Steps
 
 1. Decide when to unpause the scheduled pipeline runs.
-2. Finalize the transformation layer and supporting checks.
+2. Decide whether to enrich Bronze further from retained GKG fields like `V2Locations` and `GCAM`.
 3. Improve tests, security, and reviewability for final portfolio presentation.
-4. Finalize architecture and deployment documentation.
+4. Integrate the final Streamlit UI design.
+5. Finalize architecture and deployment documentation.
 
 ## Phases Completed
 

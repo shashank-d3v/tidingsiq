@@ -8,6 +8,10 @@ The canonical serving table is:
 
 - `gold.positive_news_feed`
 
+Supporting operational table:
+
+- `gold.pipeline_run_metrics`
+
 Where upstream GDELT mappings are not yet validated, the internal field is still defined here but the source mapping is marked as pending.
 
 ## Contract Rules
@@ -25,6 +29,7 @@ Where upstream GDELT mappings are not yet validated, the internal field is still
 | Bronze | `bronze.gdelt_news_raw` | Landed source records plus ingestion metadata |
 | Silver | `silver.gdelt_news_refined` | Cleaned, normalized, article-level records |
 | Gold | `gold.positive_news_feed` | Application-facing positive news feed |
+| Gold | `gold.pipeline_run_metrics` | Per-run warehouse and scoring metrics for operational visibility |
 
 ## Bronze Contract
 
@@ -92,13 +97,14 @@ One normalized article candidate per row before Gold filtering.
 
 | Column | Type | Required | Source | Notes |
 |---|---|---:|---|---|
+| source_record_id | STRING | Yes | Bronze | Lineage back to the landed Bronze record |
 | article_id | STRING | Yes | Derived | Stable internal identifier for the article record |
 | ingestion_id | STRING | Yes | Bronze | Last contributing ingestion batch |
 | ingested_at | TIMESTAMP | Yes | Bronze | Last contributing ingestion timestamp |
 | published_at | TIMESTAMP | No | Bronze normalized | Normalized publication timestamp |
 | source_name | STRING | No | Bronze normalized | Cleaned source name |
 | source_domain | STRING | No | Derived | Normalized domain from URL |
-| source_country | STRING | No | Pending GDELT validation | Country is optional until a reliable source mapping is confirmed |
+| source_country | STRING | No | Pending GDELT validation | Reserved for a future mentioned-country derivation from `V2Locations`, not publisher country |
 | language | STRING | No | Bronze normalized | Normalized language code |
 | title | STRING | No | Bronze normalized | Cleaned display title |
 | normalized_title | STRING | No | Derived | Lowercased and normalized title for matching |
@@ -113,13 +119,18 @@ One normalized article candidate per row before Gold filtering.
 
 ### Silver quality expectations
 
+- `source_record_id` must always be populated
 - `article_id` must be unique
+- `dedup_key` must always be populated
 - `is_duplicate` must always be populated
+- `tone_score`, when present, should stay within a broad sanity range of `-100` to `100`
 - canonical rows should have stable dedup behavior across reruns
 - fuzzy or probabilistic deduplication is not required in v1
 - Silver should retain 90 days of queryable history in BigQuery
 - current implementation uses normalized URL first, then title plus source plus hour bucket as the deterministic dedup fallback
+- current implementation keeps the canonical row by ordering on newest `published_at`, then newest `ingested_at`, then descending `article_id`
 - current implementation enforces the 90-day retention window in the Silver model itself
+- current implementation partitions Silver by `ingested_at` and clusters by `dedup_key`, `source_domain`, and `language`
 
 ## Gold Contract
 
@@ -141,33 +152,77 @@ One app-ready article record per retained article.
 
 | Column | Type | Required | Source | Notes |
 |---|---|---:|---|---|
+| source_record_id | STRING | Yes | Silver | Exposed for lineage and debugging |
 | article_id | STRING | Yes | Silver | Stable application identifier |
+| serving_date | DATE | Yes | Derived | Partition and lookback field derived from `DATE(COALESCE(published_at, ingested_at))` |
 | published_at | TIMESTAMP | No | Silver | Display and filter field |
 | source_name | STRING | No | Silver | Display field |
-| source_country | STRING | No | Silver | Optional filter field |
-| language | STRING | No | Silver | Optional filter field |
 | title | STRING | No | Silver | Display field |
 | url | STRING | No | Silver | Link-out target |
 | tone_score | FLOAT64 | No | Silver | Exposed for transparency and debugging |
-| positive_signal_score | FLOAT64 | No | Silver | Nullable if v1 launches before this mapping is confirmed |
-| negative_signal_score | FLOAT64 | No | Silver | Nullable if not used in v1 |
 | happy_factor | FLOAT64 | Yes | Derived | Positivity-oriented score on a 0 to 100 scale |
 | happy_factor_version | STRING | Yes | Derived | Current implementation is `v1_tone_only` |
 | ingested_at | TIMESTAMP | Yes | Silver | Freshness marker for the record |
 
 ### Gold quality expectations
 
+- `source_record_id` must always be populated
 - `article_id` must be unique
+- `serving_date` must always be populated
+- `title` and `url` must always be populated in the serving table
+- `tone_score`, when present, should stay within a broad sanity range of `-100` to `100`
 - `happy_factor` must be between 0 and 100
 - `happy_factor_version` must always be populated
-- the app should not depend on nullable upstream-derived signals being present in every release
+- the app should not depend on unresolved upstream-derived signal columns being present in every release
 - Gold should retain 180 days of queryable history in BigQuery
 - current implementation keeps only canonical Silver rows where `is_duplicate = false`
+- current implementation filters out canonical rows without a usable `title` or `url`
 - current implementation enforces the 180-day retention window in the Gold model itself
+- current implementation partitions Gold by `serving_date` and clusters by `source_name`
+
+## Gold Operational Metrics Contract
+
+### Table
+
+`gold.pipeline_run_metrics`
+
+### Grain
+
+One appended operational run snapshot row.
+
+### Purpose
+
+- preserve a simple warehouse health snapshot history
+- expose Bronze, Silver, and Gold row counts over time
+- expose score distribution drift at the Gold layer
+- support later freshness and regression alerting without querying the app table directly
+
+### Fields
+
+| Column | Type | Required | Source | Notes |
+|---|---|---:|---|---|
+| audit_run_at | TIMESTAMP | Yes | Internal | Timestamp when the metrics snapshot was written |
+| bronze_row_count | INT64 | Yes | Derived | Current total row count in Bronze |
+| silver_row_count | INT64 | Yes | Derived | Current total row count in Silver |
+| silver_canonical_row_count | INT64 | Yes | Derived | Current canonical Silver row count |
+| silver_duplicate_row_count | INT64 | Yes | Derived | Current duplicate Silver row count |
+| gold_row_count | INT64 | Yes | Derived | Current serving-table row count |
+| gold_min_happy_factor | FLOAT64 | No | Derived | Current minimum `happy_factor` |
+| gold_avg_happy_factor | FLOAT64 | No | Derived | Current average `happy_factor` |
+| gold_max_happy_factor | FLOAT64 | No | Derived | Current maximum `happy_factor` |
+| latest_gold_ingested_at | TIMESTAMP | No | Derived | Latest Gold ingestion timestamp |
+| latest_gold_published_at | TIMESTAMP | No | Derived | Latest Gold publication timestamp |
 
 ## Deduplication Policy
 
-v1 deduplication should be deterministic and implemented in Silver. The preferred first-pass strategy is:
+v1 deduplication should be deterministic and implemented in Silver. The current canonical tie-break policy is:
+
+1. group rows by `dedup_key`
+2. keep the row with the newest `published_at`
+3. then break ties by newest `ingested_at`
+4. then break any remaining ties by descending `article_id`
+
+Current dedup-key strategy:
 
 - normalize URL
 - normalize title
@@ -178,12 +233,10 @@ Near-duplicate detection beyond deterministic rules is optional future work and 
 
 ## Partitioning, Retention, and Archive
 
-The final partition strategy is still open. The likely choices are:
+Current chosen partition strategy:
 
-- partition by `DATE(ingested_at)` to simplify replay and freshness tracking
-- partition by `DATE(published_at)` to align with UI filtering
-
-This should be decided after the first realistic query patterns are tested in BigQuery.
+- Silver partitions by `DATE(ingested_at)` to simplify replay and freshness tracking
+- Gold partitions by `serving_date = DATE(COALESCE(published_at, ingested_at))` to align with UI lookback behavior while remaining resilient to missing publication timestamps
 
 Current retention targets:
 
@@ -207,4 +260,4 @@ Archive expectations for Bronze:
 ## Open Validation Items
 
 - Confirm whether positive and negative signals come from validated GDELT fields or whether a later Gold version should extend beyond `v1_tone_only`.
-- Confirm whether `source_country` is reliable enough to expose in Gold.
+- Confirm whether `source_country` should be derived from `V2Locations` as article-mentioned geography in a later Silver version.

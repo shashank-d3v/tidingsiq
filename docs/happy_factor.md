@@ -31,6 +31,11 @@ Important constraint:
 
 The exact upstream GDELT field mappings for positive and negative emotional signals are not yet confirmed. The first implementation must not invent them.
 
+Current serving-table rule:
+
+- unresolved signal placeholders are not exposed in `gold.positive_news_feed`
+- Gold currently exposes only `tone_score` plus the derived `happy_factor`
+
 ## Implemented v1 Strategy
 
 The current repository implementation uses:

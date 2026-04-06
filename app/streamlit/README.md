@@ -4,8 +4,12 @@ This app is the Phase 6 frontend for TidingsIQ. It queries only `gold.positive_n
 
 - minimum `happy_factor`
 - lookback window in days
-- optional language filter
 - result row limit
+
+Current serving constraint:
+
+- Gold serves the canonical scored feed without using `language` as part of the public contract
+- `language` remains an internal Bronze/Silver evaluation field until the GKG source provides something defensible
 
 ## Local Run
 
@@ -72,11 +76,11 @@ The app queries only the Gold table and does not reach into Bronze or Silver.
 
 Current expected columns:
 
+- `source_record_id`
 - `article_id`
+- `serving_date`
 - `published_at`
 - `source_name`
-- `source_country`
-- `language`
 - `title`
 - `url`
 - `tone_score`

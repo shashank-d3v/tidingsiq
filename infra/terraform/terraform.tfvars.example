@@ -12,7 +12,6 @@ bigquery_location = "asia-south1"
 # pipeline_container_image = "asia-south1-docker.pkg.dev/your-gcp-project-id/tidingsiq-pipeline/tidingsiq-bruin:latest"
 # pipeline_job_name = "tidingsiq-pipeline"
 # pipeline_job_memory_limit = "2Gi"
-# pipeline_gdelt_disable_ssl_verify = true
 # pipeline_schedule = "0 */6 * * *"
 # pipeline_schedule_paused = true
 # enable_app_hosting = true

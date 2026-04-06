@@ -20,7 +20,7 @@ Implemented now:
 - Streamlit app running locally against `gold.positive_news_feed`
 - pipeline container path for Cloud Run Job execution
 - applied Terraform automation for Artifact Registry, Cloud Run Job, and Cloud Scheduler
-- scheduler intentionally left paused until manual cloud runs are stable
+- scheduler intentionally left paused even though a manual cloud run has now succeeded
 - Streamlit app container and Terraform hosting scaffold for Cloud Run service
 - app hosting path validated once in Cloud Run and then disabled again in the active environment
 
@@ -79,8 +79,9 @@ Current prep work already in the repo:
 Current rollout boundary:
 
 - the scheduler is still paused by design
-- manual Cloud Run execution should stay the first smoke check after image changes
-- the current cloud runtime may need `GDELT_DISABLE_SSL_VERIFY=true` as a temporary workaround for upstream certificate validation failures
+- a manual Cloud Run execution succeeded on `2026-04-06`, confirming the deployed pipeline can run end to end when the job image is current
+- manual Cloud Run execution should still stay the first smoke check after image changes
+- the pipeline now defaults to the documented HTTP GDELT feed, so SSL-verify overrides should not be the normal runtime path
 
 ### 2. Application Runtime
 
