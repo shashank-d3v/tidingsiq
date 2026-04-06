@@ -40,12 +40,16 @@ Current Bronze extraction maps:
 
 - `source_record_id` from `GKGRECORDID`
 - `published_at` from `DATE`
+- `source_collection_identifier` from `SourceCollectionIdentifier`
 - `source_name` from `SourceCommonName`
 - `document_identifier` from `DocumentIdentifier`
 - `source_url` from `DocumentIdentifier` when `SourceCollectionIdentifier = 1`
+- `source_domain` from the resolved article URL, with `source_name` fallback
 - `title` from `Extras` via `<PAGE_TITLE>`
 - `tone_raw` from `V2Tone`
-- `language` from `TranslationInfo` when a source-language code is present
+- `language_raw` from `TranslationInfo` when a source-language code is present
+- `language` from native `TranslationInfo` when present, otherwise deterministic title-based inference
+- `mentioned_country_code` and `mentioned_country_name` from `V2Locations` when article geography is present
 
 The Bronze `raw_payload` now retains the additional upstream fields most relevant to future refinement:
 
@@ -62,22 +66,32 @@ The Bronze `raw_payload` now retains the additional upstream fields most relevan
 
 ## Verified Findings
 
-Latest verified warehouse state after a successful manual Cloud Run execution on `2026-04-06`:
+Latest verified warehouse state after the enrichment migration run on `2026-04-06`:
 
-- Bronze rows: `4426`
-- Silver rows: `4426`
-- Silver canonical rows: `4337`
-- Gold rows under the current no-language-gate contract: `4323`
-- Bronze rows with populated `source_name`: `4426`
-- Bronze rows with populated `source_url`: `4426`
-- Bronze rows with populated `title`: `4412`
-- Bronze rows with populated `tone_raw`: `4426`
+- Bronze rows: `644`
+- Silver rows: `644`
+- Silver canonical rows: `628`
+- Gold rows under the current no-language-gate contract: `626`
+- Bronze rows with populated `source_name`: `644`
+- Bronze rows with populated `source_url`: `644`
+- Bronze rows with populated `source_domain`: `644`
+- Bronze rows with populated `title`: `643`
+- Bronze rows with populated `tone_raw`: `644`
 - Bronze rows with populated `TranslationInfo`: `0`
-- Bronze rows with populated `language`: `0`
-- Silver rows with populated `source_domain`: `4426`
-- Silver rows with populated `normalized_url`: `4426`
-- Silver rows with populated `language`: `0`
-- Silver rows with populated `source_country`: `0`
+- Bronze rows with populated native `language_raw`: `0`
+- Bronze rows with populated resolved `language`: `644`
+- Bronze rows with populated `mentioned_country_code`: `644`
+- Silver rows with populated `source_domain`: `644`
+- Silver rows with populated `normalized_url`: `644`
+- Silver rows with populated `language`: `644`
+- Silver rows with populated `mentioned_country_code`: `644`
+
+Resolution mix in the latest Bronze window:
+
+- `language_resolution_status = inferred`: `391`
+- `language_resolution_status = undetermined`: `253`
+- `mentioned_country_resolution_status = v2_locations`: `384`
+- `mentioned_country_resolution_status = undetermined`: `260`
 
 Historical contrast from the old English-only Gold contract:
 
@@ -88,13 +102,14 @@ Historical contrast from the old English-only Gold contract:
 - The current `language` gap is not explained by an obvious parser bug.
 - The current landed GKG rows do not provide usable `TranslationInfo` values in the tested sample.
 - `source_domain` is not a blocker; it is already fully derivable in Silver from the canonical URL.
-- `source_country` is not a direct source field in the current Bronze path.
-- If `source_country` is added later, it should mean article-mentioned country derived from `V2Locations`, not publisher country inferred from a domain.
+- article geography is available from `V2Locations` for a substantial subset of landed rows and is the right source-backed path for country enrichment
+- publisher country is still not a direct source field in the current Bronze path and should not be inferred from domains in this contract
 - The GDELT transport path should default to the documented HTTP feed rather than forcing HTTPS with an SSL override.
 - The deployed Cloud Run pipeline path is now proven end to end; the remaining weakness is source-field completeness, not orchestration.
+- the Bronze and Silver contracts can now avoid blank language and country fields by using explicit sentinel values plus resolution-status columns
 
 ## Implication For Downstream Modeling
 
-- `language` should remain internal and nullable in Bronze and Silver until a defensible source-backed extraction rule is validated.
+- `language` should use native `TranslationInfo` first and deterministic inference second, while preserving explicit provenance
 - `language` should not be part of the Gold serving contract in the current project state.
 - Gold should serve scored canonical rows without a language gate.

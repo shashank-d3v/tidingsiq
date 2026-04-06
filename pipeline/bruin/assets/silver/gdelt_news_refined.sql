@@ -57,10 +57,24 @@ columns:
     type: string
   - name: source_domain
     type: string
-  - name: source_country
-    type: string
   - name: language
     type: string
+  - name: language_resolution_status
+    type: string
+    checks:
+      - name: not_null
+  - name: mentioned_country_code
+    type: string
+    checks:
+      - name: not_null
+  - name: mentioned_country_name
+    type: string
+    checks:
+      - name: not_null
+  - name: mentioned_country_resolution_status
+    type: string
+    checks:
+      - name: not_null
   - name: title
     type: string
   - name: normalized_title
@@ -101,9 +115,14 @@ with bronze_base as (
     ingested_at,
     published_at,
     nullif(trim(source_name), '') as source_name,
+    coalesce(nullif(trim(source_domain), ''), 'unknown-source') as source_domain,
+    coalesce(nullif(lower(trim(language)), ''), 'und') as language,
+    coalesce(nullif(trim(language_resolution_status), ''), 'undetermined') as language_resolution_status,
+    coalesce(nullif(upper(trim(mentioned_country_code)), ''), 'ZZ') as mentioned_country_code,
+    coalesce(nullif(trim(mentioned_country_name), ''), 'Unknown') as mentioned_country_name,
+    coalesce(nullif(trim(mentioned_country_resolution_status), ''), 'undetermined') as mentioned_country_resolution_status,
     nullif(trim(source_url), '') as source_url,
     nullif(regexp_replace(trim(title), r'\s+', ' '), '') as cleaned_title,
-    nullif(lower(trim(language)), '') as cleaned_language,
     tone_raw
   from bronze.gdelt_news_raw
 ),
@@ -115,6 +134,12 @@ normalized as (
     ingested_at,
     published_at,
     source_name,
+    source_domain,
+    language,
+    language_resolution_status,
+    mentioned_country_code,
+    mentioned_country_name,
+    mentioned_country_resolution_status,
     cleaned_title as title,
     lower(cleaned_title) as normalized_title,
     source_url as url,
@@ -132,15 +157,6 @@ normalized as (
         ''
       )
     end as normalized_url,
-    case
-      when source_url is not null then
-        nullif(regexp_replace(lower(net.host(source_url)), r'^www\.', ''), '')
-      when source_name is not null then
-        nullif(regexp_replace(lower(source_name), r'^www\.', ''), '')
-      else null
-    end as source_domain,
-    cast(null as string) as source_country,
-    cleaned_language as language,
     tone_raw as tone_score,
     cast(null as float64) as positive_signal_score,
     cast(null as float64) as negative_signal_score
@@ -156,8 +172,11 @@ keyed as (
     published_at,
     source_name,
     source_domain,
-    source_country,
     language,
+    language_resolution_status,
+    mentioned_country_code,
+    mentioned_country_name,
+    mentioned_country_resolution_status,
     title,
     normalized_title,
     url,
@@ -204,8 +223,11 @@ select
   published_at,
   source_name,
   source_domain,
-  source_country,
   language,
+  language_resolution_status,
+  mentioned_country_code,
+  mentioned_country_name,
+  mentioned_country_resolution_status,
   title,
   normalized_title,
   url,

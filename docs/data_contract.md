@@ -57,11 +57,18 @@ One ingested source record per row.
 | source_window_start | TIMESTAMP | No | Internal | Lower bound of the fetched source window |
 | source_window_end | TIMESTAMP | No | Internal | Upper bound of the fetched source window |
 | source_record_id | STRING | No | Validated from GKG | Mapped from `GKGRECORDID` |
-| document_identifier | STRING | No | Validated from GKG | Mapped from `V2DOCUMENTIDENTIFIER` |
-| source_url | STRING | No | Partially validated from GKG | Set when `V2SOURCECOLLECTIONIDENTIFIER = 1` and the document identifier is a URL |
+| source_collection_identifier | STRING | No | Validated from GKG | Mapped from `SourceCollectionIdentifier` |
+| document_identifier | STRING | No | Validated from GKG | Mapped from `DocumentIdentifier` |
+| source_url | STRING | No | Partially validated from GKG | Set when `SourceCollectionIdentifier = 1` and the document identifier is a URL |
 | source_name | STRING | No | Validated from GKG | Mapped from `V2SOURCECOMMONNAME` |
+| source_domain | STRING | No | Derived | Normalized domain derived from `source_url`, with `source_name` fallback when needed |
 | title | STRING | No | Partially validated from GKG | Extracted from the `Extras` field via `<PAGE_TITLE>` when present |
-| language | STRING | No | Partially validated from GKG | Extracted from `TranslationInfo` when a source-language code is present |
+| language_raw | STRING | No | Partially validated from GKG | Native language code parsed from `TranslationInfo` when present |
+| language | STRING | Yes | Native-first, inferred-second | Resolved language code, defaulting to `und` when unresolved |
+| language_resolution_status | STRING | Yes | Derived | `native`, `inferred`, or `undetermined` |
+| mentioned_country_code | STRING | Yes | Derived from GKG | Article geography derived from `V2Locations`, defaulting to `ZZ` when unresolved |
+| mentioned_country_name | STRING | Yes | Derived from GKG | Country display name derived from `V2Locations`, defaulting to `Unknown` when unresolved |
+| mentioned_country_resolution_status | STRING | Yes | Derived | `v2_locations` or `undetermined` |
 | published_at | TIMESTAMP | No | Validated from GKG | Mapped from the GKG publication timestamp field |
 | tone_raw | FLOAT64 | No | Validated from GKG | First component of `V2Tone` before normalization |
 | positive_signal_raw | FLOAT64 | No | Pending GDELT validation | Optional raw positive signal if a reliable source field exists |
@@ -72,6 +79,7 @@ One ingested source record per row.
 
 - `ingestion_id` and `ingested_at` must always be populated
 - the same replay window should be safe to rerun without losing traceability
+- `language`, `language_resolution_status`, `mentioned_country_code`, `mentioned_country_name`, and `mentioned_country_resolution_status` should never be blank after Bronze resolution
 - `raw_payload` currently stores selected raw GKG fields rather than the entire original row to keep Bronze practical and debuggable without retaining unnecessary volume
 - Bronze rows older than 45 days should be exportable to GCS without losing row-level traceability
 - archived Bronze objects should be retained for 365 days before deletion
@@ -104,8 +112,11 @@ One normalized article candidate per row before Gold filtering.
 | published_at | TIMESTAMP | No | Bronze normalized | Normalized publication timestamp |
 | source_name | STRING | No | Bronze normalized | Cleaned source name |
 | source_domain | STRING | No | Derived | Normalized domain from URL |
-| source_country | STRING | No | Pending GDELT validation | Reserved for a future mentioned-country derivation from `V2Locations`, not publisher country |
-| language | STRING | No | Bronze normalized | Normalized language code |
+| language | STRING | Yes | Bronze resolved | Normalized language code |
+| language_resolution_status | STRING | Yes | Bronze resolved | `native`, `inferred`, or `undetermined` |
+| mentioned_country_code | STRING | Yes | Bronze resolved | Article geography country code derived from `V2Locations` |
+| mentioned_country_name | STRING | Yes | Bronze resolved | Article geography country name derived from `V2Locations` |
+| mentioned_country_resolution_status | STRING | Yes | Bronze resolved | `v2_locations` or `undetermined` |
 | title | STRING | No | Bronze normalized | Cleaned display title |
 | normalized_title | STRING | No | Derived | Lowercased and normalized title for matching |
 | url | STRING | No | Bronze normalized | Canonical article URL |
@@ -123,6 +134,7 @@ One normalized article candidate per row before Gold filtering.
 - `article_id` must be unique
 - `dedup_key` must always be populated
 - `is_duplicate` must always be populated
+- `language_resolution_status`, `mentioned_country_code`, `mentioned_country_name`, and `mentioned_country_resolution_status` must always be populated
 - `tone_score`, when present, should stay within a broad sanity range of `-100` to `100`
 - canonical rows should have stable dedup behavior across reruns
 - fuzzy or probabilistic deduplication is not required in v1
@@ -260,4 +272,4 @@ Archive expectations for Bronze:
 ## Open Validation Items
 
 - Confirm whether positive and negative signals come from validated GDELT fields or whether a later Gold version should extend beyond `v1_tone_only`.
-- Confirm whether `source_country` should be derived from `V2Locations` as article-mentioned geography in a later Silver version.
+- Re-evaluate whether a separate publisher-country concept is worth adding later; the current contract only models article-mentioned geography.

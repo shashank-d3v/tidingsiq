@@ -44,7 +44,7 @@ Current implementation choice:
 
 Still pending validation:
 - whether positive and negative emotional signals should be mapped directly from GKG fields or derived later
-- whether `TranslationInfo` will ever be reliable enough to support downstream language use
+- how much of downstream language coverage comes from native `TranslationInfo` versus deterministic inference
 
 The internal contract remains stable even where some upstream mappings are still intentionally nullable.
 
@@ -53,6 +53,8 @@ The internal contract remains stable even where some upstream mappings are still
 Bruin Python assets will:
 - fetch a bounded GDELT GKG input window
 - parse only the fields needed for downstream modeling
+- resolve language using native `TranslationInfo` first and title-based inference second
+- resolve article geography from `V2Locations` into `mentioned_country`
 - attach ingestion metadata
 - load an idempotent Bronze table keyed by the GKG record identifier
 
@@ -120,6 +122,11 @@ Bronze is append-oriented and traceable. It should preserve the source record sh
 ### Silver
 
 Silver is the normalization boundary. URL cleanup, title cleanup, timestamp normalization, and deterministic deduplication belong here.
+
+Current metadata posture:
+- `source_domain` is a derived publisher/source-domain field
+- `mentioned_country` means article-mentioned geography, not publisher origin
+- publisher country remains out of scope
 
 ### Gold
 

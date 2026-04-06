@@ -65,19 +65,23 @@ Optional environment variables:
 Current validated mappings:
 
 - `source_record_id`: GKG record identifier
+- `source_collection_identifier`: GKG source collection identifier
 - `document_identifier`: GKG document identifier
 - `source_url`: document identifier when the source collection is open-web
 - `source_name`: GKG source common name
+- `source_domain`: resolved from the article URL with `source_name` fallback
 - `title`: extracted from `Extras` via `<PAGE_TITLE>`
 - `published_at`: GKG publication timestamp
 - `tone_raw`: first component of `V2Tone`
+- `language_raw`: parsed from `TranslationInfo` when present
+- `language`: native-first, inferred-second
+- `mentioned_country_code` and `mentioned_country_name`: article geography derived from `V2Locations`
 
-Still intentionally unresolved in Phase 3:
+Still intentionally unresolved in this layer:
 
 - `positive_signal_raw`
 - `negative_signal_raw`
-- a guaranteed language value for every record
-- a source-backed mentioned-country derivation
+- publisher-country inference
 
 ## Validation
 
@@ -103,7 +107,8 @@ Current implementation notes:
 - Silver keeps deterministic duplicate flags so Gold can expose only canonical rows.
 - Gold computes `happy_factor_version = 'v1_tone_only'`.
 - Silver retains unresolved positive and negative signal placeholders internally, but Gold does not expose them until the mappings are validated.
-- the current Bronze language mapping remains sparse, so `language` stays internal to Bronze and Silver only
+- Bronze and Silver now treat `language` as native-first and inferred-second, with explicit resolution status
+- Bronze and Silver use `mentioned_country` for article geography from `V2Locations`; they do not model publisher country
 - Silver retains the most recent 90 days in-model.
 - Gold retains the most recent 180 days in-model.
 - Silver partitions on `ingested_at` and clusters by `dedup_key`, `source_domain`, and `language`.
@@ -115,21 +120,26 @@ Current implementation notes:
 Most recent verified end-to-end cloud validation on `2026-04-06`:
 
 - direct Bronze downloader validation succeeded against `http://data.gdeltproject.org/gdeltv2/...`
-- a manual Cloud Run execution completed successfully after redeploying the updated pipeline image
-- Bronze row count: `4426`
-- Silver row count: `4426`
-- Silver canonical row count: `4337`
+- a manual Cloud Run full-refresh execution completed successfully after redeploying the enriched pipeline image
+- Bronze row count: `644`
+- Silver row count: `644`
+- Silver canonical row count: `628`
 - Bronze rows with populated `TranslationInfo`: `0`
-- Bronze rows with populated `language`: `0`
-- Silver rows with populated `source_domain`: `4426`
-- current Gold row count after removing the language gate: `4323`
+- Bronze rows with populated resolved `language`: `644`
+- Bronze rows with populated `mentioned_country_code`: `644`
+- Silver rows with populated `source_domain`: `644`
+- Silver rows with populated `language`: `644`
+- Silver rows with populated `mentioned_country_code`: `644`
+- current Gold row count after removing the language gate: `626`
 
 Current conclusion:
 
 - the current Bronze parser is not obviously dropping language data
 - the landed GKG rows themselves do not provide usable `TranslationInfo` in the tested sample
 - `source_domain` is already a working derived field in Silver
-- `language` should not be treated as a serving-layer dependency in the current contract
+- `language` now uses native `TranslationInfo` first and title-based inference second
+- `mentioned_country` now represents article geography from `V2Locations`
+- `language` should still not be treated as a serving-layer dependency in the current contract
 - removing `language` from Gold restores a populated serving table without inventing new upstream mappings
 - the deployed Cloud Run path is now validated end to end; the current quality gap is upstream metadata sparsity, not pipeline execution
 
