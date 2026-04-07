@@ -10,7 +10,8 @@ Completed:
 - Terraform-managed GCP foundation
 - Bronze GDELT ingestion into BigQuery
 - Silver normalization and deterministic deduplication
-- Gold `happy_factor` scoring with `v1_tone_only`
+- Gold guardrailed `happy_factor` scoring with feed eligibility metadata
+- Gold guardrail reference table for title allow/deny rules
 - finalized GDELT source findings and Bronze field-mapping evidence
 - Gold serving contract no longer depends on `language`
 - Gold run-metrics history for operational visibility
@@ -27,14 +28,15 @@ Operational notes:
 - a manual Cloud Run execution succeeded on `2026-04-06` after redeploying the updated pipeline image
 - hosted app deployment is currently disabled in the active environment
 - the latest source finding is that `TranslationInfo` is empty in the sampled landed GKG rows, so `language` remains internal and unresolved rather than part of the serving contract
+- the current Gold default feed is `is_positive_feed_eligible = true` with `happy_factor >= 65`
 
 ## Next Steps
 
 1. Decide when to unpause the scheduled pipeline runs.
-2. Decide whether to enrich Bronze further from retained GKG fields like `V2Locations` and `GCAM`.
-3. Improve tests, security, and reviewability for final portfolio presentation.
-4. Integrate the final Streamlit UI design.
-5. Finalize architecture and deployment documentation.
+2. Improve tests, security, and reviewability for final portfolio presentation.
+3. Integrate the final Streamlit UI design.
+4. Finalize architecture and deployment documentation.
+5. Decide whether to deepen scoring beyond title guardrails using validated GKG fields.
 
 ## Phases Completed
 
@@ -47,10 +49,12 @@ Operational notes:
 7. Retention and archive operations
 8. Pipeline containerization and Cloud Run automation activation
 9. Streamlit app Cloud Run deployment
+10. Bronze/Silver enrichment and Gold guardrailed scoring
 
 ## Future Work
 
 - Cloud Run deployment for the Streamlit app
 - scheduler unpause and operational run cadence review
 - stronger data quality checks and alerting
+- broader positive-feed QA and rule tuning
 - final documentation polish, including an architecture diagram

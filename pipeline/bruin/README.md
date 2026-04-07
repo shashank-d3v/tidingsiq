@@ -44,7 +44,8 @@ environments:
 
 - `bronze.gdelt_news_raw`: implemented as a bounded GDELT GKG 2.1 ingestion step
 - `silver.gdelt_news_refined`: implemented with normalization and deterministic deduplication
-- `gold.positive_news_feed`: implemented with canonical-row selection and `v1_tone_only` scoring
+- `gold.positive_feed_guardrail_terms`: implemented as the title-rule reference table
+- `gold.positive_news_feed`: implemented with canonical-row selection, guardrailed scoring, and feed eligibility
 
 ## Bronze Runtime Notes
 
@@ -93,6 +94,7 @@ bruin run pipeline/bruin/assets/bronze/gdelt_news_raw.py
 bruin run pipeline/bruin/assets/silver/gdelt_news_refined.sql
 bruin run pipeline/bruin/assets/gold/positive_news_feed.sql
 bruin run pipeline/bruin/assets/gold/pipeline_run_metrics.sql
+bruin run pipeline/bruin/assets/gold/positive_feed_guardrail_terms.sql
 ```
 
 Expected warehouse outputs after a successful end-to-end run:
@@ -100,12 +102,14 @@ Expected warehouse outputs after a successful end-to-end run:
 - `bronze.gdelt_news_raw`
 - `silver.gdelt_news_refined`
 - `gold.positive_news_feed`
+- `gold.positive_feed_guardrail_terms`
 - `gold.pipeline_run_metrics`
 
 Current implementation notes:
 
 - Silver keeps deterministic duplicate flags so Gold can expose only canonical rows.
-- Gold computes `happy_factor_version = 'v1_tone_only'`.
+- Gold computes `base_happy_factor`, final `happy_factor`, and `is_positive_feed_eligible`.
+- Gold uses `gold.positive_feed_guardrail_terms` for allow, soft deny, and hard deny title rules.
 - Silver retains unresolved positive and negative signal placeholders internally, but Gold does not expose them until the mappings are validated.
 - Bronze and Silver now treat `language` as native-first and inferred-second, with explicit resolution status
 - Bronze and Silver use `mentioned_country` for article geography from `V2Locations`; they do not model publisher country
@@ -142,6 +146,8 @@ Current conclusion:
 - `language` should still not be treated as a serving-layer dependency in the current contract
 - removing `language` from Gold restores a populated serving table without inventing new upstream mappings
 - the deployed Cloud Run path is now validated end to end; the current quality gap is upstream metadata sparsity, not pipeline execution
+- the default app-facing feed should now use `is_positive_feed_eligible = true`, not score alone
+- the current default serving threshold is `65`, softened from the initial `70`
 
 ## Container Runtime
 

@@ -28,6 +28,7 @@ Where upstream GDELT mappings are not yet validated, the internal field is still
 |---|---|---|
 | Bronze | `bronze.gdelt_news_raw` | Landed source records plus ingestion metadata |
 | Silver | `silver.gdelt_news_refined` | Cleaned, normalized, article-level records |
+| Gold | `gold.positive_feed_guardrail_terms` | Versioned title-rule reference table for positive-feed eligibility |
 | Gold | `gold.positive_news_feed` | Application-facing positive news feed |
 | Gold | `gold.pipeline_run_metrics` | Per-run warehouse and scoring metrics for operational visibility |
 
@@ -152,12 +153,13 @@ One normalized article candidate per row before Gold filtering.
 
 ### Grain
 
-One app-ready article record per retained article.
+One scored retained article record per canonical article candidate.
 
 ### Required behavior
 
 - expose only consumer-facing fields
 - compute and persist `happy_factor`
+- separate ranking score from feed eligibility
 - keep score logic explainable and versioned
 
 ### Fields
@@ -172,8 +174,15 @@ One app-ready article record per retained article.
 | title | STRING | No | Silver | Display field |
 | url | STRING | No | Silver | Link-out target |
 | tone_score | FLOAT64 | No | Silver | Exposed for transparency and debugging |
-| happy_factor | FLOAT64 | Yes | Derived | Positivity-oriented score on a 0 to 100 scale |
-| happy_factor_version | STRING | Yes | Derived | Current implementation is `v1_tone_only` |
+| base_happy_factor | FLOAT64 | Yes | Derived | Pure tone-normalized base score before title guardrails |
+| happy_factor | FLOAT64 | Yes | Derived | Guardrailed positivity-oriented score on a 0 to 100 scale |
+| happy_factor_version | STRING | Yes | Derived | Current implementation is `v2_1_guardrailed_tone` |
+| is_positive_feed_eligible | BOOL | Yes | Derived | Default feed gate combining score threshold and title guardrails |
+| positive_guardrail_version | STRING | Yes | Derived | Current title-rule set version, `v1_1_title_rules` |
+| exclusion_reason | STRING | No | Derived | Null when eligible, otherwise the reason the row is excluded from the default feed |
+| allow_hit_count | INT64 | Yes | Derived | Number of positive allowlist hits in the title |
+| soft_deny_hit_count | INT64 | Yes | Derived | Number of soft denylist hits in the title |
+| hard_deny_hit_count | INT64 | Yes | Derived | Number of hard denylist hits in the title |
 | ingested_at | TIMESTAMP | Yes | Silver | Freshness marker for the record |
 
 ### Gold quality expectations
@@ -181,16 +190,38 @@ One app-ready article record per retained article.
 - `source_record_id` must always be populated
 - `article_id` must be unique
 - `serving_date` must always be populated
-- `title` and `url` must always be populated in the serving table
+- `base_happy_factor` and `happy_factor` must always be between `0` and `100`
+- `is_positive_feed_eligible` must always be populated
+- `positive_guardrail_version` must always be populated
 - `tone_score`, when present, should stay within a broad sanity range of `-100` to `100`
-- `happy_factor` must be between 0 and 100
-- `happy_factor_version` must always be populated
+- eligible rows should not carry hard deny hits
+- eligible rows should not carry unresolved soft deny hits
 - the app should not depend on unresolved upstream-derived signal columns being present in every release
 - Gold should retain 180 days of queryable history in BigQuery
 - current implementation keeps only canonical Silver rows where `is_duplicate = false`
-- current implementation filters out canonical rows without a usable `title` or `url`
+- current implementation retains scored canonical rows even when they are not feed-eligible so the guardrail decision remains explainable
 - current implementation enforces the 180-day retention window in the Gold model itself
 - current implementation partitions Gold by `serving_date` and clusters by `source_name`
+
+## Gold Guardrail Terms Contract
+
+### Table
+
+`gold.positive_feed_guardrail_terms`
+
+### Grain
+
+One active or inactive title-rule term per row.
+
+### Fields
+
+| Column | Type | Required | Source | Notes |
+|---|---|---:|---|---|
+| term | STRING | Yes | Internal | Token or phrase used by the guardrail logic |
+| rule_class | STRING | Yes | Internal | `deny_hard`, `deny_soft`, or `allow` |
+| match_scope | STRING | Yes | Internal | `token` or `phrase` |
+| is_active | BOOL | Yes | Internal | Rule activation flag |
+| notes | STRING | No | Internal | Human-readable context for maintenance |
 
 ## Gold Operational Metrics Contract
 

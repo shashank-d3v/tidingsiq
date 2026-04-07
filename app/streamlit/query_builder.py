@@ -7,9 +7,10 @@ from datetime import datetime, timedelta, timezone
 @dataclass(frozen=True)
 class FeedQueryConfig:
     table_fqn: str
-    min_happy_factor: float = 70.0
+    min_happy_factor: float = 65.0
     lookback_days: int = 7
     row_limit: int = 25
+    eligible_only: bool = True
 
 
 def _clamp_float(value: float, low: float, high: float) -> float:
@@ -28,6 +29,7 @@ def build_feed_query(
     threshold = _clamp_float(config.min_happy_factor, 0.0, 100.0)
     lookback_days = _clamp_int(config.lookback_days, 1, 30)
     row_limit = _clamp_int(config.row_limit, 1, 100)
+    eligible_only = bool(config.eligible_only)
     now_utc = now_utc or datetime.now(timezone.utc)
     published_after = now_utc - timedelta(days=lookback_days)
 
@@ -46,6 +48,11 @@ select
 from `{config.table_fqn}`
 where happy_factor >= @min_happy_factor
   and serving_date >= date(@published_after)
+"""
+
+    if eligible_only:
+        sql += """
+  and is_positive_feed_eligible = true
 """
 
     parameters: list[tuple[str, str, object]] = [

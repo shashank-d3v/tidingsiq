@@ -5,11 +5,14 @@ This app is the Phase 6 frontend for TidingsIQ. It queries only `gold.positive_n
 - minimum `happy_factor`
 - lookback window in days
 - result row limit
+- eligible-feed-only toggle, enabled by default
 
 Current serving constraint:
 
 - Gold serves the canonical scored feed without using `language` as part of the public contract
 - `language` remains an internal Bronze/Silver evaluation field until the GKG source provides something defensible
+- the app defaults to `is_positive_feed_eligible = true` so the default feed reflects title guardrails as well as score
+- the current default minimum score is `65`, softened from the initial `70`
 
 ## Local Run
 
@@ -84,8 +87,15 @@ Current expected columns:
 - `title`
 - `url`
 - `tone_score`
+- `base_happy_factor`
 - `happy_factor`
 - `happy_factor_version`
+- `is_positive_feed_eligible`
+- `positive_guardrail_version`
+- `exclusion_reason`
+- `allow_hit_count`
+- `soft_deny_hit_count`
+- `hard_deny_hit_count`
 - `ingested_at`
 
 ## Future Operations Horizon

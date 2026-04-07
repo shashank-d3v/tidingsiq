@@ -2,7 +2,7 @@
 
 TidingsIQ is a portfolio data engineering project that builds a low-cost, cloud-native ELT pipeline for global news intelligence. The system ingests news metadata from GDELT, lands and transforms it in BigQuery with Bruin, provisions supporting GCP resources with Terraform, and serves sentiment-filtered results through a Streamlit app.
 
-The core product is a queryable feed of recent articles ranked by a configurable `happy_factor`, intended to surface more positive news coverage without pretending to solve sentiment perfectly.
+The core product is a queryable feed of recent articles ranked by a configurable `happy_factor` and gated by explicit title guardrails, intended to surface more positive news coverage without pretending to solve sentiment perfectly.
 
 ## Scope
 
@@ -29,9 +29,10 @@ Serving model:
 
 - `gold.positive_news_feed`
 
-Primary user control:
+Primary user controls:
 
 - `happy_factor` threshold filter in the Streamlit UI
+- eligible-feed-only filter in the Streamlit UI
 
 ## Repository Layout
 
@@ -83,7 +84,7 @@ The repository has an applied Terraform foundation, a working Bronze ingestion s
 
 The Cloud Run job path and app hosting path are both implemented in the repo. In the current environment, scheduled pipeline runs remain paused and the hosted Streamlit service is intentionally disabled until reactivated.
 The infrastructure also includes an operational `bronze_staging` dataset used only by the Bronze merge load path.
-The current Gold serving contract is being tightened around fields that are actually reliable from the upstream GKG source, while Bronze and Silver retain additional nullable internal metadata for evaluation.
+The current Gold serving contract now separates score from eligibility: `happy_factor` ranks records, while `is_positive_feed_eligible` keeps obvious non-uplifting titles out of the default feed. The current default serving threshold is `65`.
 
 ## Next Build Order
 

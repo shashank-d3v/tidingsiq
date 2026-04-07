@@ -66,7 +66,7 @@ Bruin SQL assets will materialize three logical layers:
 
 - `bronze`: landed source records plus ingestion metadata
 - `silver`: cleaned, normalized, and deduplicated article records
-- `gold`: application-facing records with `happy_factor`
+- `gold`: application-facing scored records plus feed-eligibility metadata
 
 Supporting infrastructure also includes `bronze_staging`, which is an operational dataset used by the Bronze load path and is not part of the consumer-facing warehouse contract.
 
@@ -92,6 +92,7 @@ Checks should run as close to the transformations as possible. Initial checks sh
 - uniqueness of primary identifiers
 - valid score ranges for `happy_factor`
 - duplicate rate visibility after Silver deduplication
+- eligible-feed guardrails that block hard-deny titles and unresolved soft-deny titles
 
 ### 6. Streamlit Serving Layer
 
@@ -101,6 +102,7 @@ Current UI controls:
 - `happy_factor` minimum threshold
 - lookback window in days
 - result limit
+- an `eligible only` toggle that defaults to `true`
 
 The app should remain thin. Any future scheduled execution of the Bruin pipeline belongs in GCP batch infrastructure rather than the Streamlit runtime.
 
@@ -110,8 +112,9 @@ The app should remain thin. Any future scheduled execution of the Bruin pipeline
 2. Bruin ingestion fetches a bounded GDELT window and lands data in `bronze.gdelt_news_raw`.
 3. Bruin SQL transforms Bronze data into `silver.gdelt_news_refined`.
 4. Bruin SQL builds `gold.positive_news_feed`, including `happy_factor`.
-5. Streamlit queries Gold and returns filtered results to the user.
-6. The pipeline can run locally or through the deployed Cloud Run Job, with Cloud Scheduler kept paused until the cloud execution path is stable.
+5. Bruin SQL maintains `gold.positive_feed_guardrail_terms`, which supplies the title-rule guardrails used by Gold.
+6. Streamlit queries Gold and returns filtered results to the user.
+7. The pipeline can run locally or through the deployed Cloud Run Job, with Cloud Scheduler kept paused until the cloud execution path is stable.
 
 ## Data Model Strategy
 
@@ -134,8 +137,11 @@ Gold is the stable consumer contract. It should contain only fields needed by th
 
 Current implementation choice:
 - Gold keeps only canonical Silver rows where `is_duplicate = false`
-- `happy_factor_version = 'v1_tone_only'`
-- `happy_factor` is derived from `tone_score` only until richer GDELT signal mappings are validated
+- `base_happy_factor` remains a deterministic normalization of `tone_score`
+- `happy_factor_version = 'v2_1_guardrailed_tone'`
+- `happy_factor` is the guardrailed score derived from `base_happy_factor`, title allow bonuses, and title deny penalties
+- `is_positive_feed_eligible` is the serving gate for the default app feed
+- title rules come from `gold.positive_feed_guardrail_terms`
 
 ## Operational Principles
 
@@ -152,7 +158,8 @@ Current implementation choice:
 - Bruin is the orchestrator and transformation framework.
 - The app will depend on one canonical serving table: `gold.positive_news_feed`.
 - The first release uses a configurable threshold, not a complex ranking product.
-- Phase 5 uses a tone-only Gold scoring model rather than unvalidated emotional-signal fields.
+- Gold separates score from eligibility so ranking and feed safety remain explainable.
+- The current scoring model uses guardrailed tone rather than raw tone-only ranking.
 - Retention targets are Bronze 45 days, Silver 90 days, and Gold 180 days.
 - Bronze archive should land in GCS rather than remain indefinitely in BigQuery.
 - Archived Bronze objects should expire after 365 days in GCS.
@@ -161,4 +168,5 @@ Current implementation choice:
 ## Open Items
 
 - Confirm which upstream fields map to positive and negative emotional indicators beyond `V2Tone`.
+- Decide whether the current title-rule guardrails are strict enough or should be expanded further after broader sampling.
 - Decide whether Bronze archival is implemented as a Bruin-driven export step, a scheduled BigQuery export job, or an external batch script.

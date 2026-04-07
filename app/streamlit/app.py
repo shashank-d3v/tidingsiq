@@ -79,7 +79,7 @@ def main() -> None:
             "Minimum Happy Factor",
             min_value=0,
             max_value=100,
-            value=70,
+            value=65,
             step=5,
         )
         lookback_days = st.slider(
@@ -96,12 +96,18 @@ def main() -> None:
             value=25,
             step=5,
         )
+        eligible_only = st.checkbox(
+            "Eligible feed only",
+            value=True,
+            help="Hide rows that fail the positive-news guardrails.",
+        )
 
     config = FeedQueryConfig(
         table_fqn=table_fqn,
         min_happy_factor=min_happy_factor,
         lookback_days=lookback_days,
         row_limit=row_limit,
+        eligible_only=eligible_only,
     )
 
     try:
@@ -148,6 +154,7 @@ def main() -> None:
                 "min_happy_factor": min_happy_factor,
                 "lookback_days": lookback_days,
                 "row_limit": row_limit,
+                "eligible_only": eligible_only,
             }
         )
 
