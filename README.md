@@ -69,6 +69,7 @@ Primary user controls:
 - [Bruin Pipeline](pipeline/bruin/README.md): local setup notes, asset behavior, and validation workflow
 - [Streamlit App](app/streamlit/README.md): local UI run instructions and Gold query contract
 - [Operations Scripts](scripts/README.md): manual archive and retention helpers
+- [Operations Runbook](docs/operations_runbook.md): reset, smoke test, scheduler, image, and warehouse debug commands
 
 ## Design Principles
 
@@ -82,7 +83,7 @@ Primary user controls:
 
 The repository has an applied Terraform foundation, a working Bronze ingestion slice in Bruin, a deterministic Silver normalization layer, a versioned Gold scoring model, a Streamlit app that queries Gold only, an initial retention/archive operations slice, and an applied GCP automation path for the pipeline.
 
-The Cloud Run job path and app hosting path are both implemented in the repo. In the current environment, scheduled pipeline runs remain paused and the hosted Streamlit service is intentionally disabled until reactivated.
+The Cloud Run job path, reporting path, and app hosting path are all implemented in the repo. In the current environment, the 6-hour pipeline scheduler is active, the hosted Streamlit service remains intentionally disabled until reactivated, and the Monitoring email channel may still need inbox verification before notifications start arriving.
 The infrastructure also includes an operational `bronze_staging` dataset used only by the Bronze merge load path.
 The current Gold serving contract now separates score from eligibility: `happy_factor` ranks records, while `is_positive_feed_eligible` keeps obvious non-uplifting titles out of the default feed. The current default serving threshold is `65`.
 

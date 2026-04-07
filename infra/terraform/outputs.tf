@@ -45,6 +45,26 @@ output "pipeline_scheduler_service_account_email" {
   value       = var.enable_pipeline_automation ? google_service_account.scheduler[0].email : null
 }
 
+output "reporting_service_account_email" {
+  description = "Service account email for the daily reporting job when reporting is enabled."
+  value       = var.enable_pipeline_reporting ? google_service_account.reporting[0].email : null
+}
+
+output "reporting_cloud_run_job_name" {
+  description = "Cloud Run Job name for the daily reporting task when reporting is enabled."
+  value       = var.enable_pipeline_reporting ? google_cloud_run_v2_job.reporting[0].name : null
+}
+
+output "reporting_scheduler_job_name" {
+  description = "Cloud Scheduler job name for the daily reporting task when reporting is enabled."
+  value       = var.enable_pipeline_reporting ? google_cloud_scheduler_job.reporting[0].name : null
+}
+
+output "notification_email_channel_name" {
+  description = "Monitoring email notification channel name when reporting notifications are enabled."
+  value       = var.enable_pipeline_reporting && trimspace(var.notification_email_recipient) != "" ? google_monitoring_notification_channel.pipeline_email[0].name : null
+}
+
 output "app_artifact_repository_name" {
   description = "Artifact Registry repository name for the Streamlit app image when app hosting is enabled."
   value       = var.enable_app_hosting ? google_artifact_registry_repository.app[0].name : null

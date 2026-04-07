@@ -9,6 +9,7 @@ This directory contains the first infrastructure slice for TidingsIQ. It provisi
 - app service account for Streamlit reads
 - minimum BigQuery IAM bindings for both identities
 - applied pipeline automation resources for Artifact Registry, Cloud Run Jobs, and Cloud Scheduler
+- reporting resources for a daily Cloud Run summary job and Monitoring-based email notifications
 - optional app hosting resources for Artifact Registry and a Cloud Run service
 
 ## Prerequisites
@@ -27,6 +28,7 @@ If you enable the pipeline automation slice, the following APIs must also alread
 - Artifact Registry API
 - Cloud Run Admin API
 - Cloud Scheduler API
+- Cloud Monitoring API
 
 ## Files
 
@@ -37,6 +39,7 @@ If you enable the pipeline automation slice, the following APIs must also alread
 - `terraform.tfvars.example`: starter local variable file
 - `future_multi_environment.md`: reference notes for a possible future multi-environment setup
 - `automation.tf`: pipeline automation resources
+- `reporting.tf`: daily reporting job and email notification resources
 - `app_hosting.tf`: optional Streamlit app hosting resources
 
 ## Usage
@@ -76,7 +79,14 @@ terraform apply
 | `pipeline_job_name` | No | `tidingsiq-pipeline` | Cloud Run Job name |
 | `pipeline_job_memory_limit` | No | `2Gi` | Memory limit for the Cloud Run Job container |
 | `pipeline_schedule` | No | `0 */6 * * *` | Cloud Scheduler cron for the pipeline |
-| `pipeline_schedule_paused` | No | `true` | Creates the scheduler job paused by default |
+| `pipeline_schedule_time_zone` | No | `Asia/Kolkata` | Time zone for the pipeline schedule |
+| `pipeline_schedule_paused` | No | `true` | Creates the scheduler job paused by default; set to `false` to activate recurring runs |
+| `enable_pipeline_reporting` | No | `false` | Enables the daily reporting job, reporting scheduler, and Monitoring email notifications |
+| `notification_email_recipient` | No | `""` | Recipient for failure alerts and daily summary notifications |
+| `reporting_job_name` | No | `tidingsiq-pipeline-report` | Cloud Run Job name for the daily summary task |
+| `reporting_scheduler_name` | No | `tidingsiq-pipeline-report-schedule` | Cloud Scheduler job name for the daily summary task |
+| `reporting_schedule` | No | `0 20 * * *` | Cron for the daily summary task |
+| `reporting_schedule_time_zone` | No | `Asia/Kolkata` | Time zone for the daily summary scheduler |
 | `enable_app_hosting` | No | `false` | Enables Artifact Registry and a Cloud Run service for the Streamlit app |
 | `app_artifact_repository_id` | No | `tidingsiq-app` | Artifact Registry repository ID for the app image |
 | `app_container_image` | No | derived | Full image URI for the Streamlit app container |
@@ -111,6 +121,15 @@ If pipeline automation is enabled, Terraform also provisions:
 - a scheduler service account with `roles/run.invoker` on the Cloud Run Job
 - a Cloud Scheduler HTTP job that calls the Cloud Run Jobs API with OAuth
 
+If pipeline reporting is enabled, Terraform also provisions:
+
+- a reporting service account with BigQuery read access on `gold`
+- a reporting Cloud Run Job that emits a daily warehouse summary log
+- a second Cloud Scheduler job for the daily report cadence
+- an email notification channel for Monitoring
+- a Monitoring alert policy for pipeline failures
+- a Monitoring alert policy for daily summary delivery
+
 If app hosting is enabled, Terraform also provisions:
 
 - an Artifact Registry Docker repository for the app image
@@ -121,8 +140,11 @@ Current applied automation state in this project:
 
 - Artifact Registry repository is created
 - Cloud Run Job is created
-- Cloud Scheduler trigger is created in a paused state
+- Cloud Scheduler trigger is active on the configured cadence
 - the pipeline image must already exist in Artifact Registry before apply
+- the email notification channel sends a verification email to the configured recipient
+- the reporting Cloud Run Job is created
+- the daily reporting scheduler is created and active
 - the Streamlit app Artifact Registry repository is created
 - the hosted Streamlit Cloud Run service is created when `enable_app_hosting = true`
 - in the current environment, app hosting can be kept disabled while the UI and security posture are still being finalized
@@ -138,5 +160,6 @@ Current applied automation state in this project:
 - Current retention targets are Bronze 45 days with GCS archive, Silver 90 days, and Gold 180 days.
 - The Bronze archive bucket is now part of Terraform. Export and cleanup operations are still run separately from the pipeline.
 - Pipeline automation remains opt-in in code through `enable_pipeline_automation`, but it is already applied in the current project.
-- Keep the scheduler paused until a manual `gcloud run jobs execute ... --wait` succeeds against the deployed image.
+- Keep the scheduler paused during future rollouts until a manual `gcloud run jobs execute ... --wait` succeeds against the deployed image after any reset or image change.
+- Pipeline reporting uses native Monitoring email notifications, so it does not require a third-party email API secret.
 - App hosting is also opt-in in code through `enable_app_hosting`, and is now applied in the current project.

@@ -18,25 +18,28 @@ Completed:
 - Streamlit app querying Gold only
 - Bronze archive bucket plus initial retention controls
 - pipeline containerization for Cloud Run Jobs
-- applied pipeline automation for Artifact Registry, Cloud Run Job, and paused Cloud Scheduler
+- applied pipeline automation for Artifact Registry, Cloud Run Job, and active Cloud Scheduler
+- daily reporting Cloud Run Job plus Monitoring-based email notifications
 - Streamlit app containerization and Cloud Run hosting path
 
 Operational notes:
 - `bronze_staging` is a supporting operational dataset for the Bronze merge load path
 - the pipeline Cloud Run Job currently uses `2Gi` memory
-- the scheduler remains paused until automation is explicitly enabled for recurring runs
+- the pipeline scheduler now runs every 6 hours in `Asia/Kolkata`
 - a manual Cloud Run execution succeeded on `2026-04-06` after redeploying the updated pipeline image
+- a post-reset manual Cloud Run execution succeeded on `2026-04-07` before the scheduler was activated
 - hosted app deployment is currently disabled in the active environment
 - the latest source finding is that `TranslationInfo` is empty in the sampled landed GKG rows, so `language` remains internal and unresolved rather than part of the serving contract
 - the current Gold default feed is `is_positive_feed_eligible = true` with `happy_factor >= 65`
+- Monitoring email delivery may still require the recipient to confirm the verification email from GCP
 
 ## Next Steps
 
-1. Decide when to unpause the scheduled pipeline runs.
-2. Improve tests, security, and reviewability for final portfolio presentation.
-3. Integrate the final Streamlit UI design.
-4. Finalize architecture and deployment documentation.
-5. Decide whether to deepen scoring beyond title guardrails using validated GKG fields.
+1. Improve tests, security, and reviewability for final portfolio presentation.
+2. Integrate the final Streamlit UI design.
+3. Finalize architecture and deployment documentation.
+4. Decide whether to deepen scoring beyond title guardrails using validated GKG fields.
+5. Decide whether the daily summary job should later move from Monitoring-triggered emails to a richer mail-delivery path.
 
 ## Phases Completed
 
@@ -54,7 +57,6 @@ Operational notes:
 ## Future Work
 
 - Cloud Run deployment for the Streamlit app
-- scheduler unpause and operational run cadence review
 - stronger data quality checks and alerting
 - broader positive-feed QA and rule tuning
 - final documentation polish, including an architecture diagram

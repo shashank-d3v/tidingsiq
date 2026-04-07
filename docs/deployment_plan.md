@@ -20,13 +20,13 @@ Implemented now:
 - Streamlit app running locally against `gold.positive_news_feed`
 - pipeline container path for Cloud Run Job execution
 - applied Terraform automation for Artifact Registry, Cloud Run Job, and Cloud Scheduler
-- scheduler intentionally left paused even though a manual cloud run has now succeeded
+- reporting Cloud Run Job path and Monitoring-based email notifications
+- pipeline scheduler activated after a warehouse reset and successful post-reset smoke test
 - Streamlit app container and Terraform hosting scaffold for Cloud Run service
 - app hosting path validated once in Cloud Run and then disabled again in the active environment
 
 Not implemented yet:
 
-- unpaused scheduled cloud execution for the pipeline
 - active hosted cloud deployment for the Streamlit app
 - container build and release flow in GCP
 
@@ -45,6 +45,12 @@ Recommended trigger:
 Recommended flow:
 
 `Cloud Scheduler -> Cloud Run Job -> bruin run pipeline/bruin/pipeline.yml -> BigQuery`
+
+Current cadence target:
+
+- every 6 hours
+- timezone: `Asia/Kolkata`
+- target run times: `00:00`, `06:00`, `12:00`, `18:00` IST
 
 Why this fits:
 
@@ -74,14 +80,33 @@ Current prep work already in the repo:
 - a container entrypoint that writes `.bruin.yml` from environment variables
 - a default container command that runs `bruin run pipeline/bruin/pipeline.yml`
 - Terraform resources for the Artifact Registry repository, Cloud Run Job, and Cloud Scheduler trigger
-- an applied Cloud Run Job and a paused Cloud Scheduler job in the current project
+- an applied Cloud Run Job and an active Cloud Scheduler job in the current project
 
 Current rollout boundary:
 
-- the scheduler is still paused by design
+- the scheduler is now active on the configured cadence
 - a manual Cloud Run execution succeeded on `2026-04-06`, confirming the deployed pipeline can run end to end when the job image is current
+- a manual Cloud Run execution also succeeded after the warehouse reset on `2026-04-07`, confirming the active scheduled image can rebuild the warehouse from empty state
 - manual Cloud Run execution should still stay the first smoke check after image changes
 - the pipeline now defaults to the documented HTTP GDELT feed, so SSL-verify overrides should not be the normal runtime path
+- a warehouse reset should happen before regular scheduled execution is activated for the clean-start rollout
+
+### 1A. Reporting Runtime
+
+Recommended target:
+
+- separate Cloud Run Job
+
+Recommended flow:
+
+`Cloud Scheduler -> Cloud Run Job -> query BigQuery metrics -> emit DAILY_PIPELINE_SUMMARY log -> Monitoring email`
+
+Current implementation choice:
+
+- use native Monitoring email notifications for both:
+  - immediate pipeline failure alerts
+  - daily summary delivery
+- avoid a third-party email API dependency in this project phase
 
 ### 2. Application Runtime
 
@@ -145,9 +170,9 @@ The app hosting slice is implemented and can be reactivated quickly, but it is i
 ## Suggested Delivery Order
 
 1. Retention and archive operations for Bronze, Silver, and Gold
-2. Unpause the Cloud Scheduler job only after repeated manual Cloud Run executions are clean
-3. Review whether the hosted Streamlit app should stay public or gain an auth layer
-4. CI or release workflow for image build and deployment
+1. Verify the Monitoring email recipient has confirmed any verification email
+2. Review whether the hosted Streamlit app should stay public or gain an auth layer
+3. CI or release workflow for image build and deployment
 
 ## Open Questions
 

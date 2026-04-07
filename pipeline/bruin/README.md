@@ -183,6 +183,12 @@ The entrypoint writes a local `.bruin.yml` inside the container from environment
 
 The image now initializes its own minimal git repository at build time so Bruin can resolve the workspace root without requiring the host repository to be bind-mounted at runtime.
 
+The same image now also supports the daily reporting Cloud Run Job, which runs:
+
+```bash
+python3 scripts/daily_pipeline_report.py
+```
+
 Current cloud runtime note:
 
 - if Cloud Run still shows source-fetch issues, review the configured base feed URL before reintroducing any SSL workaround

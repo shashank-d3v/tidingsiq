@@ -114,7 +114,7 @@ The app should remain thin. Any future scheduled execution of the Bruin pipeline
 4. Bruin SQL builds `gold.positive_news_feed`, including `happy_factor`.
 5. Bruin SQL maintains `gold.positive_feed_guardrail_terms`, which supplies the title-rule guardrails used by Gold.
 6. Streamlit queries Gold and returns filtered results to the user.
-7. The pipeline can run locally or through the deployed Cloud Run Job, with Cloud Scheduler kept paused until the cloud execution path is stable.
+7. The pipeline can run locally or through the deployed Cloud Run Job, with the Cloud Scheduler cadence activated only after a successful manual smoke test against the deployed image.
 
 ## Data Model Strategy
 

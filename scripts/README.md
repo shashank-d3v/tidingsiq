@@ -46,3 +46,55 @@ Requirements:
 
 This script is the current manual Bronze retention path. Scheduling it in GCP belongs to a later automation phase.
 
+## `daily_pipeline_report.py`
+
+Builds a compact daily warehouse-health summary from:
+
+- `gold.pipeline_run_metrics`
+- `gold.positive_news_feed`
+
+The script prints:
+
+- one JSON payload for machine-readable logs
+- one compact line prefixed with `DAILY_PIPELINE_SUMMARY` for Cloud Monitoring log-match alerts
+
+This script is designed to run inside the pipeline container as a separate Cloud Run Job.
+
+Example local run:
+
+```bash
+python3 scripts/daily_pipeline_report.py
+```
+
+Environment variables:
+
+- `TIDINGSIQ_GCP_PROJECT` or `GOOGLE_CLOUD_PROJECT`
+- optional `TIDINGSIQ_GOLD_FEED_TABLE`
+- optional `TIDINGSIQ_GOLD_METRICS_TABLE`
+
+Requirements:
+
+- Google Application Default Credentials or equivalent auth
+- `google-cloud-bigquery` available in the active Python environment
+
+## `reset_warehouse.sh`
+
+Performs the documented warehouse-only reset for:
+
+- `bronze.gdelt_news_raw`
+- `silver.gdelt_news_refined`
+- `gold.positive_news_feed`
+- `gold.pipeline_run_metrics`
+- any residual tables in `bronze_staging`
+
+It intentionally preserves:
+
+- `gold.positive_feed_guardrail_terms`
+- all datasets and infrastructure
+- archived Bronze objects in GCS
+
+Example:
+
+```bash
+scripts/reset_warehouse.sh tidingsiq-dev
+```
