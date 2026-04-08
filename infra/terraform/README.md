@@ -81,12 +81,12 @@ terraform apply
 | `pipeline_schedule` | No | `0 */6 * * *` | Cloud Scheduler cron for the pipeline |
 | `pipeline_schedule_time_zone` | No | `Asia/Kolkata` | Time zone for the pipeline schedule |
 | `pipeline_schedule_paused` | No | `true` | Creates the scheduler job paused by default; set to `false` to activate recurring runs |
-| `enable_pipeline_reporting` | No | `false` | Enables the daily reporting job, reporting scheduler, and Monitoring email notifications |
-| `notification_email_recipient` | No | `""` | Recipient for failure alerts and daily summary notifications |
-| `reporting_job_name` | No | `tidingsiq-pipeline-report` | Cloud Run Job name for the daily summary task |
-| `reporting_scheduler_name` | No | `tidingsiq-pipeline-report-schedule` | Cloud Scheduler job name for the daily summary task |
-| `reporting_schedule` | No | `0 20 * * *` | Cron for the daily summary task |
-| `reporting_schedule_time_zone` | No | `Asia/Kolkata` | Time zone for the daily summary scheduler |
+| `enable_pipeline_reporting` | No | `false` | Enables the reporting job, reporting scheduler, and Monitoring email notifications |
+| `notification_email_recipient` | No | `""` | Recipient for failure alerts and per-run summary notifications |
+| `reporting_job_name` | No | `tidingsiq-pipeline-report` | Cloud Run Job name for the reporting task |
+| `reporting_scheduler_name` | No | `tidingsiq-pipeline-report-schedule` | Cloud Scheduler job name for the reporting task |
+| `reporting_schedule` | No | `20 */6 * * *` | Cron for the reporting task, aligned 20 minutes after each pipeline window |
+| `reporting_schedule_time_zone` | No | `Asia/Kolkata` | Time zone for the reporting scheduler |
 | `enable_app_hosting` | No | `false` | Enables Artifact Registry and a Cloud Run service for the Streamlit app |
 | `app_artifact_repository_id` | No | `tidingsiq-app` | Artifact Registry repository ID for the app image |
 | `app_container_image` | No | derived | Full image URI for the Streamlit app container |

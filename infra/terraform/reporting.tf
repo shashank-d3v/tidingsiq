@@ -115,7 +115,7 @@ resource "google_cloud_scheduler_job" "reporting" {
   project          = var.project_id
   region           = local.automation_region
   name             = var.reporting_scheduler_name
-  description      = "Daily summary execution for the TidingsIQ warehouse."
+  description      = "Post-run summary execution for the TidingsIQ warehouse."
   schedule         = var.reporting_schedule
   time_zone        = var.reporting_schedule_time_zone
   paused           = false

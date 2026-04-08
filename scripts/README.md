@@ -44,7 +44,7 @@ Requirements:
 - `google-cloud-bigquery` available in the active Python environment
 - pipeline service account or operator identity with access to the Bronze archive bucket
 
-This script is the current manual Bronze retention path. Scheduling it in GCP belongs to a later automation phase.
+This script is the current manual Bronze retention path. No recurring retention automation is configured yet.
 
 ## `daily_pipeline_report.py`
 

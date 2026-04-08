@@ -157,7 +157,7 @@ variable "pipeline_schedule_paused" {
 }
 
 variable "enable_pipeline_reporting" {
-  description = "When true, provisions the daily reporting Cloud Run Job, scheduler, and email notification resources."
+  description = "When true, provisions the pipeline reporting Cloud Run Job, scheduler, and email notification resources."
   type        = bool
   default     = false
 }
@@ -169,25 +169,25 @@ variable "notification_email_recipient" {
 }
 
 variable "reporting_job_name" {
-  description = "Cloud Run Job name for the daily TidingsIQ reporting task."
+  description = "Cloud Run Job name for the TidingsIQ reporting task."
   type        = string
   default     = "tidingsiq-pipeline-report"
 }
 
 variable "reporting_scheduler_name" {
-  description = "Cloud Scheduler job name for the daily reporting task."
+  description = "Cloud Scheduler job name for the reporting task."
   type        = string
   default     = "tidingsiq-pipeline-report-schedule"
 }
 
 variable "reporting_schedule" {
-  description = "Cron schedule for the daily reporting job."
+  description = "Cron schedule for the reporting job."
   type        = string
-  default     = "0 20 * * *"
+  default     = "20 */6 * * *"
 }
 
 variable "reporting_schedule_time_zone" {
-  description = "Time zone for the daily reporting Cloud Scheduler cron expression."
+  description = "Time zone for the reporting Cloud Scheduler cron expression."
   type        = string
   default     = "Asia/Kolkata"
 }
