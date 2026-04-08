@@ -111,5 +111,6 @@ Historical contrast from the old English-only Gold contract:
 ## Implication For Downstream Modeling
 
 - `language` should use native `TranslationInfo` first and deterministic inference second, while preserving explicit provenance
-- `language` should not be part of the Gold serving contract in the current project state.
+- Gold can expose `language` plus resolution metadata as informational fields, but they should not act as serving gates in the current project state
+- Gold can expose `mentioned_country` as article geography metadata, but it should not be presented as publisher country
 - Gold should serve scored canonical rows without a language gate.

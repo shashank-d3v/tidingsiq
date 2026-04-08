@@ -171,6 +171,11 @@ One scored retained article record per canonical article candidate.
 | serving_date | DATE | Yes | Derived | Partition and lookback field derived from `DATE(COALESCE(published_at, ingested_at))` |
 | published_at | TIMESTAMP | No | Silver | Display and filter field |
 | source_name | STRING | No | Silver | Display field |
+| language | STRING | Yes | Silver resolved | Detected article language carried forward as informational metadata, not a serving gate |
+| language_resolution_status | STRING | Yes | Silver resolved | `native`, `inferred`, or `undetermined` for the detected article language |
+| mentioned_country_code | STRING | Yes | Silver resolved | Article-mentioned geography country code carried forward as informational metadata |
+| mentioned_country_name | STRING | Yes | Silver resolved | Article-mentioned geography country name carried forward as informational metadata |
+| mentioned_country_resolution_status | STRING | Yes | Silver resolved | `v2_locations` or `undetermined` for the article-mentioned geography |
 | title | STRING | No | Silver | Display field |
 | url | STRING | No | Silver | Link-out target |
 | tone_score | FLOAT64 | No | Silver | Exposed for transparency and debugging |
@@ -190,6 +195,7 @@ One scored retained article record per canonical article candidate.
 - `source_record_id` must always be populated
 - `article_id` must be unique
 - `serving_date` must always be populated
+- `language`, `language_resolution_status`, `mentioned_country_code`, `mentioned_country_name`, and `mentioned_country_resolution_status` must always be populated
 - `base_happy_factor` and `happy_factor` must always be between `0` and `100`
 - `is_positive_feed_eligible` must always be populated
 - `positive_guardrail_version` must always be populated
@@ -197,6 +203,7 @@ One scored retained article record per canonical article candidate.
 - eligible rows should not carry hard deny hits
 - eligible rows should not carry unresolved soft deny hits
 - the app should not depend on unresolved upstream-derived signal columns being present in every release
+- language and article geography are informational metadata in Gold; they should not be treated as publisher-origin fields or feed-eligibility gates
 - Gold should retain 180 days of queryable history in BigQuery
 - current implementation keeps only canonical Silver rows where `is_duplicate = false`
 - current implementation retains scored canonical rows even when they are not feed-eligible so the guardrail decision remains explainable

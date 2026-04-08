@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
 from datetime import datetime, timedelta, timezone
 
 
@@ -28,22 +29,35 @@ def build_feed_query(
 ) -> tuple[str, list[tuple[str, str, object]]]:
     threshold = _clamp_float(config.min_happy_factor, 0.0, 100.0)
     lookback_days = _clamp_int(config.lookback_days, 1, 30)
-    row_limit = _clamp_int(config.row_limit, 1, 100)
+    row_limit = _clamp_int(config.row_limit, 1, 200)
     eligible_only = bool(config.eligible_only)
     now_utc = now_utc or datetime.now(timezone.utc)
     published_after = now_utc - timedelta(days=lookback_days)
 
     sql = f"""
 select
+  source_record_id,
   article_id,
   serving_date,
   published_at,
   source_name,
+  language,
+  language_resolution_status,
+  mentioned_country_code,
+  mentioned_country_name,
+  mentioned_country_resolution_status,
   title,
   url,
   tone_score,
+  base_happy_factor,
   happy_factor,
   happy_factor_version,
+  is_positive_feed_eligible,
+  positive_guardrail_version,
+  exclusion_reason,
+  allow_hit_count,
+  soft_deny_hit_count,
+  hard_deny_hit_count,
   ingested_at
 from `{config.table_fqn}`
 where happy_factor >= @min_happy_factor
@@ -97,3 +111,192 @@ def summarize_feed(rows: list[dict[str, object]]) -> dict[str, float | int]:
         "max_happy_factor": round(max(happy_factors), 2) if happy_factors else 0.0,
         "source_count": len(source_names),
     }
+
+
+def split_feed_rows(
+    rows: list[dict[str, object]],
+) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    recommended = [
+        row for row in rows if bool(row.get("is_positive_feed_eligible")) is True
+    ]
+    more_to_explore = [
+        row for row in rows if row.get("exclusion_reason") == "below_threshold"
+    ]
+    return recommended, more_to_explore
+
+
+def build_timeline_data(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    grouped: dict[str, dict[str, object]] = {}
+
+    for row in rows:
+        label = _coerce_serving_date_label(row.get("serving_date"))
+        if label is None:
+            continue
+        current = grouped.setdefault(
+            label,
+            {
+                "serving_date": label,
+                "story_count": 0,
+                "eligible_count": 0,
+                "happy_total": 0.0,
+                "happy_count": 0,
+            },
+        )
+        current["story_count"] = int(current["story_count"]) + 1
+        if bool(row.get("is_positive_feed_eligible")) is True:
+            current["eligible_count"] = int(current["eligible_count"]) + 1
+        happy_factor = _coerce_float(row.get("happy_factor"))
+        if happy_factor is not None:
+            current["happy_total"] = float(current["happy_total"]) + happy_factor
+            current["happy_count"] = int(current["happy_count"]) + 1
+
+    timeline = []
+    for label in sorted(grouped.keys()):
+        point = grouped[label]
+        happy_count = int(point["happy_count"])
+        timeline.append(
+            {
+                "serving_date": label,
+                "story_count": int(point["story_count"]),
+                "eligible_count": int(point["eligible_count"]),
+                "avg_happy_factor": round(
+                    float(point["happy_total"]) / happy_count,
+                    2,
+                )
+                if happy_count
+                else 0.0,
+            }
+        )
+    return timeline
+
+
+def build_source_rankings(
+    rows: list[dict[str, object]],
+    *,
+    limit: int = 8,
+) -> list[dict[str, object]]:
+    grouped: dict[str, dict[str, object]] = {}
+
+    for row in rows:
+        if bool(row.get("is_positive_feed_eligible")) is not True:
+            continue
+        source_name = str(row.get("source_name") or "Unknown source").strip()
+        current = grouped.setdefault(
+            source_name,
+            {
+                "source_name": source_name,
+                "story_count": 0,
+                "happy_total": 0.0,
+            },
+        )
+        current["story_count"] = int(current["story_count"]) + 1
+        happy_factor = _coerce_float(row.get("happy_factor"))
+        if happy_factor is not None:
+            current["happy_total"] = float(current["happy_total"]) + happy_factor
+
+    rankings = [
+        {
+            "source_name": source_name,
+            "story_count": int(values["story_count"]),
+            "avg_happy_factor": round(
+                float(values["happy_total"]) / int(values["story_count"]),
+                2,
+            )
+            if int(values["story_count"])
+            else 0.0,
+        }
+        for source_name, values in grouped.items()
+    ]
+    rankings.sort(
+        key=lambda row: (
+            -int(row["story_count"]),
+            -float(row["avg_happy_factor"]),
+            str(row["source_name"]),
+        )
+    )
+    return rankings[:limit]
+
+
+def build_score_distribution(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    buckets = [
+        ("Below 65", None, 65.0),
+        ("65-70", 65.0, 70.0),
+        ("70-75", 70.0, 75.0),
+        ("75-80", 75.0, 80.0),
+        ("80-85", 80.0, 85.0),
+        ("85+", 85.0, None),
+    ]
+    counts = {label: 0 for label, _, _ in buckets}
+
+    for row in rows:
+        happy_factor = _coerce_float(row.get("happy_factor"))
+        if happy_factor is None:
+            continue
+        for label, low, high in buckets:
+            if low is None and happy_factor < float(high):
+                counts[label] += 1
+                break
+            if high is None and happy_factor >= float(low):
+                counts[label] += 1
+                break
+            if low is not None and high is not None and low <= happy_factor < high:
+                counts[label] += 1
+                break
+
+    return [{"bucket": label, "story_count": counts[label]} for label, _, _ in buckets]
+
+
+def build_eligibility_breakdown(
+    rows: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    labels = {
+        "eligible": "Eligible",
+        "below_threshold": "Below Threshold",
+        "hard_deny_term": "Hard Deny Term",
+        "soft_deny_without_exception": "Soft Deny Without Exception",
+        "missing_title": "Missing Title",
+        "missing_url": "Missing URL",
+    }
+    counts = {key: 0 for key in labels}
+
+    for row in rows:
+        if bool(row.get("is_positive_feed_eligible")) is True:
+            counts["eligible"] += 1
+            continue
+        reason = str(row.get("exclusion_reason") or "")
+        if reason in counts:
+            counts[reason] += 1
+
+    return [{"bucket": labels[key], "story_count": counts[key]} for key in labels]
+
+
+def paginate_rows(
+    rows: list[dict[str, object]],
+    *,
+    page_number: int,
+    page_size: int,
+) -> tuple[list[dict[str, object]], int, int, int]:
+    if page_size <= 0:
+        raise ValueError("page_size must be positive")
+    total_rows = len(rows)
+    total_pages = max(1, (total_rows + page_size - 1) // page_size)
+    current_page = max(1, min(page_number, total_pages))
+    start_index = (current_page - 1) * page_size
+    end_index = start_index + page_size
+    return rows[start_index:end_index], current_page, total_pages, total_rows
+
+
+def _coerce_float(value: object) -> float | None:
+    if value is None:
+        return None
+    return float(value)
+
+
+def _coerce_serving_date_label(value: object) -> str | None:
+    if isinstance(value, datetime):
+        return value.date().isoformat()
+    if isinstance(value, date):
+        return value.isoformat()
+    if isinstance(value, str) and value:
+        return value
+    return None

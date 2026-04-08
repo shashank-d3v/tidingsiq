@@ -113,6 +113,7 @@ Current implementation notes:
 - Silver retains unresolved positive and negative signal placeholders internally, but Gold does not expose them until the mappings are validated.
 - Bronze and Silver now treat `language` as native-first and inferred-second, with explicit resolution status
 - Bronze and Silver use `mentioned_country` for article geography from `V2Locations`; they do not model publisher country
+- Gold now carries `language`, `language_resolution_status`, `mentioned_country_code`, `mentioned_country_name`, and `mentioned_country_resolution_status` as informational metadata only
 - Silver retains the most recent 90 days in-model.
 - Gold retains the most recent 180 days in-model.
 - Silver partitions on `ingested_at` and clusters by `dedup_key`, `source_domain`, and `language`.
@@ -143,8 +144,8 @@ Current conclusion:
 - `source_domain` is already a working derived field in Silver
 - `language` now uses native `TranslationInfo` first and title-based inference second
 - `mentioned_country` now represents article geography from `V2Locations`
-- `language` should still not be treated as a serving-layer dependency in the current contract
-- removing `language` from Gold restores a populated serving table without inventing new upstream mappings
+- Gold can carry language and article-geography metadata without using them as serving-layer dependencies
+- those Gold metadata fields should not be presented as publisher country or source language
 - the deployed Cloud Run path is now validated end to end; the current quality gap is upstream metadata sparsity, not pipeline execution
 - the default app-facing feed should now use `is_positive_feed_eligible = true`, not score alone
 - the current default serving threshold is `65`, softened from the initial `70`

@@ -61,6 +61,26 @@ columns:
     type: timestamp
   - name: source_name
     type: string
+  - name: language
+    type: string
+    checks:
+      - name: not_null
+  - name: language_resolution_status
+    type: string
+    checks:
+      - name: not_null
+  - name: mentioned_country_code
+    type: string
+    checks:
+      - name: not_null
+  - name: mentioned_country_name
+    type: string
+    checks:
+      - name: not_null
+  - name: mentioned_country_resolution_status
+    type: string
+    checks:
+      - name: not_null
   - name: title
     type: string
   - name: url
@@ -127,6 +147,11 @@ with canonical_articles as (
     date(coalesce(published_at, ingested_at)) as serving_date,
     published_at,
     source_name,
+    language,
+    language_resolution_status,
+    mentioned_country_code,
+    mentioned_country_name,
+    mentioned_country_resolution_status,
     title,
     url,
     tone_score,
@@ -151,6 +176,11 @@ normalized_articles as (
     serving_date,
     published_at,
     source_name,
+    language,
+    language_resolution_status,
+    mentioned_country_code,
+    mentioned_country_name,
+    mentioned_country_resolution_status,
     title,
     url,
     coalesce(tone_score, 0.0) as tone_score,
@@ -188,6 +218,11 @@ scored as (
     article.serving_date,
     article.published_at,
     article.source_name,
+    article.language,
+    article.language_resolution_status,
+    article.mentioned_country_code,
+    article.mentioned_country_name,
+    article.mentioned_country_resolution_status,
     article.title,
     article.url,
     article.tone_score,
@@ -213,6 +248,11 @@ finalized as (
     serving_date,
     published_at,
     source_name,
+    language,
+    language_resolution_status,
+    mentioned_country_code,
+    mentioned_country_name,
+    mentioned_country_resolution_status,
     title,
     url,
     tone_score,
@@ -282,6 +322,11 @@ select
   serving_date,
   published_at,
   source_name,
+  language,
+  language_resolution_status,
+  mentioned_country_code,
+  mentioned_country_name,
+  mentioned_country_resolution_status,
   title,
   url,
   tone_score,

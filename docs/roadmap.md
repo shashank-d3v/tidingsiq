@@ -13,7 +13,7 @@ Completed:
 - Gold guardrailed `happy_factor` scoring with feed eligibility metadata
 - Gold guardrail reference table for title allow/deny rules
 - finalized GDELT source findings and Bronze field-mapping evidence
-- Gold serving contract no longer depends on `language`
+- Gold serving contract exposes detected language and article-mentioned geography as informational metadata only
 - Gold run-metrics history for operational visibility
 - Streamlit app querying Gold only
 - Bronze archive bucket plus initial retention controls
@@ -29,7 +29,7 @@ Operational notes:
 - a manual Cloud Run execution succeeded on `2026-04-06` after redeploying the updated pipeline image
 - a post-reset manual Cloud Run execution succeeded on `2026-04-07` before the scheduler was activated
 - hosted app deployment is currently disabled in the active environment
-- the latest source finding is that `TranslationInfo` is empty in the sampled landed GKG rows, so `language` remains internal and unresolved rather than part of the serving contract
+- the latest source finding is that `TranslationInfo` is empty in the sampled landed GKG rows, so Gold language metadata still depends heavily on deterministic inference and should remain informational rather than a serving gate
 - the current Gold default feed is `is_positive_feed_eligible = true` with `happy_factor >= 65`
 - Monitoring email delivery may still require the recipient to confirm the verification email from GCP
 

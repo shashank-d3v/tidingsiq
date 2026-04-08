@@ -1,17 +1,23 @@
 # TidingsIQ Streamlit App
 
-This app is the Phase 6 frontend for TidingsIQ. It queries only `gold.positive_news_feed` and exposes a small set of user-facing controls:
+This app is the local-first frontend for TidingsIQ. It queries only `gold.positive_news_feed` and renders three user-facing sections:
+
+- `The Brief` for the editorial feed
+- `Pulse` for live feed analytics
+- `Methodology` for the warehouse and scoring explainer
+
+The sidebar currently exposes a small set of user-facing controls:
 
 - minimum `happy_factor`
 - lookback window in days
 - result row limit
-- eligible-feed-only toggle, enabled by default
 
 Current serving constraint:
 
-- Gold serves the canonical scored feed without using `language` as part of the public contract
-- `language` remains an internal Bronze/Silver evaluation field until the GKG source provides something defensible
-- the app defaults to `is_positive_feed_eligible = true` so the default feed reflects title guardrails as well as score
+- Gold serves the canonical scored feed and now carries detected language plus article-mentioned geography as informational metadata
+- these fields should not be labeled as source language, publisher country, or country of publication
+- the app should not use language or article geography as serving gates in the current contract
+- the app surfaces `Recommended` stories from eligible rows and `More To Explore` from `below_threshold` rows only
 - the current default minimum score is `65`, softened from the initial `70`
 
 ## Local Run
@@ -84,6 +90,11 @@ Current expected columns:
 - `serving_date`
 - `published_at`
 - `source_name`
+- `language`
+- `language_resolution_status`
+- `mentioned_country_code`
+- `mentioned_country_name`
+- `mentioned_country_resolution_status`
 - `title`
 - `url`
 - `tone_score`
