@@ -3,6 +3,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from datetime import datetime, timedelta, timezone
+import re
+from urllib.parse import urlsplit, urlunsplit
+
+OPTIONAL_STRING_COLUMNS = {
+    "language",
+    "language_resolution_status",
+    "mentioned_country_code",
+    "mentioned_country_name",
+    "mentioned_country_resolution_status",
+}
 
 
 @dataclass(frozen=True)
@@ -26,6 +36,7 @@ def build_feed_query(
     config: FeedQueryConfig,
     *,
     now_utc: datetime | None = None,
+    available_columns: set[str] | None = None,
 ) -> tuple[str, list[tuple[str, str, object]]]:
     threshold = _clamp_float(config.min_happy_factor, 0.0, 100.0)
     lookback_days = _clamp_int(config.lookback_days, 1, 30)
@@ -34,39 +45,45 @@ def build_feed_query(
     now_utc = now_utc or datetime.now(timezone.utc)
     published_after = now_utc - timedelta(days=lookback_days)
 
-    sql = f"""
+    select_columns = _build_select_columns(available_columns)
+
+    if eligible_only:
+        sql = f"""
 select
-  source_record_id,
-  article_id,
-  serving_date,
-  published_at,
-  source_name,
-  language,
-  language_resolution_status,
-  mentioned_country_code,
-  mentioned_country_name,
-  mentioned_country_resolution_status,
-  title,
-  url,
-  tone_score,
-  base_happy_factor,
-  happy_factor,
-  happy_factor_version,
-  is_positive_feed_eligible,
-  positive_guardrail_version,
-  exclusion_reason,
-  allow_hit_count,
-  soft_deny_hit_count,
-  hard_deny_hit_count,
-  ingested_at
+{select_columns}
 from `{config.table_fqn}`
 where happy_factor >= @min_happy_factor
   and serving_date >= date(@published_after)
-"""
-
-    if eligible_only:
-        sql += """
   and is_positive_feed_eligible = true
+"""
+    else:
+        sql = f"""
+with recommended as (
+  select
+{select_columns}
+  from `{config.table_fqn}`
+  where happy_factor >= @min_happy_factor
+    and serving_date >= date(@published_after)
+    and is_positive_feed_eligible = true
+  order by happy_factor desc, coalesce(published_at, ingested_at) desc, article_id desc
+  limit @row_limit
+),
+more_to_explore as (
+  select
+{select_columns}
+  from `{config.table_fqn}`
+  where serving_date >= date(@published_after)
+    and exclusion_reason = 'below_threshold'
+  order by happy_factor desc, coalesce(published_at, ingested_at) desc, article_id desc
+  limit @row_limit
+)
+select
+  *
+from recommended
+union all
+select
+  *
+from more_to_explore
 """
 
     parameters: list[tuple[str, str, object]] = [
@@ -75,12 +92,50 @@ where happy_factor >= @min_happy_factor
         ("row_limit", "INT64", row_limit),
     ]
 
-    sql += """
+    if eligible_only:
+        sql += """
 order by happy_factor desc, coalesce(published_at, ingested_at) desc, article_id desc
 limit @row_limit
 """
 
     return sql.strip(), parameters
+
+
+def _build_select_columns(available_columns: set[str] | None) -> str:
+    ordered_columns = [
+        "source_record_id",
+        "article_id",
+        "serving_date",
+        "published_at",
+        "source_name",
+        "language",
+        "language_resolution_status",
+        "mentioned_country_code",
+        "mentioned_country_name",
+        "mentioned_country_resolution_status",
+        "title",
+        "url",
+        "tone_score",
+        "base_happy_factor",
+        "happy_factor",
+        "happy_factor_version",
+        "is_positive_feed_eligible",
+        "positive_guardrail_version",
+        "exclusion_reason",
+        "allow_hit_count",
+        "soft_deny_hit_count",
+        "hard_deny_hit_count",
+        "ingested_at",
+    ]
+    lines = []
+    for column in ordered_columns:
+        if available_columns is None or column in available_columns:
+            lines.append(f"  {column}")
+        elif column in OPTIONAL_STRING_COLUMNS:
+            lines.append(f"  cast(null as string) as {column}")
+        else:
+            lines.append(f"  {column}")
+    return ",\n".join(lines)
 
 
 def summarize_feed(rows: list[dict[str, object]]) -> dict[str, float | int]:
@@ -116,6 +171,7 @@ def summarize_feed(rows: list[dict[str, object]]) -> dict[str, float | int]:
 def split_feed_rows(
     rows: list[dict[str, object]],
 ) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    rows = dedupe_story_rows(rows)
     recommended = [
         row for row in rows if bool(row.get("is_positive_feed_eligible")) is True
     ]
@@ -123,6 +179,68 @@ def split_feed_rows(
         row for row in rows if row.get("exclusion_reason") == "below_threshold"
     ]
     return recommended, more_to_explore
+
+
+def dedupe_story_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    deduped: list[dict[str, object]] = []
+    seen_keys: set[tuple[str, str]] = set()
+
+    for row in rows:
+        key = _story_dedupe_key(row)
+        if not key[1]:
+            deduped.append(row)
+            continue
+        if key in seen_keys:
+            continue
+        seen_keys.add(key)
+        deduped.append(row)
+
+    return deduped
+
+
+def _story_dedupe_key(row: dict[str, object]) -> tuple[str, str]:
+    normalized_title = _normalize_story_title(row.get("title"))
+    if normalized_title:
+        return ("title", normalized_title)
+
+    normalized_url = _normalize_story_url(row.get("url"))
+    if normalized_url:
+        return ("url", normalized_url)
+
+    source_name = str(row.get("source_name") or "").strip().lower()
+    article_id = str(row.get("article_id") or "").strip().lower()
+    return ("fallback", f"{source_name}:{article_id}")
+
+
+def _normalize_story_title(value: object) -> str:
+    title = str(value or "").strip().lower()
+    if not title:
+        return ""
+
+    title = re.sub(r"\s+\|\s+[^|]+$", "", title)
+    title = re.sub(r"\b\d{4,}\b", " ", title)
+    title = re.sub(r"[^\w\s]", " ", title)
+    title = re.sub(r"\s+", " ", title)
+    return title.strip()
+
+
+def _normalize_story_url(value: object) -> str:
+    raw_url = str(value or "").strip().lower()
+    if not raw_url:
+        return ""
+
+    parts = urlsplit(raw_url)
+    normalized_path = re.sub(r"/+$", "", parts.path or "")
+    normalized = urlunsplit(
+        (
+            parts.scheme,
+            parts.netloc,
+            normalized_path,
+            "",
+            "",
+        )
+    )
+    return normalized.strip()
 
 
 def build_timeline_data(rows: list[dict[str, object]]) -> list[dict[str, object]]:

@@ -10,6 +10,7 @@ from app.streamlit.query_builder import (
     build_score_distribution,
     build_source_rankings,
     build_timeline_data,
+    dedupe_story_rows,
     paginate_rows,
     split_feed_rows,
     summarize_feed,
@@ -54,6 +55,34 @@ class QueryBuilderTest(unittest.TestCase):
         self.assertIn("mentioned_country_name", sql.lower())
         self.assertNotIn("language", parameter_names)
 
+    def test_build_feed_query_falls_back_for_missing_optional_metadata_columns(self) -> None:
+        sql, _ = build_feed_query(
+            FeedQueryConfig(table_fqn="tidingsiq-dev.gold.positive_news_feed"),
+            available_columns={
+                "source_record_id",
+                "article_id",
+                "serving_date",
+                "published_at",
+                "source_name",
+                "title",
+                "url",
+                "tone_score",
+                "base_happy_factor",
+                "happy_factor",
+                "happy_factor_version",
+                "is_positive_feed_eligible",
+                "positive_guardrail_version",
+                "exclusion_reason",
+                "allow_hit_count",
+                "soft_deny_hit_count",
+                "hard_deny_hit_count",
+                "ingested_at",
+            },
+        )
+
+        self.assertIn("cast(null as string) as language", sql.lower())
+        self.assertIn("cast(null as string) as mentioned_country_name", sql.lower())
+
     def test_build_feed_query_can_disable_eligibility_filter(self) -> None:
         sql, _ = build_feed_query(
             FeedQueryConfig(
@@ -62,7 +91,8 @@ class QueryBuilderTest(unittest.TestCase):
             )
         )
 
-        self.assertNotIn("is_positive_feed_eligible = true", sql)
+        self.assertIn("with recommended as", sql.lower())
+        self.assertIn("exclusion_reason = 'below_threshold'", sql.lower())
 
     def test_summarize_feed_returns_expected_metrics(self) -> None:
         summary = summarize_feed(
@@ -97,6 +127,43 @@ class QueryBuilderTest(unittest.TestCase):
 
         self.assertEqual([row["article_id"] for row in recommended], ["a"])
         self.assertEqual([row["article_id"] for row in more_to_explore], ["b"])
+
+    def test_dedupe_story_rows_keeps_first_story_variant(self) -> None:
+        deduped = dedupe_story_rows(
+            [
+                {
+                    "article_id": "a",
+                    "source_name": "iheart.com",
+                    "title": "Jennifer Lopez Celebrates 'New Beginnings' With Easter Selfies",
+                },
+                {
+                    "article_id": "b",
+                    "source_name": "iheart.com",
+                    "title": "Jennifer Lopez Celebrates 'New Beginnings' With Easter Selfies | Magic 107.7.",
+                },
+                {
+                    "article_id": "c",
+                    "source_name": "justjared.com",
+                    "title": (
+                        "Netflix Launches Interactive Playground App for Kids to Play Games & Explore "
+                        "with Beloved Characters: Photo 5304735 | Dr Seuss, Ms. Rachel, Netflix, "
+                        "Peppa Pig, Sesame Street Photos"
+                    ),
+                },
+                {
+                    "article_id": "d",
+                    "source_name": "justjared.com",
+                    "title": (
+                        "Netflix Launches Interactive Playground App for Kids to Play Games & Explore "
+                        "with Beloved Characters: Photo 5304749 | Dr Seuss, Ms. Rachel, Netflix, "
+                        "Peppa Pig, Sesame Street Photos"
+                    ),
+                },
+                {"article_id": "e", "source_name": "Source B", "title": "Different"},
+            ]
+        )
+
+        self.assertEqual([row["article_id"] for row in deduped], ["a", "c", "e"])
 
     def test_build_timeline_data_aggregates_story_and_eligibility_counts(self) -> None:
         timeline = build_timeline_data(
