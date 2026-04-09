@@ -15,7 +15,9 @@ PAGE_PULSE: Final[str] = "Pulse"
 PAGE_METHODOLOGY: Final[str] = "Methodology"
 
 LOOKBACK_OPTIONS: Final[list[int]] = [1, 3, 7, 30]
-RESULT_LIMIT_OPTIONS: Final[list[int]] = [25, 50, 100, 200]
+
+# App-side safety cap for BigQuery queries. This is not a user-facing control.
+QUERY_ROW_LIMIT: Final[int] = 200
 
 RECOMMENDED_PAGE_SIZE: Final[int] = 10
 EXPLORE_PAGE_SIZE: Final[int] = 6

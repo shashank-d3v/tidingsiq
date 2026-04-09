@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 import re
 from urllib.parse import urlsplit, urlunsplit
 
@@ -35,15 +35,12 @@ def _clamp_int(value: int, low: int, high: int) -> int:
 def build_feed_query(
     config: FeedQueryConfig,
     *,
-    now_utc: datetime | None = None,
     available_columns: set[str] | None = None,
 ) -> tuple[str, list[tuple[str, str, object]]]:
     threshold = _clamp_float(config.min_happy_factor, 0.0, 100.0)
     lookback_days = _clamp_int(config.lookback_days, 1, 30)
     row_limit = _clamp_int(config.row_limit, 1, 200)
     eligible_only = bool(config.eligible_only)
-    now_utc = now_utc or datetime.now(timezone.utc)
-    published_after = now_utc - timedelta(days=lookback_days)
 
     select_columns = _build_select_columns(available_columns)
 
@@ -53,17 +50,21 @@ select
 {select_columns}
 from `{config.table_fqn}`
 where happy_factor >= @min_happy_factor
-  and serving_date >= date(@published_after)
+  and serving_date >= date_sub(current_date("UTC"), interval @lookback_days day)
   and is_positive_feed_eligible = true
 """
+        parameters: list[tuple[str, str, object]] = [
+            ("min_happy_factor", "FLOAT64", threshold),
+            ("lookback_days", "INT64", lookback_days),
+            ("row_limit", "INT64", row_limit),
+        ]
     else:
         sql = f"""
 with recommended as (
   select
 {select_columns}
   from `{config.table_fqn}`
-  where happy_factor >= @min_happy_factor
-    and serving_date >= date(@published_after)
+  where serving_date >= date_sub(current_date("UTC"), interval @lookback_days day)
     and is_positive_feed_eligible = true
   order by happy_factor desc, coalesce(published_at, ingested_at) desc, article_id desc
   limit @row_limit
@@ -72,7 +73,7 @@ more_to_explore as (
   select
 {select_columns}
   from `{config.table_fqn}`
-  where serving_date >= date(@published_after)
+  where serving_date >= date_sub(current_date("UTC"), interval @lookback_days day)
     and exclusion_reason = 'below_threshold'
   order by happy_factor desc, coalesce(published_at, ingested_at) desc, article_id desc
   limit @row_limit
@@ -85,12 +86,10 @@ select
   *
 from more_to_explore
 """
-
-    parameters: list[tuple[str, str, object]] = [
-        ("min_happy_factor", "FLOAT64", threshold),
-        ("published_after", "TIMESTAMP", published_after),
-        ("row_limit", "INT64", row_limit),
-    ]
+        parameters = [
+            ("lookback_days", "INT64", lookback_days),
+            ("row_limit", "INT64", row_limit),
+        ]
 
     if eligible_only:
         sql += """
@@ -179,42 +178,6 @@ def split_feed_rows(
         row for row in rows if row.get("exclusion_reason") == "below_threshold"
     ]
     return recommended, more_to_explore
-
-
-def apply_result_limit(
-    recommended_rows: list[dict[str, object]],
-    more_to_explore_rows: list[dict[str, object]],
-    *,
-    total_limit: int,
-    reserved_explore_slots: int = 6,
-) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
-    total_limit = _clamp_int(total_limit, 1, 200)
-    if not more_to_explore_rows:
-        return recommended_rows[:total_limit], []
-    if not recommended_rows:
-        return [], more_to_explore_rows[:total_limit]
-
-    explore_limit = min(len(more_to_explore_rows), reserved_explore_slots, total_limit)
-    recommended_limit = max(0, total_limit - explore_limit)
-
-    selected_recommended = recommended_rows[:recommended_limit]
-    selected_explore = more_to_explore_rows[:explore_limit]
-
-    remaining = total_limit - len(selected_recommended) - len(selected_explore)
-    if remaining <= 0:
-        return selected_recommended, selected_explore
-
-    recommended_remainder = recommended_rows[len(selected_recommended) :]
-    if recommended_remainder:
-        additional_recommended = recommended_remainder[:remaining]
-        selected_recommended.extend(additional_recommended)
-        remaining -= len(additional_recommended)
-
-    if remaining > 0:
-        explore_remainder = more_to_explore_rows[len(selected_explore) :]
-        selected_explore.extend(explore_remainder[:remaining])
-
-    return selected_recommended, selected_explore
 
 
 def dedupe_story_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:

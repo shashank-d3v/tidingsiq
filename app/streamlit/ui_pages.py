@@ -17,7 +17,6 @@ from ui_helpers import (
     format_geography,
     format_language,
     format_relative_time,
-    format_timestamp,
     render_empty_state,
     render_metric_card,
     render_pagination,
@@ -32,8 +31,7 @@ def render_article_card(row: dict[str, object], *, compact: bool = False) -> Non
     link_target = html.escape(url) if url else ""
     published_value = row.get("published_at") or row.get("ingested_at")
     published_display = format_relative_time(published_value)
-    published_detail = format_timestamp(published_value)
-    language = html.escape(format_language(row.get("language")))
+    language_value = format_language(row.get("language"))
     geography_value = format_geography(row.get("mentioned_country_name"))
     tone_score = html.escape(format_float(row.get("tone_score"), digits=1))
     happy_factor = format_float(row.get("happy_factor"), digits=1)
@@ -57,7 +55,11 @@ def render_article_card(row: dict[str, object], *, compact: bool = False) -> Non
         headline_html = f'<div class="tiq-card-headline">{title}</div>'
         footer_link = '<span style="font-weight:700;color:#676b63;">No source URL</span>'
 
-    metadata_chips = [f'<span class="tiq-mini-chip">Language: {language}</span>']
+    metadata_chips: list[str] = []
+    if language_value != "Unknown":
+        metadata_chips.append(
+            f'<span class="tiq-mini-chip">Language: {html.escape(language_value)}</span>'
+        )
     if geography_value != "Unknown":
         metadata_chips.append(
             f'<span class="tiq-mini-chip">Mentioned geography: {html.escape(geography_value)}</span>'
@@ -79,7 +81,6 @@ def render_article_card(row: dict[str, object], *, compact: bool = False) -> Non
             <div class="tiq-card-meta-row">
               <span>{html.escape(published_display)}</span>
               <span>Tone: {tone_score}</span>
-              <span>{html.escape(published_detail)}</span>
             </div>
             <div>{footer_link}</div>
           </div>

@@ -4,7 +4,6 @@ import unittest
 from datetime import datetime, timezone
 
 from app.streamlit.query_builder import (
-    apply_result_limit,
     FeedQueryConfig,
     build_eligibility_breakdown,
     build_feed_query,
@@ -28,19 +27,15 @@ class QueryBuilderTest(unittest.TestCase):
                 row_limit=500,
                 eligible_only=True,
             ),
-            now_utc=datetime(2026, 4, 2, 0, 0, tzinfo=timezone.utc),
         )
 
         parameter_map = {name: value for name, _, value in parameters}
 
-        self.assertIn("serving_date >= date(@published_after)", sql)
+        self.assertIn('serving_date >= date_sub(current_date("utc")', sql.lower())
         self.assertIn("is_positive_feed_eligible = true", sql)
         self.assertEqual(parameter_map["min_happy_factor"], 100.0)
         self.assertEqual(parameter_map["row_limit"], 200)
-        self.assertEqual(
-            parameter_map["published_after"],
-            datetime(2026, 3, 3, 0, 0, tzinfo=timezone.utc),
-        )
+        self.assertEqual(parameter_map["lookback_days"], 30)
         self.assertIn("language", sql.lower())
         self.assertIn("mentioned_country_name", sql.lower())
         self.assertIn("exclusion_reason", sql.lower())
@@ -165,18 +160,6 @@ class QueryBuilderTest(unittest.TestCase):
         )
 
         self.assertEqual([row["article_id"] for row in deduped], ["a", "c", "e"])
-
-    def test_apply_result_limit_reserves_space_for_explore_rows(self) -> None:
-        recommended, explore = apply_result_limit(
-            [{"article_id": f"r{i}"} for i in range(20)],
-            [{"article_id": f"e{i}"} for i in range(10)],
-            total_limit=12,
-            reserved_explore_slots=4,
-        )
-
-        self.assertEqual(len(recommended), 8)
-        self.assertEqual(len(explore), 4)
-        self.assertEqual([row["article_id"] for row in explore], ["e0", "e1", "e2", "e3"])
 
     def test_build_timeline_data_aggregates_story_and_eligibility_counts(self) -> None:
         timeline = build_timeline_data(

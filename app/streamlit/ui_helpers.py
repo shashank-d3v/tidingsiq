@@ -55,10 +55,7 @@ def format_timestamp(value: object) -> str:
         month = value.strftime("%b")
         day = value.day
         year = value.year
-        hour = value.strftime("%I").lstrip("0") or "12"
-        minute = value.strftime("%M")
-        meridiem = value.strftime("%p")
-        return f"{month} {day}, {year} at {hour}:{minute} {meridiem} UTC"
+        return f"{month} {day}, {year} (UTC)"
     return "Unknown"
 
 

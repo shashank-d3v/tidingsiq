@@ -25,6 +25,10 @@ html, body, [class*="css"]  {
   color: var(--tiq-charcoal);
 }
 
+.stButton button {
+  white-space: nowrap;
+}
+
 [data-testid="stToolbar"],
 [data-testid="stDecoration"],
 #MainMenu,
@@ -63,7 +67,7 @@ footer {
   border-radius: 14px;
   color: var(--tiq-slate);
   font-weight: 600;
-  padding: 0.75rem 0.9rem;
+  padding: 0.6rem 0.8rem;
 }
 
 .stRadio label:has(input:checked) {
@@ -95,7 +99,7 @@ footer {
 }
 
 .tiq-logo-expanded {
-  gap: 0.95rem;
+  gap: 0.7rem;
 }
 
 .tiq-logo-collapsed {
@@ -118,12 +122,12 @@ footer {
   font-family: "Outfit", sans-serif;
   font-size: 1.85rem;
   font-weight: 800;
-  height: 5rem;
+  height: 4rem;
   justify-content: center;
   letter-spacing: -0.06em;
    overflow: hidden;
    position: relative;
-  width: 5rem;
+  width: 4rem;
 }
 
 .tiq-logo-mark::before {
@@ -139,7 +143,7 @@ footer {
   color: rgba(255, 255, 255, 0.17);
   content: "T";
   font-family: "Outfit", sans-serif;
-  font-size: 4.2rem;
+  font-size: 3.3rem;
   font-weight: 900;
   left: 50%;
   line-height: 1;
@@ -201,7 +205,7 @@ footer {
 .tiq-logo-wordmark {
   color: var(--tiq-charcoal);
   font-family: "Outfit", sans-serif;
-  font-size: 2.25rem;
+  font-size: 1.7rem;
   font-weight: 800;
   letter-spacing: -0.06em;
   white-space: nowrap;
@@ -214,9 +218,9 @@ footer {
 .tiq-logo-tagline {
   color: #9aa1af;
   font-family: "Inter", sans-serif;
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  letter-spacing: 0.34em;
+  letter-spacing: 0.22em;
   margin-left: 0.12rem;
   text-transform: uppercase;
   white-space: nowrap;
@@ -257,8 +261,28 @@ div[data-testid="stVerticalBlock"]:has(.tiq-logo-expanded) button {
   font-size: 0.9rem;
   font-weight: 700;
   gap: 0.35rem;
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.65rem;
   padding: 0.2rem 0.85rem;
+}
+
+[data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]:has([data-baseweb="select"]) {
+  margin-top: 0.2rem;
+}
+
+[data-baseweb="select"] > div {
+  background: #ffffff !important;
+  border: 1px solid var(--tiq-border) !important;
+  border-radius: 14px !important;
+  min-height: 2.65rem !important;
+}
+
+[data-baseweb="select"] span,
+[data-baseweb="select"] div {
+  font-family: "Inter", sans-serif !important;
+}
+
+[data-baseweb="select"] input::placeholder {
+  color: #8b9088 !important;
 }
 
 div[data-testid="stVerticalBlock"]:has(.tiq-main-expand-anchor) {
@@ -267,7 +291,6 @@ div[data-testid="stVerticalBlock"]:has(.tiq-main-expand-anchor) {
 
 div[data-testid="stVerticalBlock"]:has(.tiq-logo-collapsed) {
   margin-top: 0.3rem;
-  max-width: 7rem;
 }
 
 div[data-testid="stVerticalBlock"]:has(.tiq-logo-expanded) {
@@ -540,6 +563,9 @@ div[data-testid="stVerticalBlock"]:has(.tiq-logo-expanded) {
 .block-container {
   padding-top: 1.4rem;
   padding-bottom: 3rem;
+  max-width: 100% !important;
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
 }
 </style>
 """
