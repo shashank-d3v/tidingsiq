@@ -13,6 +13,7 @@ from constants import (
 )
 from data_access import load_feed, load_pipeline_status
 from query_builder import (
+    apply_result_limit,
     FeedQueryConfig,
     dedupe_story_rows,
     split_feed_rows,
@@ -47,10 +48,9 @@ def main() -> None:
     row_limit = int(st.session_state.get("row_limit", 100))
 
     if sidebar_collapsed:
-        logo_col, expand_col, _ = st.columns([0.9, 1.45, 7.65], gap="small")
-        with logo_col:
+        rail_col, content_col = st.columns([1.15, 8.85], gap="large")
+        with rail_col:
             render_logo(is_collapsed=True)
-        with expand_col:
             st.markdown(
                 '<div class="tiq-main-expand-anchor tiq-main-expand-row"></div>',
                 unsafe_allow_html=True,
@@ -58,7 +58,7 @@ def main() -> None:
             if st.button("→ Filters", key="expand_sidebar_button", width="stretch"):
                 st.session_state["sidebar_collapsed"] = False
                 st.rerun()
-        content_container = st.container()
+        content_container = content_col
         status_placeholder = None
     else:
         rail_col, content_col = st.columns([1.55, 5.45], gap="large")
@@ -129,6 +129,11 @@ def main() -> None:
         )
 
     recommended_rows, more_to_explore_rows = split_feed_rows(rows)
+    recommended_rows, more_to_explore_rows = apply_result_limit(
+        recommended_rows,
+        more_to_explore_rows,
+        total_limit=row_limit,
+    )
     visible_rows = recommended_rows + more_to_explore_rows
     summary = summarize_feed(visible_rows)
 

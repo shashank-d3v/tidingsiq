@@ -4,6 +4,7 @@ import unittest
 from datetime import datetime, timezone
 
 from app.streamlit.query_builder import (
+    apply_result_limit,
     FeedQueryConfig,
     build_eligibility_breakdown,
     build_feed_query,
@@ -164,6 +165,18 @@ class QueryBuilderTest(unittest.TestCase):
         )
 
         self.assertEqual([row["article_id"] for row in deduped], ["a", "c", "e"])
+
+    def test_apply_result_limit_reserves_space_for_explore_rows(self) -> None:
+        recommended, explore = apply_result_limit(
+            [{"article_id": f"r{i}"} for i in range(20)],
+            [{"article_id": f"e{i}"} for i in range(10)],
+            total_limit=12,
+            reserved_explore_slots=4,
+        )
+
+        self.assertEqual(len(recommended), 8)
+        self.assertEqual(len(explore), 4)
+        self.assertEqual([row["article_id"] for row in explore], ["e0", "e1", "e2", "e3"])
 
     def test_build_timeline_data_aggregates_story_and_eligibility_counts(self) -> None:
         timeline = build_timeline_data(

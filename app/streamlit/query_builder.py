@@ -181,6 +181,42 @@ def split_feed_rows(
     return recommended, more_to_explore
 
 
+def apply_result_limit(
+    recommended_rows: list[dict[str, object]],
+    more_to_explore_rows: list[dict[str, object]],
+    *,
+    total_limit: int,
+    reserved_explore_slots: int = 6,
+) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    total_limit = _clamp_int(total_limit, 1, 200)
+    if not more_to_explore_rows:
+        return recommended_rows[:total_limit], []
+    if not recommended_rows:
+        return [], more_to_explore_rows[:total_limit]
+
+    explore_limit = min(len(more_to_explore_rows), reserved_explore_slots, total_limit)
+    recommended_limit = max(0, total_limit - explore_limit)
+
+    selected_recommended = recommended_rows[:recommended_limit]
+    selected_explore = more_to_explore_rows[:explore_limit]
+
+    remaining = total_limit - len(selected_recommended) - len(selected_explore)
+    if remaining <= 0:
+        return selected_recommended, selected_explore
+
+    recommended_remainder = recommended_rows[len(selected_recommended) :]
+    if recommended_remainder:
+        additional_recommended = recommended_remainder[:remaining]
+        selected_recommended.extend(additional_recommended)
+        remaining -= len(additional_recommended)
+
+    if remaining > 0:
+        explore_remainder = more_to_explore_rows[len(selected_explore) :]
+        selected_explore.extend(explore_remainder[:remaining])
+
+    return selected_recommended, selected_explore
+
+
 def dedupe_story_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
     deduped: list[dict[str, object]] = []
     seen_keys: set[tuple[str, str]] = set()

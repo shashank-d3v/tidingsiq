@@ -12,7 +12,7 @@ def render_logo(*, is_collapsed: bool = False) -> None:
         f"""
         <div class="tiq-logo {logo_state_class}">
           <div class="tiq-logo-mark-wrap">
-            <div class="tiq-logo-mark">T</div>
+            <div class="tiq-logo-mark"><span class="tiq-logo-mark-letter">T</span></div>
             <div class="tiq-logo-sparkle" aria-hidden="true">✦</div>
           </div>
           <div class="tiq-logo-copy">
@@ -51,7 +51,14 @@ def format_timestamp(value: object) -> str:
     if isinstance(value, datetime):
         if value.tzinfo is None:
             value = value.replace(tzinfo=timezone.utc)
-        return value.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        value = value.astimezone(timezone.utc)
+        month = value.strftime("%b")
+        day = value.day
+        year = value.year
+        hour = value.strftime("%I").lstrip("0") or "12"
+        minute = value.strftime("%M")
+        meridiem = value.strftime("%p")
+        return f"{month} {day}, {year} at {hour}:{minute} {meridiem} UTC"
     return "Unknown"
 
 
@@ -65,12 +72,15 @@ def format_relative_time(value: object) -> str:
     total_seconds = int(max(delta.total_seconds(), 0))
     if total_seconds < 3600:
         minutes = max(1, total_seconds // 60)
-        return f"{minutes}m ago"
+        unit = "minute" if minutes == 1 else "minutes"
+        return f"{minutes} {unit} ago"
     if total_seconds < 86400:
         hours = total_seconds // 3600
-        return f"{hours}h ago"
+        unit = "hour" if hours == 1 else "hours"
+        return f"{hours} {unit} ago"
     days = total_seconds // 86400
-    return f"{days}d ago"
+    unit = "day" if days == 1 else "days"
+    return f"{days} {unit} ago"
 
 
 def format_language(value: object) -> str:

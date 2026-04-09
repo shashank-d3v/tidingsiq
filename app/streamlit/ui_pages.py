@@ -34,7 +34,7 @@ def render_article_card(row: dict[str, object], *, compact: bool = False) -> Non
     published_display = format_relative_time(published_value)
     published_detail = format_timestamp(published_value)
     language = html.escape(format_language(row.get("language")))
-    geography = html.escape(format_geography(row.get("mentioned_country_name")))
+    geography_value = format_geography(row.get("mentioned_country_name"))
     tone_score = html.escape(format_float(row.get("tone_score"), digits=1))
     happy_factor = format_float(row.get("happy_factor"), digits=1)
     badge_class = (
@@ -57,6 +57,13 @@ def render_article_card(row: dict[str, object], *, compact: bool = False) -> Non
         headline_html = f'<div class="tiq-card-headline">{title}</div>'
         footer_link = '<span style="font-weight:700;color:#676b63;">No source URL</span>'
 
+    metadata_chips = [f'<span class="tiq-mini-chip">Language: {language}</span>']
+    if geography_value != "Unknown":
+        metadata_chips.append(
+            f'<span class="tiq-mini-chip">Mentioned geography: {html.escape(geography_value)}</span>'
+        )
+    metadata_chips_html = "".join(metadata_chips)
+
     st.markdown(
         f"""
         <div class="tiq-card{compact_class}">
@@ -66,8 +73,7 @@ def render_article_card(row: dict[str, object], *, compact: bool = False) -> Non
           </div>
           {headline_html}
           <div class="tiq-card-meta-row">
-            <span class="tiq-mini-chip">Language: {language}</span>
-            <span class="tiq-mini-chip">Mentioned geography: {geography}</span>
+            {metadata_chips_html}
           </div>
           <div class="tiq-card-footer">
             <div class="tiq-card-meta-row">

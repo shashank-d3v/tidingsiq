@@ -121,7 +121,36 @@ footer {
   height: 5rem;
   justify-content: center;
   letter-spacing: -0.06em;
+   overflow: hidden;
+   position: relative;
   width: 5rem;
+}
+
+.tiq-logo-mark::before {
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.34) 0, rgba(255, 255, 255, 0.08) 34%, rgba(255, 255, 255, 0) 62%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.tiq-logo-mark::after {
+  color: rgba(255, 255, 255, 0.17);
+  content: "T";
+  font-family: "Outfit", sans-serif;
+  font-size: 4.2rem;
+  font-weight: 900;
+  left: 50%;
+  line-height: 1;
+  position: absolute;
+  top: 56%;
+  transform: translate(-50%, -50%);
+}
+
+.tiq-logo-mark-letter {
+  position: relative;
+  z-index: 1;
 }
 
 .tiq-logo-collapsed .tiq-logo-mark {
@@ -129,6 +158,10 @@ footer {
   font-size: 1.55rem;
   height: 3.25rem;
   width: 3.25rem;
+}
+
+.tiq-logo-collapsed .tiq-logo-mark::after {
+  font-size: 2.7rem;
 }
 
 .tiq-logo-sparkle {
@@ -208,6 +241,7 @@ div[data-testid="stVerticalBlock"]:has(.tiq-main-expand-anchor) button {
   font-size: 0.9rem;
   font-weight: 700;
   gap: 0.35rem;
+  margin-top: 0.55rem;
   padding: 0.2rem 0.85rem;
 }
 
@@ -233,6 +267,7 @@ div[data-testid="stVerticalBlock"]:has(.tiq-main-expand-anchor) {
 
 div[data-testid="stVerticalBlock"]:has(.tiq-logo-collapsed) {
   margin-top: 0.3rem;
+  max-width: 7rem;
 }
 
 div[data-testid="stVerticalBlock"]:has(.tiq-logo-expanded) {
