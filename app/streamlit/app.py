@@ -23,6 +23,7 @@ from data_access import load_feed, load_pipeline_status  # noqa: E402
 from query_builder import (  # noqa: E402
     FeedQueryConfig,
     dedupe_story_rows,
+    filter_exploratory_rows,
     split_feed_rows,
     summarize_feed,
 )
@@ -36,8 +37,12 @@ def _initialize_state() -> None:
     st.session_state.setdefault("recommended_page", 1)
     st.session_state.setdefault("explore_page", 1)
     st.session_state.setdefault("sidebar_collapsed", False)
+    st.session_state.setdefault("feed_sort_order", "Least optimistic first")
     st.session_state.setdefault("selected_languages", [])
     st.session_state.setdefault("selected_geographies", [])
+    st.session_state.setdefault("selected_serving_date", "All")
+    st.session_state.setdefault("cached_rows", [])
+    st.session_state.setdefault("cached_lookback_days", None)
 
 
 def main() -> None:
@@ -47,24 +52,31 @@ def main() -> None:
     current_page = str(st.session_state.get("current_page", PAGE_BRIEF))
     min_happy_factor = int(st.session_state.get("min_happy_factor", 65))
     lookback_days = int(st.session_state.get("lookback_days", LOOKBACK_OPTIONS[0]))
+    feed_sort_order = str(
+        st.session_state.get("feed_sort_order", "Least optimistic first")
+    )
     selected_languages = list(st.session_state.get("selected_languages", []))
     selected_geographies = list(st.session_state.get("selected_geographies", []))
+    selected_serving_date = str(st.session_state.get("selected_serving_date", "All"))
 
-    config = FeedQueryConfig(
-        table_fqn=DEFAULT_TABLE_FQN,
-        min_happy_factor=0.0,
-        lookback_days=lookback_days,
-        row_limit=QUERY_ROW_LIMIT,
-        eligible_only=False,
-    )
+    if st.session_state.get("cached_lookback_days") != lookback_days:
+        config = FeedQueryConfig(
+            table_fqn=DEFAULT_TABLE_FQN,
+            min_happy_factor=0.0,
+            lookback_days=lookback_days,
+            row_limit=QUERY_ROW_LIMIT,
+            eligible_only=False,
+        )
+        try:
+            with st.spinner("Updating feed..."):
+                rows, _ = load_feed(DEFAULT_PROJECT_ID, config)
+        except Exception as exc:  # pragma: no cover - UI fallback
+            st.error(f"Query failed: {exc}")
+            st.stop()
+        st.session_state["cached_rows"] = dedupe_story_rows(rows)
+        st.session_state["cached_lookback_days"] = lookback_days
 
-    try:
-        rows, _ = load_feed(DEFAULT_PROJECT_ID, config)
-    except Exception as exc:  # pragma: no cover - UI fallback
-        st.error(f"Query failed: {exc}")
-        st.stop()
-
-    rows = dedupe_story_rows(rows)
+    rows = list(st.session_state.get("cached_rows", []))
 
     def _row_language(row: dict[str, object]) -> str:
         value = row.get("language")
@@ -84,37 +96,81 @@ def main() -> None:
     geography_options = sorted(
         {geo for geo in (_row_geography(row) for row in rows) if geo != "Unknown"}
     )
+    serving_date_options = sorted(
+        {
+            str(row.get("serving_date"))
+            for row in rows
+            if row.get("serving_date") is not None
+        },
+        reverse=True,
+    )
     st.session_state["selected_languages"] = [
         lang for lang in selected_languages if lang in language_options
     ]
     st.session_state["selected_geographies"] = [
         geo for geo in selected_geographies if geo in geography_options
     ]
+    if selected_serving_date != "All" and selected_serving_date not in serving_date_options:
+        st.session_state["selected_serving_date"] = "All"
+        selected_serving_date = "All"
 
     if sidebar_collapsed:
-        rail_col, content_col = st.columns([1.0, 9.0], gap="large")
+        rail_col, content_col = st.columns([0.82, 9.18], gap="large")
         with rail_col:
-            render_logo(is_collapsed=True)
-            st.markdown(
-                '<div class="tiq-main-expand-anchor tiq-main-expand-row"></div>',
-                unsafe_allow_html=True,
-            )
-            if st.button("Show filters", key="expand_sidebar_button"):
-                st.session_state["sidebar_collapsed"] = False
+            st.markdown('<div class="tiq-rail-anchor tiq-rail-anchor-collapsed"></div>', unsafe_allow_html=True)
+            st.markdown('<div class="tiq-rail-compact-head"></div>', unsafe_allow_html=True)
+            header_col, toggle_col = st.columns([1, 1], gap="small")
+            with header_col:
+                render_logo(is_collapsed=True)
+            with toggle_col:
+                st.markdown('<div class="tiq-rail-toggle-anchor"></div>', unsafe_allow_html=True)
+                if st.button(
+                    " ",
+                    key="expand_sidebar_button",
+                    icon=":material/tune:",
+                    width="stretch",
+                ):
+                    st.session_state["sidebar_collapsed"] = False
+                    st.rerun()
         content_container = content_col
         status_placeholder = None
     else:
-        rail_col, content_col = st.columns([1.35, 8.65], gap="large")
+        rail_col, content_col = st.columns([1.72, 8.28], gap="large")
         with rail_col:
-            render_logo(is_collapsed=False)
-            if st.button("← Hide filters", key="collapse_sidebar_button", width="stretch"):
-                st.session_state["sidebar_collapsed"] = True
-            current_page = st.radio(
-                "Navigate",
-                options=[PAGE_BRIEF, PAGE_PULSE, PAGE_METHODOLOGY],
-                key="current_page",
-                label_visibility="collapsed",
-            )
+            st.markdown('<div class="tiq-rail-anchor tiq-rail-anchor-expanded"></div>', unsafe_allow_html=True)
+            st.markdown('<div class="tiq-rail-head"></div>', unsafe_allow_html=True)
+            logo_col, toggle_col = st.columns([7.2, 1], gap="large")
+            with logo_col:
+                render_logo(is_collapsed=False)
+            with toggle_col:
+                st.markdown('<div class="tiq-rail-toggle-anchor"></div>', unsafe_allow_html=True)
+                if st.button(
+                    " ",
+                    key="collapse_sidebar_button",
+                    icon=":material/close:",
+                    width="stretch",
+                ):
+                    st.session_state["sidebar_collapsed"] = True
+                    st.rerun()
+            nav_container = st.container()
+            with nav_container:
+                st.markdown('<div class="tiq-nav-anchor"></div>', unsafe_allow_html=True)
+                for page_name, icon in [
+                    (PAGE_BRIEF, ":material/grid_view:"),
+                    (PAGE_PULSE, ":material/monitoring:"),
+                    (PAGE_METHODOLOGY, ":material/info:"),
+                ]:
+                    button_key = f"nav_{page_name.lower().replace(' ', '_')}"
+                    is_active = current_page == page_name
+                    if st.button(
+                        page_name,
+                        key=button_key,
+                        width="stretch",
+                        type="primary" if is_active else "secondary",
+                        icon=icon,
+                    ):
+                        st.session_state["current_page"] = page_name
+                        st.rerun()
             min_happy_factor = st.slider(
                 "Min Happy Factor",
                 min_value=0,
@@ -140,7 +196,6 @@ def main() -> None:
                     if language_options
                     else "No language data in current feed"
                 ),
-                disabled=not language_options,
             )
             selected_geographies = st.multiselect(
                 "Mentioned geography",
@@ -151,7 +206,14 @@ def main() -> None:
                     if geography_options
                     else "No geography data in current feed"
                 ),
-                disabled=not geography_options,
+            )
+            selected_serving_date = st.selectbox(
+                "Date",
+                options=["All"] + serving_date_options,
+                index=(["All"] + serving_date_options).index(
+                    selected_serving_date if selected_serving_date in serving_date_options else "All"
+                ),
+                key="selected_serving_date",
             )
             status_placeholder = st.empty()
         content_container = content_col
@@ -161,14 +223,16 @@ def main() -> None:
         lookback_days,
         tuple(sorted(selected_languages)),
         tuple(sorted(selected_geographies)),
+        selected_serving_date,
     )
     if st.session_state.get("filter_signature") != filter_signature:
         st.session_state["filter_signature"] = filter_signature
         st.session_state["recommended_page"] = 1
         st.session_state["explore_page"] = 1
 
-    pipeline_status = load_pipeline_status(DEFAULT_PROJECT_ID, DEFAULT_TABLE_FQN)
+    pipeline_status = None
     if status_placeholder is not None:
+        pipeline_status = load_pipeline_status(DEFAULT_PROJECT_ID, DEFAULT_TABLE_FQN)
         status_placeholder.markdown(
             render_pipeline_status(pipeline_status, rows),
             unsafe_allow_html=True,
@@ -185,6 +249,10 @@ def main() -> None:
         filtered_rows = [
             row for row in filtered_rows if _row_geography(row) in selected_geo_set
         ]
+    if selected_serving_date != "All":
+        filtered_rows = [
+            row for row in filtered_rows if str(row.get("serving_date")) == selected_serving_date
+        ]
 
     recommended_rows, more_to_explore_rows = split_feed_rows(filtered_rows)
     recommended_rows = [
@@ -193,6 +261,13 @@ def main() -> None:
         if row.get("happy_factor") is not None
         and float(row["happy_factor"]) >= float(min_happy_factor)
     ]
+    more_to_explore_rows = filter_exploratory_rows(
+        more_to_explore_rows,
+        min_happy_factor=float(min_happy_factor),
+    )
+    if feed_sort_order == "Most optimistic first":
+        recommended_rows = list(reversed(recommended_rows))
+        more_to_explore_rows = list(reversed(more_to_explore_rows))
     visible_rows = recommended_rows + more_to_explore_rows
     summary = summarize_feed(visible_rows)
 
@@ -200,6 +275,7 @@ def main() -> None:
         if current_page == PAGE_BRIEF:
             render_brief(
                 lookback_days=lookback_days,
+                feed_sort_order=feed_sort_order,
                 summary=summary,
                 recommended_rows=recommended_rows,
                 more_to_explore_rows=more_to_explore_rows,

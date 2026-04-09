@@ -101,10 +101,11 @@ The Streamlit app queries only the Gold model in v1. It is not responsible for b
 Current UI controls:
 - `happy_factor` minimum threshold
 - lookback window in days
-- result limit
-- an `eligible only` toggle that defaults to `true`
+- date within the currently loaded lookback window
+- detected language filter
+- mentioned geography filter
 
-The app should remain thin. Any future scheduled execution of the Bruin pipeline belongs in GCP batch infrastructure rather than the Streamlit runtime.
+The app should remain thin. It can apply lightweight local filters and presentation ordering over the current lookback window, but warehouse scoring and eligibility decisions still belong in Gold. The only deliberate app-side safety exception today is `More To Explore`, where the UI applies an extra screen to avoid surfacing obviously disturbing below-threshold titles if warehouse guardrails missed them. Any future scheduled execution of the Bruin pipeline belongs in GCP batch infrastructure rather than the Streamlit runtime.
 
 ## End-to-End Flow
 

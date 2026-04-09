@@ -14,6 +14,18 @@ OPTIONAL_STRING_COLUMNS = {
     "mentioned_country_resolution_status",
 }
 
+EXPLORATORY_TITLE_DENY_PATTERN = re.compile(
+    (
+        r"\b("
+        r"kill(?:er|ed|ing)?|murder(?:ed|ing)?|manslaughter|"
+        r"shoot(?:ing|ings|er|ers)?|shot|stabb(?:ed|ing)?|"
+        r"rape|suicide|bomb(?:ing)?|throat|meth|"
+        r"foot chase|charges? pile up|accused of serious crimes"
+        r")\b"
+    ),
+    re.IGNORECASE,
+)
+
 
 @dataclass(frozen=True)
 class FeedQueryConfig:
@@ -66,7 +78,7 @@ with recommended as (
   from `{config.table_fqn}`
   where serving_date >= date_sub(current_date("UTC"), interval @lookback_days day)
     and is_positive_feed_eligible = true
-  order by happy_factor desc, coalesce(published_at, ingested_at) desc, article_id desc
+  order by happy_factor asc, coalesce(published_at, ingested_at) desc, article_id desc
   limit @row_limit
 ),
 more_to_explore as (
@@ -75,7 +87,7 @@ more_to_explore as (
   from `{config.table_fqn}`
   where serving_date >= date_sub(current_date("UTC"), interval @lookback_days day)
     and exclusion_reason = 'below_threshold'
-  order by happy_factor desc, coalesce(published_at, ingested_at) desc, article_id desc
+  order by happy_factor asc, coalesce(published_at, ingested_at) desc, article_id desc
   limit @row_limit
 )
 select
@@ -93,7 +105,7 @@ from more_to_explore
 
     if eligible_only:
         sql += """
-order by happy_factor desc, coalesce(published_at, ingested_at) desc, article_id desc
+order by happy_factor asc, coalesce(published_at, ingested_at) desc, article_id desc
 limit @row_limit
 """
 
@@ -171,13 +183,54 @@ def split_feed_rows(
     rows: list[dict[str, object]],
 ) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
     rows = dedupe_story_rows(rows)
-    recommended = [
+    recommended = sort_feed_rows([
         row for row in rows if bool(row.get("is_positive_feed_eligible")) is True
-    ]
-    more_to_explore = [
+    ])
+    more_to_explore = sort_feed_rows([
         row for row in rows if row.get("exclusion_reason") == "below_threshold"
-    ]
+    ])
     return recommended, more_to_explore
+
+
+def filter_exploratory_rows(
+    rows: list[dict[str, object]],
+    *,
+    min_happy_factor: float,
+) -> list[dict[str, object]]:
+    safe_rows: list[dict[str, object]] = []
+    score_floor = 35.0
+
+    for row in rows:
+        happy_factor = _coerce_float(row.get("happy_factor"))
+        tone_score = _coerce_float(row.get("tone_score"))
+        hard_deny_hits = int(row.get("hard_deny_hit_count") or 0)
+        title = str(row.get("title") or "")
+
+        if happy_factor is None or happy_factor < score_floor:
+            continue
+        if tone_score is None or tone_score < 0.0:
+            continue
+        if hard_deny_hits > 0:
+            continue
+        if EXPLORATORY_TITLE_DENY_PATTERN.search(title):
+            continue
+
+        safe_rows.append(row)
+
+    return sort_feed_rows(safe_rows)
+
+
+def sort_feed_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    return sorted(
+        rows,
+        key=lambda row: (
+            _coerce_float(row.get("happy_factor"))
+            if row.get("happy_factor") is not None
+            else float("inf"),
+            -_coerce_timestamp_order(row.get("published_at") or row.get("ingested_at")),
+            str(row.get("article_id") or ""),
+        ),
+    )
 
 
 def dedupe_story_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -417,3 +470,11 @@ def _coerce_serving_date_label(value: object) -> str | None:
     if isinstance(value, str) and value:
         return value
     return None
+
+
+def _coerce_timestamp_order(value: object) -> float:
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            return value.timestamp()
+        return value.astimezone().timestamp()
+    return 0.0

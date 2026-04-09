@@ -11,6 +11,7 @@ from app.streamlit.query_builder import (
     build_source_rankings,
     build_timeline_data,
     dedupe_story_rows,
+    filter_exploratory_rows,
     paginate_rows,
     split_feed_rows,
     summarize_feed,
@@ -89,6 +90,7 @@ class QueryBuilderTest(unittest.TestCase):
 
         self.assertIn("with recommended as", sql.lower())
         self.assertIn("exclusion_reason = 'below_threshold'", sql.lower())
+        self.assertIn("order by happy_factor asc", sql.lower())
 
     def test_summarize_feed_returns_expected_metrics(self) -> None:
         summary = summarize_feed(
@@ -292,6 +294,47 @@ class QueryBuilderTest(unittest.TestCase):
         self.assertEqual(total_pages, 2)
         self.assertEqual(current_page, 2)
         self.assertEqual(page_rows, [{"id": "10"}])
+
+    def test_filter_exploratory_rows_blocks_disturbing_titles_and_low_tone(self) -> None:
+        filtered = filter_exploratory_rows(
+            [
+                {
+                    "article_id": "safe",
+                    "title": "Local arts festival opens with community support",
+                    "happy_factor": 58.0,
+                    "tone_score": 2.4,
+                    "hard_deny_hit_count": 0,
+                    "soft_deny_hit_count": 0,
+                },
+                {
+                    "article_id": "violent",
+                    "title": "Alleged killer threatened to cut girlfriend's throat out",
+                    "happy_factor": 63.0,
+                    "tone_score": 1.2,
+                    "hard_deny_hit_count": 0,
+                    "soft_deny_hit_count": 0,
+                },
+                {
+                    "article_id": "soft",
+                    "title": "Uplifting update",
+                    "happy_factor": 61.0,
+                    "tone_score": 1.5,
+                    "hard_deny_hit_count": 0,
+                    "soft_deny_hit_count": 1,
+                },
+                {
+                    "article_id": "negative",
+                    "title": "Community reacts to difficult incident",
+                    "happy_factor": 60.0,
+                    "tone_score": -0.4,
+                    "hard_deny_hit_count": 0,
+                    "soft_deny_hit_count": 0,
+                },
+            ],
+            min_happy_factor=65.0,
+        )
+
+        self.assertEqual([row["article_id"] for row in filtered], ["safe", "soft"])
 
 
 if __name__ == "__main__":

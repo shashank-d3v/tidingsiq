@@ -29,6 +29,10 @@ html, body, [class*="css"]  {
   white-space: nowrap;
 }
 
+button[kind] {
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
 [data-testid="stToolbar"],
 [data-testid="stDecoration"],
 #MainMenu,
@@ -51,6 +55,10 @@ footer {
 
 [data-testid="stAppViewContainer"] > .main {
   background: var(--tiq-offwhite);
+}
+
+[data-testid="stAppViewContainer"] > .main > div {
+  max-width: 100%;
 }
 
 [data-testid="stSidebar"] {
@@ -99,7 +107,7 @@ footer {
 }
 
 .tiq-logo-expanded {
-  gap: 0.7rem;
+  gap: 0.6rem;
 }
 
 .tiq-logo-collapsed {
@@ -205,7 +213,7 @@ footer {
 .tiq-logo-wordmark {
   color: var(--tiq-charcoal);
   font-family: "Outfit", sans-serif;
-  font-size: 1.7rem;
+  font-size: 1.55rem;
   font-weight: 800;
   letter-spacing: -0.06em;
   white-space: nowrap;
@@ -218,9 +226,9 @@ footer {
 .tiq-logo-tagline {
   color: #9aa1af;
   font-family: "Inter", sans-serif;
-  font-size: 0.7rem;
+  font-size: 0.64rem;
   font-weight: 800;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.18em;
   margin-left: 0.12rem;
   text-transform: uppercase;
   white-space: nowrap;
@@ -233,23 +241,41 @@ footer {
   width: 0;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-main-expand-anchor) button {
-  align-items: center;
-  background: #ffffff;
-  border: 1px solid var(--tiq-border);
-  border-radius: 999px;
-  box-shadow: var(--tiq-card-shadow);
-  color: var(--tiq-charcoal);
-  display: inline-flex;
-  font-family: "Inter", sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  gap: 0.35rem;
-  margin-top: 0.55rem;
-  padding: 0.2rem 0.85rem;
+.tiq-rail-anchor {
+  display: block;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-logo-expanded) button {
+.tiq-rail-anchor-expanded {
+  margin-bottom: 0.5rem;
+}
+
+.tiq-rail-anchor-collapsed {
+  margin-bottom: 0.2rem;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-rail-anchor-expanded) {
+  background: linear-gradient(180deg, rgba(255,255,255,0.74), rgba(255,255,255,0.56));
+  border: 1px solid rgba(230, 228, 221, 0.95);
+  border-radius: 30px;
+  box-shadow: 0 14px 30px rgba(21, 21, 21, 0.04);
+  padding: 1.1rem 0.95rem 1rem;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-rail-anchor-collapsed) {
+  align-items: center;
+  background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.66));
+  border: 1px solid rgba(230, 228, 221, 0.95);
+  border-radius: 26px;
+  box-shadow: 0 10px 24px rgba(21, 21, 21, 0.04);
+  padding: 0.85rem 0.55rem 0.65rem;
+}
+
+.tiq-rail-head,
+.tiq-rail-compact-head {
+  display: block;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-rail-toggle-anchor) button {
   align-items: center;
   background: #ffffff;
   border: 1px solid var(--tiq-border);
@@ -258,11 +284,66 @@ div[data-testid="stVerticalBlock"]:has(.tiq-logo-expanded) button {
   color: var(--tiq-charcoal);
   display: inline-flex;
   font-family: "Inter", sans-serif;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 700;
-  gap: 0.35rem;
-  margin-bottom: 0.65rem;
-  padding: 0.2rem 0.85rem;
+  height: 2.5rem;
+  justify-content: center;
+  margin-top: 0.1rem;
+  min-width: 2.5rem;
+  padding: 0;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-rail-toggle-anchor) button:hover {
+  background: #f7f6f2;
+  border-color: #d9d5ca;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-rail-anchor-collapsed) .tiq-logo {
+  justify-content: center;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-nav-anchor) {
+  margin-top: 0.35rem;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-nav-anchor) .stButton button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  box-shadow: none;
+  color: #75839d;
+  display: flex;
+  font-family: "Inter", sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  gap: 0.65rem;
+  justify-content: flex-start;
+  margin-bottom: 0.5rem;
+  min-height: 3.45rem;
+  padding: 0.85rem 1rem;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-nav-anchor) .stButton button[kind="primary"] {
+  background: #e8fbf1;
+  border-color: #ccefdc;
+  box-shadow: 0 8px 18px rgba(0, 201, 117, 0.08);
+  color: #0f6d48;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-nav-anchor) .stButton button[kind="secondary"]:hover {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: #ece9e1;
+  color: #607089;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-nav-anchor) .stButton button[kind] p {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-nav-anchor) .stButton button[kind] svg {
+  color: inherit;
 }
 
 [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]:has([data-baseweb="select"]) {
@@ -276,6 +357,10 @@ div[data-testid="stVerticalBlock"]:has(.tiq-logo-expanded) button {
   min-height: 2.65rem !important;
 }
 
+[data-testid="stSelectbox"] {
+  margin-bottom: 0.45rem;
+}
+
 [data-baseweb="select"] span,
 [data-baseweb="select"] div {
   font-family: "Inter", sans-serif !important;
@@ -285,16 +370,8 @@ div[data-testid="stVerticalBlock"]:has(.tiq-logo-expanded) button {
   color: #8b9088 !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-main-expand-anchor) {
-  margin-top: 0.7rem;
-}
-
 div[data-testid="stVerticalBlock"]:has(.tiq-logo-collapsed) {
-  margin-top: 0.3rem;
-}
-
-div[data-testid="stVerticalBlock"]:has(.tiq-logo-expanded) {
-  margin-bottom: 0.25rem;
+  margin-top: 0.2rem;
 }
 
 .tiq-page-title {

@@ -93,6 +93,7 @@ def render_article_card(row: dict[str, object], *, compact: bool = False) -> Non
 def render_brief(
     *,
     lookback_days: int,
+    feed_sort_order: str,
     summary: dict[str, float | int],
     recommended_rows: list[dict[str, object]],
     more_to_explore_rows: list[dict[str, object]],
@@ -111,6 +112,15 @@ def render_brief(
         render_metric_card("Peak Positivity", summary["max_happy_factor"])
     with metric_columns[3]:
         render_metric_card("Active Sources", summary["source_count"])
+
+    sort_left, sort_right = st.columns([7.5, 2.5], gap="small")
+    with sort_right:
+        st.selectbox(
+            "Sort feed",
+            options=["Least optimistic first", "Most optimistic first"],
+            index=0 if feed_sort_order == "Least optimistic first" else 1,
+            key="feed_sort_order",
+        )
 
     st.markdown("<div style='height:1.25rem;'></div>", unsafe_allow_html=True)
     st.markdown(

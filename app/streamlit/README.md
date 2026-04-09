@@ -6,19 +6,24 @@ This app is the local-first frontend for TidingsIQ. It queries only `gold.positi
 - `Pulse` for live feed analytics
 - `Methodology` for the warehouse and scoring explainer
 
-The sidebar currently exposes a small set of user-facing controls:
+The filter rail currently exposes a small set of user-facing controls:
 
 - minimum `happy_factor`
 - lookback window in days
-- result row limit
+- date within the currently loaded lookback window
+- detected language
+- mentioned geography
 
 Current serving constraint:
 
 - Gold serves the canonical scored feed and now carries detected language plus article-mentioned geography as informational metadata
 - these fields should not be labeled as source language, publisher country, or country of publication
-- the app should not use language or article geography as serving gates in the current contract
+- the warehouse contract should not use language or article geography as serving gates
+- the app can still filter locally on these informational fields for browsing
 - the app surfaces `Recommended` stories from eligible rows and `More To Explore` from `below_threshold` rows only
+- `More To Explore` also applies an app-side safety screen so obviously disturbing titles do not surface even if they slipped through the current warehouse guardrails
 - the current default minimum score is `65`, softened from the initial `70`
+- feed cards are ordered from least optimistic to most optimistic within each section
 
 ## Local Run
 
@@ -81,7 +86,7 @@ export TIDINGSIQ_GOLD_TABLE=tidingsiq-dev.gold.positive_news_feed
 
 ## Query Contract
 
-The app queries only the Gold table and does not reach into Bronze or Silver.
+The app queries only the Gold table and does not reach into Bronze or Silver. It fetches the current lookback window from Gold, then applies `happy_factor`, date, language, and geography filters locally in the Streamlit layer to keep UI interactions responsive.
 
 Current expected columns:
 
