@@ -18,7 +18,7 @@ from query_builder import (
     split_feed_rows,
     summarize_feed,
 )
-from ui_helpers import render_pipeline_status
+from ui_helpers import render_logo, render_pipeline_status
 from ui_pages import render_brief, render_methodology, render_pulse
 from ui_styles import APP_CSS
 
@@ -47,9 +47,14 @@ def main() -> None:
     row_limit = int(st.session_state.get("row_limit", 100))
 
     if sidebar_collapsed:
-        expand_col, _ = st.columns([1.2, 8.8])
+        logo_col, expand_col, _ = st.columns([0.9, 1.45, 7.65], gap="small")
+        with logo_col:
+            render_logo(is_collapsed=True)
         with expand_col:
-            st.markdown('<div class="tiq-main-expand-anchor"></div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="tiq-main-expand-anchor tiq-main-expand-row"></div>',
+                unsafe_allow_html=True,
+            )
             if st.button("→ Filters", key="expand_sidebar_button", width="stretch"):
                 st.session_state["sidebar_collapsed"] = False
                 st.rerun()
@@ -58,10 +63,10 @@ def main() -> None:
     else:
         rail_col, content_col = st.columns([1.55, 5.45], gap="large")
         with rail_col:
+            render_logo(is_collapsed=False)
             if st.button("← Hide filters", key="collapse_sidebar_button", width="stretch"):
                 st.session_state["sidebar_collapsed"] = True
                 st.rerun()
-            st.markdown('<div class="tiq-brand">TidingsIQ</div>', unsafe_allow_html=True)
             current_page = st.radio(
                 "Navigate",
                 options=[PAGE_BRIEF, PAGE_PULSE, PAGE_METHODOLOGY],

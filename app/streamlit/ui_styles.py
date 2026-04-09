@@ -87,23 +87,113 @@ footer {
   color: var(--tiq-charcoal) !important;
 }
 
-.tiq-brand {
-  color: var(--tiq-charcoal);
-  font-family: "Playfair Display", serif;
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
+.tiq-logo {
+  align-items: center;
+  display: flex;
   margin-bottom: 1rem;
+  transition: all 180ms ease;
 }
 
-.tiq-control-rail {
+.tiq-logo-expanded {
+  gap: 0.95rem;
+}
+
+.tiq-logo-collapsed {
+  gap: 0;
+  justify-content: center;
+  margin-bottom: 0;
+}
+
+.tiq-logo-mark-wrap {
+  position: relative;
+}
+
+.tiq-logo-mark {
+  align-items: center;
+  background: linear-gradient(135deg, #18ef8d 0%, #9be71f 48%, #ffd500 100%);
+  border-radius: 1.2rem;
+  box-shadow: 0 14px 26px rgba(0, 201, 117, 0.2);
+  color: #ffffff;
+  display: flex;
+  font-family: "Outfit", sans-serif;
+  font-size: 1.85rem;
+  font-weight: 800;
+  height: 5rem;
+  justify-content: center;
+  letter-spacing: -0.06em;
+  width: 5rem;
+}
+
+.tiq-logo-collapsed .tiq-logo-mark {
+  border-radius: 1rem;
+  font-size: 1.55rem;
+  height: 3.25rem;
+  width: 3.25rem;
+}
+
+.tiq-logo-sparkle {
+  align-items: center;
   background: #ffffff;
-  border: 1px solid var(--tiq-border);
-  border-radius: 30px;
-  box-shadow: var(--tiq-card-shadow);
-  padding: 1rem 1rem 1.15rem;
-  position: sticky;
-  top: 1rem;
+  border-radius: 999px;
+  box-shadow: 0 8px 18px rgba(21, 21, 21, 0.08);
+  color: var(--tiq-amber);
+  display: flex;
+  font-size: 0.9rem;
+  font-weight: 900;
+  height: 1.4rem;
+  justify-content: center;
+  position: absolute;
+  right: -0.28rem;
+  top: -0.28rem;
+  width: 1.4rem;
+}
+
+.tiq-logo-collapsed .tiq-logo-sparkle {
+  font-size: 0.72rem;
+  height: 1.15rem;
+  right: -0.18rem;
+  top: -0.18rem;
+  width: 1.15rem;
+}
+
+.tiq-logo-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  line-height: 1;
+  transform-origin: left center;
+  transition: all 180ms ease;
+}
+
+.tiq-logo-wordmark {
+  color: var(--tiq-charcoal);
+  font-family: "Outfit", sans-serif;
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  white-space: nowrap;
+}
+
+.tiq-logo-wordmark span {
+  color: var(--tiq-mint);
+}
+
+.tiq-logo-tagline {
+  color: #9aa1af;
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.34em;
+  margin-left: 0.12rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tiq-logo-collapsed .tiq-logo-copy {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.92);
+  width: 0;
 }
 
 div[data-testid="stVerticalBlock"]:has(.tiq-main-expand-anchor) button {
@@ -121,7 +211,7 @@ div[data-testid="stVerticalBlock"]:has(.tiq-main-expand-anchor) button {
   padding: 0.2rem 0.85rem;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-control-rail) button {
+div[data-testid="stVerticalBlock"]:has(.tiq-logo-expanded) button {
   align-items: center;
   background: #ffffff;
   border: 1px solid var(--tiq-border);
@@ -138,7 +228,15 @@ div[data-testid="stVerticalBlock"]:has(.tiq-control-rail) button {
 }
 
 div[data-testid="stVerticalBlock"]:has(.tiq-main-expand-anchor) {
-  margin-bottom: 0.8rem;
+  margin-top: 0.7rem;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-logo-collapsed) {
+  margin-top: 0.3rem;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-logo-expanded) {
+  margin-bottom: 0.25rem;
 }
 
 .tiq-page-title {

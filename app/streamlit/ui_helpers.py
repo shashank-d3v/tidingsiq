@@ -6,6 +6,25 @@ from datetime import datetime, timezone
 import streamlit as st
 
 
+def render_logo(*, is_collapsed: bool = False) -> None:
+    logo_state_class = "tiq-logo-collapsed" if is_collapsed else "tiq-logo-expanded"
+    st.markdown(
+        f"""
+        <div class="tiq-logo {logo_state_class}">
+          <div class="tiq-logo-mark-wrap">
+            <div class="tiq-logo-mark">T</div>
+            <div class="tiq-logo-sparkle" aria-hidden="true">✦</div>
+          </div>
+          <div class="tiq-logo-copy">
+            <div class="tiq-logo-wordmark">Tidings<span>IQ</span></div>
+            <div class="tiq-logo-tagline">Positive Intel</div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def render_metric_card(label: str, value: object) -> None:
     st.markdown(
         f"""
