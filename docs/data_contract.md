@@ -84,7 +84,7 @@ One ingested source record per row.
 - `raw_payload` currently stores selected raw GKG fields rather than the entire original row to keep Bronze practical and debuggable without retaining unnecessary volume
 - Bronze rows older than 45 days should be exportable to GCS without losing row-level traceability
 - archived Bronze objects should be retained for 365 days before deletion
-- current implementation uses a manual archive script plus a Terraform-managed archive bucket
+- current implementation uses the canonical `scripts/archive_bronze.py` worker plus a Terraform-managed archive bucket and optional scheduled Cloud Run execution
 
 ## Silver Contract
 

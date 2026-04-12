@@ -21,6 +21,7 @@ Implemented now:
 - pipeline container path for Cloud Run Job execution
 - applied Terraform automation for Artifact Registry, Cloud Run Job, and Cloud Scheduler
 - reporting Cloud Run Job path and Monitoring-based email notifications
+- Bronze archive Cloud Run Job, scheduler, and Monitoring scaffolding in repository, designed to reuse the pipeline image and service account during rollout
 - pipeline scheduler activated after a warehouse reset and successful post-reset smoke test
 - Streamlit app container and Terraform hosting scaffold for Cloud Run service
 - app hosting path validated once in Cloud Run and then disabled again in the active environment

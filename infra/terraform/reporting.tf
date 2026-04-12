@@ -46,7 +46,7 @@ resource "google_cloud_run_v2_job" "reporting" {
       timeout         = "600s"
 
       containers {
-        image = local.pipeline_container_image
+        image   = local.pipeline_container_image
         command = ["python3"]
         args    = ["scripts/daily_pipeline_report.py"]
 
@@ -146,7 +146,10 @@ resource "google_cloud_scheduler_job" "reporting" {
 }
 
 resource "google_monitoring_notification_channel" "pipeline_email" {
-  count = var.enable_pipeline_reporting && local.enable_notification_email ? 1 : 0
+  count = local.enable_notification_email && (
+    var.enable_pipeline_reporting
+    || var.enable_bronze_archive_automation
+  ) ? 1 : 0
 
   project      = var.project_id
   display_name = "TidingsIQ Pipeline Email"

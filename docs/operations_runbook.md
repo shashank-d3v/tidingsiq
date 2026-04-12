@@ -8,8 +8,10 @@ Current project and region assumptions:
 - region: `asia-south1`
 - pipeline job: `tidingsiq-pipeline`
 - reporting job: `tidingsiq-pipeline-report`
+- Bronze archive job: `tidingsiq-bronze-archive`
 - pipeline scheduler: `tidingsiq-pipeline-schedule`
 - reporting scheduler: `tidingsiq-pipeline-report-schedule`
+- Bronze archive scheduler: `tidingsiq-bronze-archive-schedule`
 
 ## Warehouse Reset
 
@@ -118,6 +120,81 @@ gcloud scheduler jobs describe tidingsiq-pipeline-report-schedule \
   --project=tidingsiq-dev
 ```
 
+Describe the Bronze archive scheduler:
+
+```bash
+gcloud scheduler jobs describe tidingsiq-bronze-archive-schedule \
+  --location=asia-south1 \
+  --project=tidingsiq-dev
+```
+
+## Bronze Archive Operations
+
+Run the deployed Bronze archive job manually in dry-run mode:
+
+```bash
+gcloud run jobs execute tidingsiq-bronze-archive \
+  --region=asia-south1 \
+  --project=tidingsiq-dev \
+  --wait
+```
+
+Inspect recent archive executions:
+
+```bash
+gcloud run jobs executions list \
+  --job=tidingsiq-bronze-archive \
+  --region=asia-south1 \
+  --project=tidingsiq-dev \
+  --limit=5
+```
+
+Inspect archive summary logs:
+
+```bash
+gcloud logging read \
+  'resource.type="cloud_run_job" AND resource.labels.job_name="tidingsiq-bronze-archive" AND textPayload:"BRONZE_ARCHIVE_SUMMARY"' \
+  --project=tidingsiq-dev \
+  --limit=20 \
+  --format='value(textPayload)'
+```
+
+Pause the Bronze archive scheduler during rollout:
+
+```bash
+gcloud scheduler jobs pause tidingsiq-bronze-archive-schedule \
+  --location=asia-south1 \
+  --project=tidingsiq-dev
+```
+
+Resume the Bronze archive scheduler:
+
+```bash
+gcloud scheduler jobs resume tidingsiq-bronze-archive-schedule \
+  --location=asia-south1 \
+  --project=tidingsiq-dev
+```
+
+Trigger the Bronze archive scheduler immediately:
+
+```bash
+gcloud scheduler jobs run tidingsiq-bronze-archive-schedule \
+  --location=asia-south1 \
+  --project=tidingsiq-dev
+```
+
+Check the current eligible Bronze backlog against the archive cutoff:
+
+```bash
+bq query --use_legacy_sql=false "select count(*) as eligible_rows, min(ingested_at) as oldest_eligible_ingested_at from \`tidingsiq-dev.bronze.gdelt_news_raw\` where ingested_at < timestamp_sub(timestamp_trunc(current_timestamp(), day), interval 45 day)"
+```
+
+Validate exported parquet row count for a specific cutoff date:
+
+```bash
+bq query --use_legacy_sql=false "create or replace external table \`tidingsiq-dev.bronze_staging.archive_validation\` options(format='PARQUET', uris=['gs://tidingsiq-dev-tidingsiq-bronze-archive/automated/bronze_gdelt_news_raw/cutoff_date=2026-02-26/*.parquet']); select count(*) as exported_rows from \`tidingsiq-dev.bronze_staging.archive_validation\`"
+```
+
 ## Image and Deployment Debug
 
 Build and push the pipeline image:
@@ -144,6 +221,15 @@ Update the reporting job to the same image:
 
 ```bash
 gcloud run jobs update tidingsiq-pipeline-report \
+  --region=asia-south1 \
+  --project=tidingsiq-dev \
+  --image=asia-south1-docker.pkg.dev/tidingsiq-dev/tidingsiq-pipeline/tidingsiq-bruin:latest
+```
+
+Update the Bronze archive job to the same image:
+
+```bash
+gcloud run jobs update tidingsiq-bronze-archive \
   --region=asia-south1 \
   --project=tidingsiq-dev \
   --image=asia-south1-docker.pkg.dev/tidingsiq-dev/tidingsiq-pipeline/tidingsiq-bruin:latest
@@ -212,3 +298,4 @@ terraform apply
 ```
 
 If the scheduler should stay paused during a rollout, keep `pipeline_schedule_paused = true` in the local `terraform.tfvars` until the manual smoke test is clean.
+For archive rollout, keep `bronze_archive_schedule_paused = true`, `bronze_archive_dry_run = true`, and `bronze_archive_delete_after_export = false` until the dry-run and export-only checks are clean.

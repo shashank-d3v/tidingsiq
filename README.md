@@ -64,6 +64,7 @@ Primary user controls:
 - [GDELT Findings](docs/gdelt_findings.md): verified upstream GKG column layout, current mappings, and source-quality findings
 - [Happy Factor](docs/happy_factor.md): initial scoring approach and validation rules
 - [Roadmap](docs/roadmap.md): public build status and next-step summary
+- [Authoritative Fetching With Controlled Query Cost](docs/authoritative_fetching_query_cost.md): deferred Streamlit serving design for authoritative warehouse-side filtering, counts, and pagination
 - [Deployment Plan](docs/deployment_plan.md): future GCP hosting path for the pipeline and app
 - [Terraform Foundation](infra/terraform/README.md): initial GCP and BigQuery infrastructure scaffold
 - [Bruin Pipeline](pipeline/bruin/README.md): local setup notes, asset behavior, and validation workflow

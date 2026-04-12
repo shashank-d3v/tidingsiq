@@ -60,9 +60,24 @@ output "reporting_scheduler_job_name" {
   value       = var.enable_pipeline_reporting ? google_cloud_scheduler_job.reporting[0].name : null
 }
 
+output "bronze_archive_cloud_run_job_name" {
+  description = "Cloud Run Job name for Bronze archive automation when enabled."
+  value       = var.enable_bronze_archive_automation ? google_cloud_run_v2_job.bronze_archive[0].name : null
+}
+
+output "bronze_archive_scheduler_job_name" {
+  description = "Cloud Scheduler job name for Bronze archive automation when enabled."
+  value       = var.enable_bronze_archive_automation ? google_cloud_scheduler_job.bronze_archive[0].name : null
+}
+
+output "bronze_archive_scheduler_service_account_email" {
+  description = "Service account email used by Cloud Scheduler to invoke the Bronze archive Cloud Run Job when automation is enabled."
+  value       = var.enable_bronze_archive_automation ? google_service_account.bronze_archive_scheduler[0].email : null
+}
+
 output "notification_email_channel_name" {
-  description = "Monitoring email notification channel name when reporting notifications are enabled."
-  value       = var.enable_pipeline_reporting && trimspace(var.notification_email_recipient) != "" ? google_monitoring_notification_channel.pipeline_email[0].name : null
+  description = "Monitoring email notification channel name when reporting or archive notifications are enabled."
+  value       = (var.enable_pipeline_reporting || var.enable_bronze_archive_automation) && trimspace(var.notification_email_recipient) != "" ? google_monitoring_notification_channel.pipeline_email[0].name : null
 }
 
 output "app_artifact_repository_name" {

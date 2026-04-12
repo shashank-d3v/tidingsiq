@@ -22,10 +22,8 @@ from constants import (  # noqa: E402
 from data_access import load_feed, load_pipeline_status  # noqa: E402
 from query_builder import (  # noqa: E402
     FeedQueryConfig,
+    build_visible_feed_state,
     dedupe_story_rows,
-    filter_exploratory_rows,
-    split_feed_rows,
-    summarize_feed,
 )
 from ui_helpers import render_logo, render_pipeline_status  # noqa: E402
 from ui_pages import render_brief, render_methodology, render_pulse  # noqa: E402
@@ -254,34 +252,24 @@ def main() -> None:
             row for row in filtered_rows if str(row.get("serving_date")) == selected_serving_date
         ]
 
-    recommended_rows, more_to_explore_rows = split_feed_rows(filtered_rows)
-    recommended_rows = [
-        row
-        for row in recommended_rows
-        if row.get("happy_factor") is not None
-        and float(row["happy_factor"]) >= float(min_happy_factor)
-    ]
-    more_to_explore_rows = filter_exploratory_rows(
-        more_to_explore_rows,
+    visible_feed_state = build_visible_feed_state(
+        filtered_rows,
         min_happy_factor=float(min_happy_factor),
+        feed_sort_order=feed_sort_order,
     )
-    if feed_sort_order == "Most optimistic first":
-        recommended_rows = list(reversed(recommended_rows))
-        more_to_explore_rows = list(reversed(more_to_explore_rows))
-    visible_rows = recommended_rows + more_to_explore_rows
-    summary = summarize_feed(visible_rows)
 
     with content_container:
         if current_page == PAGE_BRIEF:
             render_brief(
                 lookback_days=lookback_days,
                 feed_sort_order=feed_sort_order,
-                summary=summary,
-                recommended_rows=recommended_rows,
-                more_to_explore_rows=more_to_explore_rows,
+                summary=visible_feed_state.summary,
+                recommended_rows=visible_feed_state.recommended_rows,
+                more_to_explore_rows=visible_feed_state.more_to_explore_rows,
+                more_to_explore_empty_reason=visible_feed_state.more_to_explore_empty_reason,
             )
         elif current_page == PAGE_PULSE:
-            render_pulse(filtered_rows)
+            render_pulse(visible_feed_state.visible_rows)
         else:
             render_methodology()
 

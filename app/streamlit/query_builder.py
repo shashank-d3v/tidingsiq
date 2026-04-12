@@ -36,6 +36,15 @@ class FeedQueryConfig:
     eligible_only: bool = True
 
 
+@dataclass(frozen=True)
+class VisibleFeedState:
+    recommended_rows: list[dict[str, object]]
+    more_to_explore_rows: list[dict[str, object]]
+    visible_rows: list[dict[str, object]]
+    summary: dict[str, float | int]
+    more_to_explore_empty_reason: str | None
+
+
 def _clamp_float(value: float, low: float, high: float) -> float:
     return max(low, min(high, float(value)))
 
@@ -194,8 +203,6 @@ def split_feed_rows(
 
 def filter_exploratory_rows(
     rows: list[dict[str, object]],
-    *,
-    min_happy_factor: float,
 ) -> list[dict[str, object]]:
     safe_rows: list[dict[str, object]] = []
     score_floor = 35.0
@@ -218,6 +225,58 @@ def filter_exploratory_rows(
         safe_rows.append(row)
 
     return sort_feed_rows(safe_rows)
+
+
+def filter_rows_by_min_happy_factor(
+    rows: list[dict[str, object]],
+    *,
+    min_happy_factor: float,
+) -> list[dict[str, object]]:
+    threshold = float(min_happy_factor)
+    return [
+        row
+        for row in rows
+        if row.get("happy_factor") is not None
+        and float(row["happy_factor"]) >= threshold
+    ]
+
+
+def build_visible_feed_state(
+    rows: list[dict[str, object]],
+    *,
+    min_happy_factor: float,
+    feed_sort_order: str,
+) -> VisibleFeedState:
+    recommended_candidates, more_to_explore_candidates = split_feed_rows(rows)
+    safe_more_to_explore_rows = filter_exploratory_rows(more_to_explore_candidates)
+    recommended_rows = filter_rows_by_min_happy_factor(
+        recommended_candidates,
+        min_happy_factor=min_happy_factor,
+    )
+    more_to_explore_rows = filter_rows_by_min_happy_factor(
+        safe_more_to_explore_rows,
+        min_happy_factor=min_happy_factor,
+    )
+
+    if feed_sort_order == "Most optimistic first":
+        recommended_rows = list(reversed(recommended_rows))
+        more_to_explore_rows = list(reversed(more_to_explore_rows))
+
+    visible_rows = recommended_rows + more_to_explore_rows
+    more_to_explore_empty_reason = _resolve_more_to_explore_empty_reason(
+        candidate_rows=more_to_explore_candidates,
+        safe_rows=safe_more_to_explore_rows,
+        visible_rows=more_to_explore_rows,
+        min_happy_factor=min_happy_factor,
+    )
+
+    return VisibleFeedState(
+        recommended_rows=recommended_rows,
+        more_to_explore_rows=more_to_explore_rows,
+        visible_rows=visible_rows,
+        summary=summarize_feed(visible_rows),
+        more_to_explore_empty_reason=more_to_explore_empty_reason,
+    )
 
 
 def sort_feed_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -438,6 +497,27 @@ def build_eligibility_breakdown(
             counts[reason] += 1
 
     return [{"bucket": labels[key], "story_count": counts[key]} for key in labels]
+
+
+def _resolve_more_to_explore_empty_reason(
+    *,
+    candidate_rows: list[dict[str, object]],
+    safe_rows: list[dict[str, object]],
+    visible_rows: list[dict[str, object]],
+    min_happy_factor: float,
+) -> str | None:
+    if visible_rows:
+        return None
+    if not candidate_rows:
+        return "No below-threshold stories matched the current filters."
+    if not safe_rows:
+        return "Below-threshold stories matched the current filters, but the safety screen removed them."
+
+    threshold_label = int(min_happy_factor) if float(min_happy_factor).is_integer() else round(float(min_happy_factor), 1)
+    return (
+        "Below-threshold stories matched the current filters, but none met the current "
+        f"Min Happy Factor of {threshold_label}."
+    )
 
 
 def paginate_rows(

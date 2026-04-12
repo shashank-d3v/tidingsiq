@@ -88,6 +88,8 @@ export TIDINGSIQ_GOLD_TABLE=tidingsiq-dev.gold.positive_news_feed
 
 The app queries only the Gold table and does not reach into Bronze or Silver. It fetches the current lookback window from Gold, then applies `happy_factor`, date, language, and geography filters locally in the Streamlit layer to keep UI interactions responsive.
 
+Current implementation intentionally stays local-first for browsing responsiveness. The planned future direction is documented in [Authoritative Fetching With Controlled Query Cost](../../docs/authoritative_fetching_query_cost.md): move truth-defining filters, counts, Pulse scope, pagination, and filter-option generation into authoritative BigQuery queries while keeping Gold as the only serving source and keeping query cost bounded with short-lived caching.
+
 Current expected columns:
 
 - `source_record_id`

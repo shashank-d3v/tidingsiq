@@ -40,6 +40,7 @@ Operational notes:
 3. Finalize architecture and deployment documentation.
 4. Decide whether to deepen scoring beyond title guardrails using validated GKG fields.
 5. Decide whether the daily summary job should later move from Monitoring-triggered emails to a richer mail-delivery path.
+6. Keep the deferred authoritative-fetching design note available for a later Streamlit serving refactor without changing the current local-first app behavior.
 
 ## Phases Completed
 
@@ -60,3 +61,4 @@ Operational notes:
 - stronger data quality checks and alerting
 - broader positive-feed QA and rule tuning
 - final documentation polish, including an architecture diagram
+- deferred app-serving refactor: move truth-defining filters, counts, Pulse scope, pagination, and filter-option generation into authoritative BigQuery queries with bounded caching and query cost; see [Authoritative Fetching With Controlled Query Cost](authoritative_fetching_query_cost.md)

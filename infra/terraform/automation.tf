@@ -5,9 +5,14 @@ data "google_project" "current" {
 locals {
   automation_region          = coalesce(var.automation_region, var.region)
   artifact_registry_location = coalesce(var.artifact_registry_location, local.automation_region)
-  pipeline_container_image   = trimspace(var.pipeline_container_image) != "" ? trimspace(var.pipeline_container_image) : "${local.artifact_registry_location}-docker.pkg.dev/${var.project_id}/${var.pipeline_artifact_repository_id}/tidingsiq-bruin:latest"
-  pipeline_job_run_uri       = "https://run.googleapis.com/v2/projects/${var.project_id}/locations/${local.automation_region}/jobs/${var.pipeline_job_name}:run"
-  cloud_run_service_agent    = "service-${data.google_project.current.number}@serverless-robot-prod.iam.gserviceaccount.com"
+  enable_pipeline_image_consumers = (
+    var.enable_pipeline_automation
+    || var.enable_pipeline_reporting
+    || var.enable_bronze_archive_automation
+  )
+  pipeline_container_image = trimspace(var.pipeline_container_image) != "" ? trimspace(var.pipeline_container_image) : "${local.artifact_registry_location}-docker.pkg.dev/${var.project_id}/${var.pipeline_artifact_repository_id}/tidingsiq-bruin:latest"
+  pipeline_job_run_uri     = "https://run.googleapis.com/v2/projects/${var.project_id}/locations/${local.automation_region}/jobs/${var.pipeline_job_name}:run"
+  cloud_run_service_agent  = "service-${data.google_project.current.number}@serverless-robot-prod.iam.gserviceaccount.com"
 }
 
 resource "google_service_account" "scheduler" {
@@ -20,7 +25,7 @@ resource "google_service_account" "scheduler" {
 }
 
 resource "google_artifact_registry_repository" "pipeline" {
-  count = var.enable_pipeline_automation ? 1 : 0
+  count = local.enable_pipeline_image_consumers ? 1 : 0
 
   project       = var.project_id
   location      = local.artifact_registry_location
@@ -31,7 +36,7 @@ resource "google_artifact_registry_repository" "pipeline" {
 }
 
 resource "google_artifact_registry_repository_iam_member" "cloud_run_service_agent_reader" {
-  count = var.enable_pipeline_automation ? 1 : 0
+  count = local.enable_pipeline_image_consumers ? 1 : 0
 
   project    = var.project_id
   location   = google_artifact_registry_repository.pipeline[0].location

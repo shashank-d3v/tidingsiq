@@ -83,7 +83,7 @@ Current implementation state:
 - the Bronze archive bucket and its 365-day lifecycle are provisioned in Terraform
 - Silver filters itself to the most recent 90 days
 - Gold filters itself to the most recent 180 days
-- Bronze archive and cleanup runs remain manual through an operations script today
+- the Bronze archive worker is implemented as `scripts/archive_bronze.py` and can run manually or as a dedicated scheduled Cloud Run Job
 
 ### 5. Data Quality Layer
 

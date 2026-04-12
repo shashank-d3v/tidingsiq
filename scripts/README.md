@@ -9,8 +9,11 @@ Exports Bronze rows older than the retention window to GCS and can optionally de
 The script is intentionally explicit:
 
 - it counts eligible rows first
-- it defaults to dry-run behavior when `--dry-run` is provided
-- it deletes rows only when `--delete-after-export` is set
+- it normalizes the cutoff to a stable daily boundary unless an explicit cutoff override is provided
+- it writes to an idempotent archive path partitioned by `cutoff_date=YYYY-MM-DD`
+- it validates exported parquet row count before any delete phase
+- it deletes rows only when `--delete-after-export` is set and `--max-delete-rows` is not exceeded
+- it emits both a JSON summary payload and a compact `BRONZE_ARCHIVE_SUMMARY` line for Cloud Logging and alerting
 
 Example dry run:
 
@@ -18,6 +21,7 @@ Example dry run:
 python3 scripts/archive_bronze.py \
   --project-id tidingsiq-dev \
   --archive-uri-prefix gs://your-bronze-archive-bucket/manual \
+  --run-date 2026-04-12 \
   --dry-run
 ```
 
@@ -26,7 +30,8 @@ Example export without deletion:
 ```bash
 python3 scripts/archive_bronze.py \
   --project-id tidingsiq-dev \
-  --archive-uri-prefix gs://your-bronze-archive-bucket/manual
+  --archive-uri-prefix gs://your-bronze-archive-bucket/manual \
+  --max-delete-rows 20000
 ```
 
 Example export and cleanup:
@@ -35,6 +40,7 @@ Example export and cleanup:
 python3 scripts/archive_bronze.py \
   --project-id tidingsiq-dev \
   --archive-uri-prefix gs://your-bronze-archive-bucket/manual \
+  --max-delete-rows 20000 \
   --delete-after-export
 ```
 
@@ -44,7 +50,7 @@ Requirements:
 - `google-cloud-bigquery` available in the active Python environment
 - pipeline service account or operator identity with access to the Bronze archive bucket
 
-This script is the current manual Bronze retention path. No recurring retention automation is configured yet.
+This script is the canonical Bronze archive worker for both manual runs and the scheduled Cloud Run job path.
 
 ## `daily_pipeline_report.py`
 

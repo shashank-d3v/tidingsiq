@@ -162,6 +162,65 @@ variable "enable_pipeline_reporting" {
   default     = false
 }
 
+variable "enable_bronze_archive_automation" {
+  description = "When true, provisions the Bronze archive Cloud Run Job, scheduler, and Monitoring resources."
+  type        = bool
+  default     = false
+}
+
+variable "bronze_archive_job_name" {
+  description = "Cloud Run Job name for Bronze archive automation."
+  type        = string
+  default     = "tidingsiq-bronze-archive"
+}
+
+variable "bronze_archive_scheduler_name" {
+  description = "Cloud Scheduler job name for Bronze archive automation."
+  type        = string
+  default     = "tidingsiq-bronze-archive-schedule"
+}
+
+variable "bronze_archive_schedule" {
+  description = "Cron schedule for the Bronze archive job."
+  type        = string
+  default     = "15 3 * * *"
+}
+
+variable "bronze_archive_schedule_time_zone" {
+  description = "Time zone for the Bronze archive scheduler."
+  type        = string
+  default     = "Asia/Kolkata"
+}
+
+variable "bronze_archive_schedule_paused" {
+  description = "When true, creates the Bronze archive scheduler in a paused state."
+  type        = bool
+  default     = true
+}
+
+variable "bronze_archive_dry_run" {
+  description = "When true, runs the Bronze archive job in dry-run mode."
+  type        = bool
+  default     = true
+}
+
+variable "bronze_archive_delete_after_export" {
+  description = "When true, deletes eligible Bronze rows after export reconciliation passes."
+  type        = bool
+  default     = false
+}
+
+variable "bronze_archive_max_delete_rows" {
+  description = "Maximum eligible row count allowed before the Bronze archive job aborts the delete phase."
+  type        = number
+  default     = 20000
+
+  validation {
+    condition     = var.bronze_archive_max_delete_rows > 0
+    error_message = "bronze_archive_max_delete_rows must be positive."
+  }
+}
+
 variable "notification_email_recipient" {
   description = "Email address that should receive pipeline failure alerts and daily summary notifications."
   type        = string

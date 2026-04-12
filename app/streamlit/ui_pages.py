@@ -97,6 +97,7 @@ def render_brief(
     summary: dict[str, float | int],
     recommended_rows: list[dict[str, object]],
     more_to_explore_rows: list[dict[str, object]],
+    more_to_explore_empty_reason: str | None = None,
 ) -> None:
     st.markdown(
         '<div class="tiq-page-title">Today\'s Global Optimism</div>',
@@ -158,7 +159,7 @@ def render_brief(
             label="recommended stories",
         )
 
-    if more_to_explore_rows:
+    if more_to_explore_rows or more_to_explore_empty_reason:
         st.markdown("<div style='height:1.5rem;'></div>", unsafe_allow_html=True)
         st.markdown(
             """
@@ -181,19 +182,25 @@ def render_brief(
         )
         st.session_state["explore_page"] = current_explore_page
 
-        explore_columns = st.columns(2)
-        for index, row in enumerate(paginated_explore):
-            with explore_columns[index % 2]:
-                render_article_card(row, compact=True)
+        if not more_to_explore_rows:
+            render_empty_state(
+                more_to_explore_empty_reason
+                or "No exploratory stories matched the current filters."
+            )
+        else:
+            explore_columns = st.columns(2)
+            for index, row in enumerate(paginated_explore):
+                with explore_columns[index % 2]:
+                    render_article_card(row, compact=True)
 
-        render_pagination(
-            state_key="explore_page",
-            current_page=current_explore_page,
-            total_pages=explore_total_pages,
-            total_rows=explore_total_rows,
-            page_size=EXPLORE_PAGE_SIZE,
-            label="exploratory stories",
-        )
+            render_pagination(
+                state_key="explore_page",
+                current_page=current_explore_page,
+                total_pages=explore_total_pages,
+                total_rows=explore_total_rows,
+                page_size=EXPLORE_PAGE_SIZE,
+                label="exploratory stories",
+            )
 
 
 def _render_chart_card(title: str, subtitle: str) -> None:
@@ -212,7 +219,9 @@ def render_pulse(rows: list[dict[str, object]]) -> None:
     st.markdown('<div class="tiq-page-title">Pulse</div>', unsafe_allow_html=True)
 
     if not rows:
-        render_empty_state("No records matched the current filters, so there is nothing to chart.")
+        render_empty_state(
+            "No stories are visible under the current filters, so there is nothing to chart."
+        )
         return
 
     timeline_data = build_timeline_data(rows)
@@ -222,7 +231,7 @@ def render_pulse(rows: list[dict[str, object]]) -> None:
 
     _render_chart_card(
         "Positivity Over Time",
-        "Daily story volume, eligible-story volume, and average happy factor across the current filtered feed.",
+        "Daily story volume, eligible-story volume, and average happy factor across the current visible feed.",
     )
     timeline_left, timeline_right = st.columns(2)
     with timeline_left:
@@ -292,7 +301,7 @@ def render_pulse(rows: list[dict[str, object]]) -> None:
     with chart_left:
         _render_chart_card(
             "Top Positive Sources",
-            "Eligible-story counts in the current filtered window, with average happy factor for context.",
+            "Eligible-story counts within the current visible feed, with average happy factor for context.",
         )
         if source_rankings:
             st.vega_lite_chart(
@@ -329,7 +338,7 @@ def render_pulse(rows: list[dict[str, object]]) -> None:
     with chart_right:
         _render_chart_card(
             "Score Distribution",
-            "How the current filtered stories are distributed across the happy-factor range.",
+            "How the stories currently visible under these filters are distributed across the happy-factor range.",
         )
         st.vega_lite_chart(
             score_distribution,
@@ -366,7 +375,7 @@ def render_pulse(rows: list[dict[str, object]]) -> None:
     st.markdown("<div style='height:0.4rem;'></div>", unsafe_allow_html=True)
     _render_chart_card(
         "Eligibility Breakdown",
-        "How the current filtered feed divides between eligible stories and the persisted exclusion reasons.",
+        "How the current visible feed divides between eligible stories and the persisted exclusion reasons.",
     )
     st.vega_lite_chart(
         eligibility_breakdown,

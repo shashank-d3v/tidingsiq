@@ -82,11 +82,20 @@ terraform apply
 | `pipeline_schedule_time_zone` | No | `Asia/Kolkata` | Time zone for the pipeline schedule |
 | `pipeline_schedule_paused` | No | `true` | Creates the scheduler job paused by default; set to `false` to activate recurring runs |
 | `enable_pipeline_reporting` | No | `false` | Enables the reporting job, reporting scheduler, and Monitoring email notifications |
+| `enable_bronze_archive_automation` | No | `false` | Enables the Bronze archive job, scheduler, and Monitoring alerts |
 | `notification_email_recipient` | No | `""` | Recipient for failure alerts and per-run summary notifications |
 | `reporting_job_name` | No | `tidingsiq-pipeline-report` | Cloud Run Job name for the reporting task |
 | `reporting_scheduler_name` | No | `tidingsiq-pipeline-report-schedule` | Cloud Scheduler job name for the reporting task |
 | `reporting_schedule` | No | `20 */6 * * *` | Cron for the reporting task, aligned 20 minutes after each pipeline window |
 | `reporting_schedule_time_zone` | No | `Asia/Kolkata` | Time zone for the reporting scheduler |
+| `bronze_archive_job_name` | No | `tidingsiq-bronze-archive` | Cloud Run Job name for Bronze archive automation |
+| `bronze_archive_scheduler_name` | No | `tidingsiq-bronze-archive-schedule` | Cloud Scheduler job name for Bronze archive automation |
+| `bronze_archive_schedule` | No | `15 3 * * *` | Daily cron for the Bronze archive job |
+| `bronze_archive_schedule_time_zone` | No | `Asia/Kolkata` | Time zone for the Bronze archive scheduler |
+| `bronze_archive_schedule_paused` | No | `true` | Creates the Bronze archive scheduler paused by default |
+| `bronze_archive_dry_run` | No | `true` | Runs the Bronze archive worker in dry-run mode |
+| `bronze_archive_delete_after_export` | No | `false` | Enables delete-after-export once reconciliation is trusted |
+| `bronze_archive_max_delete_rows` | No | `20000` | Delete guardrail for the Bronze archive worker |
 | `enable_app_hosting` | No | `false` | Enables Artifact Registry and a Cloud Run service for the Streamlit app |
 | `app_artifact_repository_id` | No | `tidingsiq-app` | Artifact Registry repository ID for the app image |
 | `app_container_image` | No | derived | Full image URI for the Streamlit app container |
@@ -130,6 +139,15 @@ If pipeline reporting is enabled, Terraform also provisions:
 - a Monitoring alert policy for pipeline failures
 - a Monitoring alert policy for daily summary delivery
 
+If Bronze archive automation is enabled, Terraform also provisions:
+
+- a dedicated Cloud Run Job that runs `python3 scripts/archive_bronze.py`
+- a scheduler service account with `roles/run.invoker` on the Bronze archive job
+- a Cloud Scheduler HTTP job for the archive cadence
+- a log-based metric for repeated archive failures
+- a log-based metric for delete-enabled backlog detection
+- Monitoring alert policies for repeated failures and backlog accumulation
+
 If app hosting is enabled, Terraform also provisions:
 
 - an Artifact Registry Docker repository for the app image
@@ -145,6 +163,7 @@ Current applied automation state in this project:
 - the email notification channel sends a verification email to the configured recipient
 - the reporting Cloud Run Job is created
 - the daily reporting scheduler is created and active
+- the Bronze archive job path is available in code and defaults to a paused scheduler plus dry-run mode
 - the Streamlit app Artifact Registry repository is created
 - the hosted Streamlit Cloud Run service is created when `enable_app_hosting = true`
 - in the current environment, app hosting can be kept disabled while the UI and security posture are still being finalized
@@ -158,7 +177,7 @@ Current applied automation state in this project:
 - If stricter IAM boundaries are required later, move from dataset-wide editor access to more specific table or routine permissions after the first end-to-end slice is working.
 - If you revisit a multi-environment setup later, see `future_multi_environment.md`.
 - Current retention targets are Bronze 45 days with GCS archive, Silver 90 days, and Gold 180 days.
-- The Bronze archive bucket is now part of Terraform. Export and cleanup operations are still run separately from the pipeline.
+- The Bronze archive bucket is part of Terraform, and the scheduled Bronze archive job reuses the existing pipeline image and service account by design.
 - Pipeline automation remains opt-in in code through `enable_pipeline_automation`, but it is already applied in the current project.
 - Keep the scheduler paused during future rollouts until a manual `gcloud run jobs execute ... --wait` succeeds against the deployed image after any reset or image change.
 - Pipeline reporting uses native Monitoring email notifications, so it does not require a third-party email API secret.
