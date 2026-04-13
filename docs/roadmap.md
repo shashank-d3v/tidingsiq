@@ -32,6 +32,7 @@ Operational notes:
 - the latest source finding is that `TranslationInfo` is empty in the sampled landed GKG rows, so Gold language metadata still depends heavily on deterministic inference and should remain informational rather than a serving gate
 - the current Gold default feed is `is_positive_feed_eligible = true` with `happy_factor >= 65`
 - Monitoring email delivery may still require the recipient to confirm the verification email from GCP
+- the current `Pulse` page now reads warehouse-wide Gold aggregates and is no longer tied to the Brief filter rail
 
 ## Next Steps
 
@@ -61,4 +62,6 @@ Operational notes:
 - stronger data quality checks and alerting
 - broader positive-feed QA and rule tuning
 - final documentation polish, including an architecture diagram
-- deferred app-serving refactor: move truth-defining filters, counts, Pulse scope, pagination, and filter-option generation into authoritative BigQuery queries with bounded caching and query cost; see [Authoritative Fetching With Controlled Query Cost](authoritative_fetching_query_cost.md)
+- precomputed Gold snapshot table for Pulse aggregates to reduce live BigQuery reads on dashboard load
+- progressive Pulse rendering so the page shell appears immediately while slower charts populate incrementally
+- deferred app-serving refactor: move truth-defining Brief filters, counts, pagination, and filter-option generation into authoritative BigQuery queries with bounded caching and query cost; see [Authoritative Fetching With Controlled Query Cost](authoritative_fetching_query_cost.md)

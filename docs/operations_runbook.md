@@ -130,6 +130,11 @@ gcloud scheduler jobs describe tidingsiq-bronze-archive-schedule \
 
 ## Bronze Archive Operations
 
+Current rollout caveat:
+
+- Export-only Bronze archive runs are not yet idempotent across repeated daily executions. If `bronze_archive_dry_run = false` and `bronze_archive_delete_after_export = false`, or if a delete-enabled run exports successfully but fails before delete completes, the next run can export the same old Bronze rows again into a new `cutoff_date=...` path.
+- Keep export-only mode short-lived during rollout, review the emitted `BRONZE_ARCHIVE_SUMMARY` logs closely, and do not treat repeated export-only schedules as a steady-state retention strategy until the archive path gains a persisted high-water mark, non-overlapping export windows, or equivalent reconciliation.
+
 Run the deployed Bronze archive job manually in dry-run mode:
 
 ```bash
@@ -299,3 +304,4 @@ terraform apply
 
 If the scheduler should stay paused during a rollout, keep `pipeline_schedule_paused = true` in the local `terraform.tfvars` until the manual smoke test is clean.
 For archive rollout, keep `bronze_archive_schedule_paused = true`, `bronze_archive_dry_run = true`, and `bronze_archive_delete_after_export = false` until the dry-run and export-only checks are clean.
+Do not leave the archive scheduler running indefinitely in export-only mode as the long-term default, because repeated export-only executions can duplicate already archived Bronze rows under newer cutoff-date prefixes.

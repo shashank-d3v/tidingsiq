@@ -25,3 +25,8 @@ Current `v3` defaults intentionally leave upstream GDELT-derived signal adjustme
 
 - Unit tests cover deterministic score math, URL-status handling, and rollout-script SQL builders.
 - Full `bruin validate` still depends on live BigQuery access and could not complete in the sandboxed environment used for implementation.
+
+## Known Follow-Ups
+
+- `gold.url_validation_results` currently caps fresh validations per run, but its due-for-recheck lookup still reads the full history table before deciding which candidate URLs to process. That is acceptable for the first bounded rollout, but it is not the intended long-term shape once the table grows.
+- When this path is revisited, narrow the lookup to the current candidate `normalized_url` set or move the recheck-due logic into a warehouse-side join/filter so `URL_VALIDATION_MAX_URLS` also bounds the metadata-read cost.

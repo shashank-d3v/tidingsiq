@@ -31,8 +31,8 @@ Serving model:
 
 Primary user controls:
 
-- `happy_factor` threshold filter in the Streamlit UI
-- eligible-feed-only filter in the Streamlit UI
+- Brief lookback, date, language, and geography filters in the Streamlit UI
+- a warehouse-wide `Pulse` page backed by Gold operational aggregates
 
 ## Repository Layout
 

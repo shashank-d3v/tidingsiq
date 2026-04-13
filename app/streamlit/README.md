@@ -3,12 +3,11 @@
 This app is the local-first frontend for TidingsIQ. It queries only `gold.positive_news_feed` and renders three user-facing sections:
 
 - `The Brief` for the editorial feed
-- `Pulse` for live feed analytics
+- `Pulse` for warehouse-wide pipeline and feed health analytics
 - `Methodology` for the warehouse and scoring explainer
 
 The filter rail currently exposes a small set of user-facing controls:
 
-- minimum `happy_factor`
 - lookback window in days
 - date within the currently loaded lookback window
 - detected language
@@ -20,10 +19,12 @@ Current serving constraint:
 - these fields should not be labeled as source language, publisher country, or country of publication
 - the warehouse contract should not use language or article geography as serving gates
 - the app can still filter locally on these informational fields for browsing
-- the app surfaces `Recommended` stories from eligible rows and `More To Explore` from `below_threshold` rows only
-- `More To Explore` also applies an app-side safety screen so obviously disturbing titles do not surface even if they slipped through the current warehouse guardrails
-- the current default minimum score is `65`, softened from the initial `70`
-- feed cards are ordered from least optimistic to most optimistic within each section
+- the Brief now surfaces only the warehouse-defined eligible feed
+- the app no longer exposes a minimum `happy_factor` slider in the Brief because Gold eligibility already defines the feed floor
+- the previous `More To Explore` section has been intentionally retired from the Brief after repeated UX and test-case failures, and is not part of the current product path
+- feed cards are ordered from least optimistic to most optimistic unless the active sort changes that display order
+- the filter rail now applies to `The Brief` browsing experience only
+- `Pulse` no longer reuses the Brief's filtered row set and instead reads warehouse-wide aggregates from Gold operational metrics plus Gold serving-table summaries
 
 ## Local Run
 
@@ -86,9 +87,14 @@ export TIDINGSIQ_GOLD_TABLE=tidingsiq-dev.gold.positive_news_feed
 
 ## Query Contract
 
-The app queries only the Gold table and does not reach into Bronze or Silver. It fetches the current lookback window from Gold, then applies `happy_factor`, date, language, and geography filters locally in the Streamlit layer to keep UI interactions responsive.
+The app queries only Gold-layer tables and does not reach into Bronze or Silver directly from the UI.
 
-Current implementation intentionally stays local-first for browsing responsiveness. The planned future direction is documented in [Authoritative Fetching With Controlled Query Cost](../../docs/authoritative_fetching_query_cost.md): move truth-defining filters, counts, Pulse scope, pagination, and filter-option generation into authoritative BigQuery queries while keeping Gold as the only serving source and keeping query cost bounded with short-lived caching.
+Current serving behavior:
+
+- `The Brief` fetches the current lookback window from Gold's eligible feed, then applies date, language, and geography filters locally in the Streamlit layer to keep browsing interactions responsive
+- `Pulse` reads warehouse-wide Gold aggregates and `gold.pipeline_run_metrics` snapshots, so its charts are intentionally independent from the Brief filter rail
+
+Current implementation intentionally stays local-first for Brief browsing responsiveness. The planned future direction is documented in [Authoritative Fetching With Controlled Query Cost](../../docs/authoritative_fetching_query_cost.md): move truth-defining Brief filters, counts, pagination, and filter-option generation into authoritative BigQuery queries while keeping Gold as the only serving source and keeping query cost bounded with short-lived caching.
 
 Current expected columns:
 

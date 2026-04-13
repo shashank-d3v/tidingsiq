@@ -12,9 +12,7 @@ from app.streamlit.query_builder import (
     build_source_rankings,
     build_timeline_data,
     dedupe_story_rows,
-    filter_exploratory_rows,
     paginate_rows,
-    split_feed_rows,
     summarize_feed,
 )
 
@@ -47,14 +45,12 @@ def _make_row(
 
 
 class QueryBuilderTest(unittest.TestCase):
-    def test_build_feed_query_clamps_with_eligibility_filter(self) -> None:
+    def test_build_feed_query_clamps_lookback_and_row_limit_for_eligible_feed(self) -> None:
         sql, parameters = build_feed_query(
             FeedQueryConfig(
                 table_fqn="tidingsiq-dev.gold.positive_news_feed",
-                min_happy_factor=130,
                 lookback_days=90,
                 row_limit=500,
-                eligible_only=True,
             ),
         )
 
@@ -62,12 +58,13 @@ class QueryBuilderTest(unittest.TestCase):
 
         self.assertIn('serving_date >= date_sub(current_date("utc")', sql.lower())
         self.assertIn("is_positive_feed_eligible = true", sql)
-        self.assertEqual(parameter_map["min_happy_factor"], 100.0)
         self.assertEqual(parameter_map["row_limit"], 200)
         self.assertEqual(parameter_map["lookback_days"], 30)
         self.assertIn("language", sql.lower())
         self.assertIn("mentioned_country_name", sql.lower())
         self.assertIn("exclusion_reason", sql.lower())
+        self.assertNotIn("below_threshold", sql.lower())
+        self.assertNotIn("min_happy_factor", parameter_map)
 
     def test_build_feed_query_has_metadata_columns_but_no_metadata_parameters(self) -> None:
         sql, parameters = build_feed_query(
@@ -108,18 +105,6 @@ class QueryBuilderTest(unittest.TestCase):
         self.assertIn("cast(null as string) as language", sql.lower())
         self.assertIn("cast(null as string) as mentioned_country_name", sql.lower())
 
-    def test_build_feed_query_can_disable_eligibility_filter(self) -> None:
-        sql, _ = build_feed_query(
-            FeedQueryConfig(
-                table_fqn="tidingsiq-dev.gold.positive_news_feed",
-                eligible_only=False,
-            )
-        )
-
-        self.assertIn("with recommended as", sql.lower())
-        self.assertIn("exclusion_reason = 'below_threshold'", sql.lower())
-        self.assertIn("order by happy_factor asc", sql.lower())
-
     def test_summarize_feed_returns_expected_metrics(self) -> None:
         summary = summarize_feed(
             [
@@ -133,26 +118,6 @@ class QueryBuilderTest(unittest.TestCase):
         self.assertEqual(summary["avg_happy_factor"], 72.5)
         self.assertEqual(summary["max_happy_factor"], 81.0)
         self.assertEqual(summary["source_count"], 2)
-
-    def test_split_feed_rows_separates_recommended_and_more_to_explore(self) -> None:
-        recommended, more_to_explore = split_feed_rows(
-            [
-                {"article_id": "a", "is_positive_feed_eligible": True},
-                {
-                    "article_id": "b",
-                    "is_positive_feed_eligible": False,
-                    "exclusion_reason": "below_threshold",
-                },
-                {
-                    "article_id": "c",
-                    "is_positive_feed_eligible": False,
-                    "exclusion_reason": "hard_deny_term",
-                },
-            ]
-        )
-
-        self.assertEqual([row["article_id"] for row in recommended], ["a"])
-        self.assertEqual([row["article_id"] for row in more_to_explore], ["b"])
 
     def test_dedupe_story_rows_keeps_first_story_variant(self) -> None:
         deduped = dedupe_story_rows(
@@ -323,61 +288,15 @@ class QueryBuilderTest(unittest.TestCase):
         self.assertEqual(current_page, 2)
         self.assertEqual(page_rows, [{"id": "10"}])
 
-    def test_filter_exploratory_rows_blocks_disturbing_titles_and_low_tone(self) -> None:
-        filtered = filter_exploratory_rows(
-            [
-                {
-                    "article_id": "safe",
-                    "title": "Local arts festival opens with community support",
-                    "happy_factor": 58.0,
-                    "tone_score": 2.4,
-                    "hard_deny_hit_count": 0,
-                    "soft_deny_hit_count": 0,
-                },
-                {
-                    "article_id": "violent",
-                    "title": "Alleged killer threatened to cut girlfriend's throat out",
-                    "happy_factor": 63.0,
-                    "tone_score": 1.2,
-                    "hard_deny_hit_count": 0,
-                    "soft_deny_hit_count": 0,
-                },
-                {
-                    "article_id": "soft",
-                    "title": "Uplifting update",
-                    "happy_factor": 61.0,
-                    "tone_score": 1.5,
-                    "hard_deny_hit_count": 0,
-                    "soft_deny_hit_count": 1,
-                },
-                {
-                    "article_id": "negative",
-                    "title": "Community reacts to difficult incident",
-                    "happy_factor": 60.0,
-                    "tone_score": -0.4,
-                    "hard_deny_hit_count": 0,
-                    "soft_deny_hit_count": 0,
-                },
-            ],
-        )
-
-        self.assertEqual([row["article_id"] for row in filtered], ["safe", "soft"])
-
     def test_build_visible_feed_state_returns_empty_state_for_no_rows(self) -> None:
         state = build_visible_feed_state(
             [],
-            min_happy_factor=65.0,
             feed_sort_order="Least optimistic first",
         )
 
         self.assertEqual(state.recommended_rows, [])
-        self.assertEqual(state.more_to_explore_rows, [])
         self.assertEqual(state.visible_rows, [])
         self.assertEqual(state.summary["row_count"], 0)
-        self.assertEqual(
-            state.more_to_explore_empty_reason,
-            "No below-threshold stories matched the current filters.",
-        )
         self.assertEqual(build_timeline_data(state.visible_rows), [])
         self.assertEqual(build_score_distribution(state.visible_rows)[0]["story_count"], 0)
 
@@ -387,24 +306,18 @@ class QueryBuilderTest(unittest.TestCase):
                 _make_row("a", happy_factor=68.0, is_positive_feed_eligible=True),
                 _make_row("b", happy_factor=81.0, is_positive_feed_eligible=True),
             ],
-            min_happy_factor=65.0,
             feed_sort_order="Least optimistic first",
         )
 
         self.assertEqual([row["article_id"] for row in state.recommended_rows], ["a", "b"])
-        self.assertEqual(state.more_to_explore_rows, [])
         self.assertEqual(len(state.visible_rows), 2)
         self.assertEqual(state.summary["row_count"], len(state.visible_rows))
         self.assertEqual(
             sum(point["story_count"] for point in build_timeline_data(state.visible_rows)),
             len(state.visible_rows),
         )
-        self.assertEqual(
-            state.more_to_explore_empty_reason,
-            "No below-threshold stories matched the current filters.",
-        )
 
-    def test_build_visible_feed_state_only_exploratory_rows_match_pulse_totals(self) -> None:
+    def test_build_visible_feed_state_hides_non_eligible_rows(self) -> None:
         state = build_visible_feed_state(
             [
                 _make_row(
@@ -421,21 +334,19 @@ class QueryBuilderTest(unittest.TestCase):
                     source_name="Source B",
                 ),
             ],
-            min_happy_factor=40.0,
             feed_sort_order="Least optimistic first",
         )
 
         self.assertEqual(state.recommended_rows, [])
-        self.assertEqual([row["article_id"] for row in state.more_to_explore_rows], ["x", "y"])
+        self.assertEqual(state.visible_rows, [])
         self.assertEqual(state.summary["row_count"], len(state.visible_rows))
         self.assertEqual(build_source_rankings(state.visible_rows), [])
         self.assertEqual(
             sum(bucket["story_count"] for bucket in build_score_distribution(state.visible_rows)),
             len(state.visible_rows),
         )
-        self.assertIsNone(state.more_to_explore_empty_reason)
 
-    def test_build_visible_feed_state_mixed_rows_keeps_brief_and_pulse_in_sync(self) -> None:
+    def test_build_visible_feed_state_mixed_rows_keeps_only_recommended_rows_in_sync(self) -> None:
         state = build_visible_feed_state(
             [
                 _make_row(
@@ -459,14 +370,10 @@ class QueryBuilderTest(unittest.TestCase):
                     serving_date="2026-04-02",
                 ),
             ],
-            min_happy_factor=55.0,
             feed_sort_order="Least optimistic first",
         )
 
-        self.assertEqual(
-            len(state.visible_rows),
-            len(state.recommended_rows) + len(state.more_to_explore_rows),
-        )
+        self.assertEqual([row["article_id"] for row in state.visible_rows], ["rec-1", "rec-2"])
         self.assertEqual(state.summary["row_count"], len(state.visible_rows))
         self.assertEqual(
             sum(point["story_count"] for point in build_timeline_data(state.visible_rows)),
@@ -477,68 +384,88 @@ class QueryBuilderTest(unittest.TestCase):
             len(state.visible_rows),
         )
 
-    def test_build_visible_feed_state_reports_threshold_filtered_explore_rows(self) -> None:
+    def test_build_visible_feed_state_reverses_sort_order_for_recommended_rows(self) -> None:
+        state = build_visible_feed_state(
+            [
+                _make_row("rec-1", happy_factor=72.0, is_positive_feed_eligible=True),
+                _make_row("rec-2", happy_factor=84.0, is_positive_feed_eligible=True),
+            ],
+            feed_sort_order="Most optimistic first",
+        )
+
+        self.assertEqual([row["article_id"] for row in state.recommended_rows], ["rec-2", "rec-1"])
+
+    def test_build_visible_feed_state_sorts_by_most_recent_news(self) -> None:
         state = build_visible_feed_state(
             [
                 _make_row(
-                    "exp-1",
-                    happy_factor=58.0,
-                    is_positive_feed_eligible=False,
-                    exclusion_reason="below_threshold",
-                ),
+                    "rec-older",
+                    happy_factor=88.0,
+                    is_positive_feed_eligible=True,
+                    title="Older",
+                )
+                | {"published_at": datetime(2026, 4, 1, 8, 0, tzinfo=timezone.utc)},
                 _make_row(
-                    "exp-2",
-                    happy_factor=61.0,
-                    is_positive_feed_eligible=False,
-                    exclusion_reason="below_threshold",
-                ),
+                    "rec-newer",
+                    happy_factor=70.0,
+                    is_positive_feed_eligible=True,
+                    title="Newer",
+                )
+                | {"published_at": datetime(2026, 4, 2, 8, 0, tzinfo=timezone.utc)},
             ],
-            min_happy_factor=65.0,
-            feed_sort_order="Least optimistic first",
+            feed_sort_order="Most recent news",
         )
 
-        self.assertEqual(state.more_to_explore_rows, [])
-        self.assertEqual(state.visible_rows, [])
-        self.assertEqual(
-            state.more_to_explore_empty_reason,
-            "Below-threshold stories matched the current filters, but none met the current Min Happy Factor of 65.",
-        )
-        self.assertEqual(
-            sum(point["story_count"] for point in build_timeline_data(state.visible_rows)),
-            0,
-        )
+        self.assertEqual([row["article_id"] for row in state.recommended_rows], ["rec-newer", "rec-older"])
 
-    def test_build_visible_feed_state_reports_safety_filtered_explore_rows(self) -> None:
+    def test_build_visible_feed_state_sorts_by_oldest_news(self) -> None:
         state = build_visible_feed_state(
             [
                 _make_row(
-                    "exp-1",
-                    happy_factor=58.0,
-                    is_positive_feed_eligible=False,
-                    exclusion_reason="below_threshold",
-                    title="Alleged killer threatened to cut girlfriend's throat out",
-                    tone_score=1.2,
-                ),
+                    "rec-newer",
+                    happy_factor=75.0,
+                    is_positive_feed_eligible=True,
+                    title="Newer",
+                )
+                | {"published_at": datetime(2026, 4, 2, 8, 0, tzinfo=timezone.utc)},
                 _make_row(
-                    "exp-2",
-                    happy_factor=60.0,
-                    is_positive_feed_eligible=False,
-                    exclusion_reason="below_threshold",
-                    title="Community reacts to difficult incident",
-                    tone_score=-0.4,
-                ),
+                    "rec-older",
+                    happy_factor=71.0,
+                    is_positive_feed_eligible=True,
+                    title="Older",
+                )
+                | {"published_at": datetime(2026, 4, 1, 8, 0, tzinfo=timezone.utc)},
             ],
-            min_happy_factor=35.0,
-            feed_sort_order="Least optimistic first",
+            feed_sort_order="Oldest news",
         )
 
-        self.assertEqual(state.more_to_explore_rows, [])
+        self.assertEqual([row["article_id"] for row in state.recommended_rows], ["rec-older", "rec-newer"])
+
+    def test_build_visible_feed_state_sorts_by_recent_news_using_string_dates_and_fallbacks(self) -> None:
+        state = build_visible_feed_state(
+            [
+                _make_row(
+                    "fallback-serving-date",
+                    happy_factor=78.0,
+                    is_positive_feed_eligible=True,
+                )
+                | {"published_at": None, "ingested_at": None, "serving_date": "2026-04-01"},
+                _make_row(
+                    "string-published-at",
+                    happy_factor=66.0,
+                    is_positive_feed_eligible=True,
+                )
+                | {"published_at": "2026-04-02T08:00:00+00:00"},
+            ],
+            feed_sort_order="Most recent news",
+        )
+
         self.assertEqual(
-            state.more_to_explore_empty_reason,
-            "Below-threshold stories matched the current filters, but the safety screen removed them.",
+            [row["article_id"] for row in state.recommended_rows],
+            ["string-published-at", "fallback-serving-date"],
         )
 
-    def test_build_visible_feed_state_parity_assertion_hides_non_visible_rows_from_pulse(self) -> None:
+    def test_build_visible_feed_state_keeps_pulse_scope_to_visible_eligible_rows(self) -> None:
         state = build_visible_feed_state(
             [
                 _make_row("rec-1", happy_factor=74.0, is_positive_feed_eligible=True),
@@ -555,7 +482,6 @@ class QueryBuilderTest(unittest.TestCase):
                     exclusion_reason="hard_deny_term",
                 ),
             ],
-            min_happy_factor=65.0,
             feed_sort_order="Least optimistic first",
         )
 

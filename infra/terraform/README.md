@@ -178,6 +178,7 @@ Current applied automation state in this project:
 - If you revisit a multi-environment setup later, see `future_multi_environment.md`.
 - Current retention targets are Bronze 45 days with GCS archive, Silver 90 days, and Gold 180 days.
 - The Bronze archive bucket is part of Terraform, and the scheduled Bronze archive job reuses the existing pipeline image and service account by design.
+- During rollout, export-only archive mode should be treated as transitional rather than steady-state because repeated export-only executions can re-export the same old Bronze rows into newer cutoff-date prefixes until delete succeeds or the worker gains a persisted archival boundary.
 - Pipeline automation remains opt-in in code through `enable_pipeline_automation`, but it is already applied in the current project.
 - Keep the scheduler paused during future rollouts until a manual `gcloud run jobs execute ... --wait` succeeds against the deployed image after any reset or image change.
 - Pipeline reporting uses native Monitoring email notifications, so it does not require a third-party email API secret.

@@ -8,14 +8,16 @@ Deferred future improvement. Not scheduled for current implementation.
 
 Gold should remain the source of truth for which rows match the user's active filters. The app should stop treating a locally filtered subset as if it were the full filtered universe.
 
+This note now applies primarily to `The Brief`. `Pulse` has since been reshaped into a warehouse-wide dashboard backed by Gold operational aggregates rather than the Brief's filtered row scope.
+
 ## Planned Direction
 
 - move truth-defining filters into the BigQuery query layer
 - keep presentational-only state in the app layer
 - replace the current broad lookback fetch with query-per-filter-signature
-- use one authoritative filter signature for rows, counts, and Pulse-style aggregates
+- use one authoritative filter signature for Brief rows, counts, and filter options
 - add server-side pagination instead of paginating a locally cached result set
-- cache rows, counts, Pulse aggregates, and filter options with a short TTL
+- cache rows, counts, and filter options with a short TTL
 - build language, geography, and date options from Gold scope rather than from the first returned page
 
 ## Truth-Defining Filters To Move Into Query Layer
@@ -24,8 +26,6 @@ Gold should remain the source of truth for which rows match the user's active fi
 - serving date
 - language
 - geography
-- minimum `happy_factor`
-- feed segment such as `recommended` vs `more_to_explore`
 
 ## Presentation-Only State To Keep Local
 
@@ -47,7 +47,7 @@ Gold should remain the source of truth for which rows match the user's active fi
 
 ### Phase 1
 
-Move row filtering, counts, and Brief/Pulse scope parity to BigQuery.
+Move Brief row filtering and counts to BigQuery.
 
 ### Phase 2
 
@@ -64,7 +64,6 @@ Consider helper tables or pre-aggregates only if query cost remains too high.
 ## Validation Criteria
 
 - displayed rows and count query always agree for the same filter signature
-- Brief and Pulse use the same authoritative post-filter scope
 - changing a truth-defining filter changes rows and counts consistently
 - filter options do not disappear just because they were absent from the first page
 

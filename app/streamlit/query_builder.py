@@ -14,40 +14,18 @@ OPTIONAL_STRING_COLUMNS = {
     "mentioned_country_resolution_status",
 }
 
-EXPLORATORY_TITLE_DENY_PATTERN = re.compile(
-    (
-        r"\b("
-        r"kill(?:er|ed|ing)?|murder(?:ed|ing)?|manslaughter|"
-        r"shoot(?:ing|ings|er|ers)?|shot|stabb(?:ed|ing)?|"
-        r"rape|suicide|bomb(?:ing)?|throat|meth|"
-        r"foot chase|charges? pile up|accused of serious crimes"
-        r")\b"
-    ),
-    re.IGNORECASE,
-)
-
-
 @dataclass(frozen=True)
 class FeedQueryConfig:
     table_fqn: str
-    min_happy_factor: float = 65.0
     lookback_days: int = 7
     row_limit: int = 25
-    eligible_only: bool = True
 
 
 @dataclass(frozen=True)
 class VisibleFeedState:
     recommended_rows: list[dict[str, object]]
-    more_to_explore_rows: list[dict[str, object]]
     visible_rows: list[dict[str, object]]
     summary: dict[str, float | int]
-    more_to_explore_empty_reason: str | None
-
-
-def _clamp_float(value: float, low: float, high: float) -> float:
-    return max(low, min(high, float(value)))
-
 
 def _clamp_int(value: int, low: int, high: int) -> int:
     return max(low, min(high, int(value)))
@@ -58,62 +36,24 @@ def build_feed_query(
     *,
     available_columns: set[str] | None = None,
 ) -> tuple[str, list[tuple[str, str, object]]]:
-    threshold = _clamp_float(config.min_happy_factor, 0.0, 100.0)
     lookback_days = _clamp_int(config.lookback_days, 1, 30)
     row_limit = _clamp_int(config.row_limit, 1, 200)
-    eligible_only = bool(config.eligible_only)
 
     select_columns = _build_select_columns(available_columns)
 
-    if eligible_only:
-        sql = f"""
+    sql = f"""
 select
 {select_columns}
 from `{config.table_fqn}`
-where happy_factor >= @min_happy_factor
-  and serving_date >= date_sub(current_date("UTC"), interval @lookback_days day)
+where serving_date >= date_sub(current_date("UTC"), interval @lookback_days day)
   and is_positive_feed_eligible = true
 """
-        parameters: list[tuple[str, str, object]] = [
-            ("min_happy_factor", "FLOAT64", threshold),
-            ("lookback_days", "INT64", lookback_days),
-            ("row_limit", "INT64", row_limit),
-        ]
-    else:
-        sql = f"""
-with recommended as (
-  select
-{select_columns}
-  from `{config.table_fqn}`
-  where serving_date >= date_sub(current_date("UTC"), interval @lookback_days day)
-    and is_positive_feed_eligible = true
-  order by happy_factor asc, coalesce(published_at, ingested_at) desc, article_id desc
-  limit @row_limit
-),
-more_to_explore as (
-  select
-{select_columns}
-  from `{config.table_fqn}`
-  where serving_date >= date_sub(current_date("UTC"), interval @lookback_days day)
-    and exclusion_reason = 'below_threshold'
-  order by happy_factor asc, coalesce(published_at, ingested_at) desc, article_id desc
-  limit @row_limit
-)
-select
-  *
-from recommended
-union all
-select
-  *
-from more_to_explore
-"""
-        parameters = [
-            ("lookback_days", "INT64", lookback_days),
-            ("row_limit", "INT64", row_limit),
-        ]
+    parameters: list[tuple[str, str, object]] = [
+        ("lookback_days", "INT64", lookback_days),
+        ("row_limit", "INT64", row_limit),
+    ]
 
-    if eligible_only:
-        sql += """
+    sql += """
 order by happy_factor asc, coalesce(published_at, ingested_at) desc, article_id desc
 limit @row_limit
 """
@@ -188,94 +128,26 @@ def summarize_feed(rows: list[dict[str, object]]) -> dict[str, float | int]:
     }
 
 
-def split_feed_rows(
-    rows: list[dict[str, object]],
-) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
-    rows = dedupe_story_rows(rows)
-    recommended = sort_feed_rows([
-        row for row in rows if bool(row.get("is_positive_feed_eligible")) is True
-    ])
-    more_to_explore = sort_feed_rows([
-        row for row in rows if row.get("exclusion_reason") == "below_threshold"
-    ])
-    return recommended, more_to_explore
-
-
-def filter_exploratory_rows(
-    rows: list[dict[str, object]],
-) -> list[dict[str, object]]:
-    safe_rows: list[dict[str, object]] = []
-    score_floor = 35.0
-
-    for row in rows:
-        happy_factor = _coerce_float(row.get("happy_factor"))
-        tone_score = _coerce_float(row.get("tone_score"))
-        hard_deny_hits = int(row.get("hard_deny_hit_count") or 0)
-        title = str(row.get("title") or "")
-
-        if happy_factor is None or happy_factor < score_floor:
-            continue
-        if tone_score is None or tone_score < 0.0:
-            continue
-        if hard_deny_hits > 0:
-            continue
-        if EXPLORATORY_TITLE_DENY_PATTERN.search(title):
-            continue
-
-        safe_rows.append(row)
-
-    return sort_feed_rows(safe_rows)
-
-
-def filter_rows_by_min_happy_factor(
-    rows: list[dict[str, object]],
-    *,
-    min_happy_factor: float,
-) -> list[dict[str, object]]:
-    threshold = float(min_happy_factor)
-    return [
-        row
-        for row in rows
-        if row.get("happy_factor") is not None
-        and float(row["happy_factor"]) >= threshold
-    ]
-
-
 def build_visible_feed_state(
     rows: list[dict[str, object]],
     *,
-    min_happy_factor: float,
     feed_sort_order: str,
 ) -> VisibleFeedState:
-    recommended_candidates, more_to_explore_candidates = split_feed_rows(rows)
-    safe_more_to_explore_rows = filter_exploratory_rows(more_to_explore_candidates)
-    recommended_rows = filter_rows_by_min_happy_factor(
-        recommended_candidates,
-        min_happy_factor=min_happy_factor,
+    recommended_rows = sort_feed_rows([
+        row
+        for row in dedupe_story_rows(rows)
+        if bool(row.get("is_positive_feed_eligible")) is True
+    ])
+    recommended_rows = sort_rows_for_display(
+        recommended_rows,
+        feed_sort_order=feed_sort_order,
     )
-    more_to_explore_rows = filter_rows_by_min_happy_factor(
-        safe_more_to_explore_rows,
-        min_happy_factor=min_happy_factor,
-    )
-
-    if feed_sort_order == "Most optimistic first":
-        recommended_rows = list(reversed(recommended_rows))
-        more_to_explore_rows = list(reversed(more_to_explore_rows))
-
-    visible_rows = recommended_rows + more_to_explore_rows
-    more_to_explore_empty_reason = _resolve_more_to_explore_empty_reason(
-        candidate_rows=more_to_explore_candidates,
-        safe_rows=safe_more_to_explore_rows,
-        visible_rows=more_to_explore_rows,
-        min_happy_factor=min_happy_factor,
-    )
+    visible_rows = list(recommended_rows)
 
     return VisibleFeedState(
         recommended_rows=recommended_rows,
-        more_to_explore_rows=more_to_explore_rows,
         visible_rows=visible_rows,
         summary=summarize_feed(visible_rows),
-        more_to_explore_empty_reason=more_to_explore_empty_reason,
     )
 
 
@@ -286,10 +158,57 @@ def sort_feed_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
             _coerce_float(row.get("happy_factor"))
             if row.get("happy_factor") is not None
             else float("inf"),
-            -_coerce_timestamp_order(row.get("published_at") or row.get("ingested_at")),
+            -_row_timestamp_order(row),
             str(row.get("article_id") or ""),
         ),
     )
+
+
+def sort_rows_for_display(
+    rows: list[dict[str, object]],
+    *,
+    feed_sort_order: str,
+) -> list[dict[str, object]]:
+    if feed_sort_order == "Most optimistic first":
+        return sorted(
+            rows,
+            key=lambda row: (
+                -(
+                    _coerce_float(row.get("happy_factor"))
+                    if row.get("happy_factor") is not None
+                    else float("-inf")
+                ),
+                -_row_timestamp_order(row),
+                str(row.get("article_id") or ""),
+            ),
+        )
+    if feed_sort_order == "Most recent news":
+        return sorted(
+            rows,
+            key=lambda row: (
+                -_row_timestamp_order(row),
+                -(
+                    _coerce_float(row.get("happy_factor"))
+                    if row.get("happy_factor") is not None
+                    else float("-inf")
+                ),
+                str(row.get("article_id") or ""),
+            ),
+        )
+    if feed_sort_order == "Oldest news":
+        return sorted(
+            rows,
+            key=lambda row: (
+                _row_timestamp_order(row),
+                -(
+                    _coerce_float(row.get("happy_factor"))
+                    if row.get("happy_factor") is not None
+                    else float("-inf")
+                ),
+                str(row.get("article_id") or ""),
+            ),
+        )
+    return list(rows)
 
 
 def dedupe_story_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -497,29 +416,6 @@ def build_eligibility_breakdown(
             counts[reason] += 1
 
     return [{"bucket": labels[key], "story_count": counts[key]} for key in labels]
-
-
-def _resolve_more_to_explore_empty_reason(
-    *,
-    candidate_rows: list[dict[str, object]],
-    safe_rows: list[dict[str, object]],
-    visible_rows: list[dict[str, object]],
-    min_happy_factor: float,
-) -> str | None:
-    if visible_rows:
-        return None
-    if not candidate_rows:
-        return "No below-threshold stories matched the current filters."
-    if not safe_rows:
-        return "Below-threshold stories matched the current filters, but the safety screen removed them."
-
-    threshold_label = int(min_happy_factor) if float(min_happy_factor).is_integer() else round(float(min_happy_factor), 1)
-    return (
-        "Below-threshold stories matched the current filters, but none met the current "
-        f"Min Happy Factor of {threshold_label}."
-    )
-
-
 def paginate_rows(
     rows: list[dict[str, object]],
     *,
@@ -557,4 +453,27 @@ def _coerce_timestamp_order(value: object) -> float:
         if value.tzinfo is None:
             return value.timestamp()
         return value.astimezone().timestamp()
+    if isinstance(value, date):
+        return datetime(value.year, value.month, value.day).timestamp()
+    if isinstance(value, str) and value.strip():
+        normalized_value = value.strip().replace("Z", "+00:00")
+        try:
+            parsed = datetime.fromisoformat(normalized_value)
+        except ValueError:
+            return 0.0
+        if parsed.tzinfo is None:
+            return parsed.timestamp()
+        return parsed.astimezone().timestamp()
+    return 0.0
+
+
+def _row_timestamp_order(row: dict[str, object]) -> float:
+    for candidate in (
+        row.get("published_at"),
+        row.get("ingested_at"),
+        row.get("serving_date"),
+    ):
+        timestamp = _coerce_timestamp_order(candidate)
+        if timestamp > 0:
+            return timestamp
     return 0.0
