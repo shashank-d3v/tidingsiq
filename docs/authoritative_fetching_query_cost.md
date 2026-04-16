@@ -31,7 +31,7 @@ This note now applies primarily to `The Brief`. `Pulse` has since been reshaped 
 
 - current page state
 - card layout
-- sidebar and expansion state
+- inline control layout and expansion state
 - page chrome
 - minor display ordering only if it does not change dataset membership
 

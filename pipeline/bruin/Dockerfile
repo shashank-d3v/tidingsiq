@@ -15,7 +15,11 @@ WORKDIR /workspace
 
 COPY pipeline/bruin/pyproject.toml ./pipeline/bruin/pyproject.toml
 COPY pipeline/bruin/uv.lock ./pipeline/bruin/uv.lock
-RUN pip install "pandas>=2.2.0" "google-cloud-bigquery>=3.25.0"
+RUN pip install \
+    "google-cloud-bigquery>=3.25.0" \
+    "lingua-language-detector>=2.1.1" \
+    "pandas>=2.2.0" \
+    "pycountry>=24.6.1"
 
 COPY pipeline ./pipeline
 COPY scripts ./scripts

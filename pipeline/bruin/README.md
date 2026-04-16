@@ -110,6 +110,7 @@ Current implementation notes:
 - Silver keeps deterministic duplicate flags so Gold can expose only canonical rows.
 - Gold computes `base_happy_factor`, final `happy_factor`, and `is_positive_feed_eligible`.
 - Gold uses `gold.positive_feed_guardrail_terms` for allow, soft deny, and hard deny title rules.
+- Gold Python merge loads such as `gold.url_validation_results` use `dlt` and require the operational `gold_staging` dataset to exist in the same BigQuery location as `gold`.
 - Silver retains unresolved positive and negative signal placeholders internally, but Gold does not expose them until the mappings are validated.
 - Bronze and Silver now treat `language` as native-first and inferred-second, with explicit resolution status
 - Bronze and Silver use `mentioned_country` for article geography from `V2Locations`; they do not model publisher country
@@ -147,6 +148,7 @@ Current conclusion:
 - Gold can carry language and article-geography metadata without using them as serving-layer dependencies
 - those Gold metadata fields should not be presented as publisher country or source language
 - the deployed Cloud Run path is now validated end to end; the current quality gap is upstream metadata sparsity, not pipeline execution
+- the `dlt`-backed Gold Python load path is now also validated end to end after provisioning `gold_staging` and correcting nullable integer load dtypes for `gold.url_validation_results`
 - the default app-facing feed should now use `is_positive_feed_eligible = true`, not score alone
 - the current default serving threshold is `65`, softened from the initial `70`
 

@@ -24,20 +24,22 @@ Completed:
 
 Operational notes:
 - `bronze_staging` is a supporting operational dataset for the Bronze merge load path
+- `gold_staging` is a supporting operational dataset for Gold merge loads driven by `dlt`
 - the pipeline Cloud Run Job currently uses `2Gi` memory
 - the pipeline scheduler now runs every 6 hours in `Asia/Kolkata`
 - a manual Cloud Run execution succeeded on `2026-04-06` after redeploying the updated pipeline image
 - a post-reset manual Cloud Run execution succeeded on `2026-04-07` before the scheduler was activated
+- a manual Cloud Run execution succeeded on `2026-04-16` after provisioning `gold_staging`, correcting the nullable integer load shape for `gold.url_validation_results`, and recreating `gold.positive_news_feed_v3_shadow` with the expected partitioning
 - hosted app deployment is currently disabled in the active environment
 - the latest source finding is that `TranslationInfo` is empty in the sampled landed GKG rows, so Gold language metadata still depends heavily on deterministic inference and should remain informational rather than a serving gate
 - the current Gold default feed is `is_positive_feed_eligible = true` with `happy_factor >= 65`
 - Monitoring email delivery may still require the recipient to confirm the verification email from GCP
-- the current `Pulse` page now reads warehouse-wide Gold aggregates and is no longer tied to the Brief filter rail
+- the current `Pulse` page now reads warehouse-wide Gold aggregates and is no longer tied to the Brief's inline compact controls
 
 ## Next Steps
 
 1. Improve tests, security, and reviewability for final portfolio presentation.
-2. Integrate the final Streamlit UI design.
+2. Integrate the final Streamlit UI design, including the inline compact Brief filter and sort controls beside the `Recommended` section header.
 3. Finalize architecture and deployment documentation.
 4. Decide whether to deepen scoring beyond title guardrails using validated GKG fields.
 5. Decide whether the daily summary job should later move from Monitoring-triggered emails to a richer mail-delivery path.

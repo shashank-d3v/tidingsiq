@@ -406,35 +406,137 @@ div[data-testid="stElementContainer"]:has(.tiq-masthead-anchor) {
   margin-bottom: 0.25rem;
 }
 
-.tiq-sort-control-anchor {
+.tiq-brief-filter-bar-anchor {
   display: block;
-  min-height: 0.35rem;
+  min-height: 0.15rem;
 }
 
-.tiq-sort-inline-label {
-  color: #676b63;
-  font-family: "Inter", sans-serif;
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  line-height: 2.65rem;
-  text-transform: uppercase;
-  white-space: nowrap;
+div[data-testid="stVerticalBlock"]:has(.tiq-brief-filter-bar-anchor) {
+  padding-top: 0.38rem;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-sort-control-anchor) {
-  padding-top: 0.15rem;
+div[data-testid="stVerticalBlock"]:has(.tiq-brief-filter-bar-anchor) > div[data-testid="stHorizontalBlock"] {
+  align-items: center;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-sort-control-anchor) [data-testid="stSelectbox"] {
+div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor),
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor),
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor),
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) {
+  position: relative;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) [data-testid="stSegmentedControl"],
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) [data-testid="stSegmentedControl"],
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"],
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] {
   margin-bottom: 0;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-sort-control-anchor) [data-baseweb="select"] > div {
-  background: rgba(255, 255, 255, 0.92) !important;
-  border-color: #ddd8ca !important;
+div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) [data-baseweb="segmented-control"] {
+  background: #f5f6fa;
+  border: 1px solid #eaedf3;
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 8px 24px rgba(21, 21, 21, 0.035);
+  display: flex;
+  gap: 0.14rem;
+  padding: 0.22rem;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) [data-baseweb="segmented-control"] button {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+  color: #9aa2ae !important;
+  font-family: "Inter", sans-serif !important;
+  font-size: 0.8rem !important;
+  font-weight: 800 !important;
+  height: 1.84rem !important;
+  min-width: 2.32rem !important;
+  padding: 0 0.48rem !important;
+  transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) [data-baseweb="segmented-control"] button[aria-pressed="true"] {
+  background: #ffffff !important;
+  box-shadow: 0 5px 14px rgba(21, 21, 21, 0.12) !important;
+  color: var(--tiq-charcoal) !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) [data-baseweb="segmented-control"] button[aria-pressed="false"]:hover {
+  color: var(--tiq-charcoal) !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] button,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] button {
+  align-items: center !important;
+  background: #f5f6fa !important;
+  border: 1px solid #eaedf3 !important;
   border-radius: 999px !important;
-  min-height: 2.7rem !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 8px 24px rgba(21, 21, 21, 0.035) !important;
+  color: #8f97a4 !important;
+  display: inline-flex !important;
+  font-family: "Inter", sans-serif !important;
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+  height: 2.34rem !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  padding: 0 0.86rem !important;
+  transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease !important;
+  white-space: nowrap !important;
+  width: 100% !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] button:hover,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] button:hover {
+  background: #ffffff !important;
+  box-shadow: 0 5px 14px rgba(21, 21, 21, 0.1) !important;
+  color: var(--tiq-charcoal) !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] button:disabled,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] button:disabled {
+  color: #bcc2ca !important;
+  opacity: 1 !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) [data-baseweb="segmented-control"] {
+  background: var(--tiq-charcoal);
+  border: 1px solid rgba(21, 21, 21, 0.96);
+  border-radius: 999px;
+  box-shadow: 0 12px 28px rgba(21, 21, 21, 0.18);
+  display: flex;
+  gap: 0.18rem;
+  padding: 0.22rem;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) [data-baseweb="segmented-control"] button {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+  color: #8d929c !important;
+  flex: 1 1 0;
+  font-family: "Inter", sans-serif !important;
+  font-size: 0.84rem !important;
+  font-weight: 800 !important;
+  height: 1.88rem !important;
+  min-width: 0 !important;
+  padding: 0 0.7rem !important;
+  transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease !important;
+  white-space: nowrap !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) [data-baseweb="segmented-control"] button[aria-pressed="true"] {
+  background: var(--tiq-mint) !important;
+  box-shadow: 0 5px 14px rgba(0, 201, 117, 0.24) !important;
+  color: #053d28 !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) [data-baseweb="segmented-control"] button[aria-pressed="false"]:hover {
+  color: #ffffff !important;
 }
 
 .tiq-section-divider {
@@ -877,6 +979,24 @@ div[data-testid="stVerticalBlock"]:has(.tiq-pagination-anchor) .stButton button 
   .tiq-page-title {
     font-size: 2.35rem;
     white-space: normal;
+  }
+
+  div[data-testid="stVerticalBlock"]:has(.tiq-brief-filter-bar-anchor) > div[data-testid="stHorizontalBlock"] {
+    flex-wrap: wrap;
+    row-gap: 0.55rem;
+  }
+
+  div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) [data-baseweb="segmented-control"] button,
+  div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) [data-baseweb="segmented-control"] button {
+    font-size: 0.74rem !important;
+    height: 1.82rem !important;
+    padding: 0 0.46rem !important;
+  }
+
+  div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] button,
+  div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] button {
+    font-size: 0.78rem !important;
+    height: 2.26rem !important;
   }
 
   .tiq-status-chip {

@@ -37,11 +37,10 @@ from ui_styles import APP_CSS  # noqa: E402
 def _initialize_state() -> None:
     st.session_state.setdefault("current_page", PAGE_BRIEF)
     st.session_state.setdefault("recommended_page", 1)
-    st.session_state.setdefault("sidebar_collapsed", False)
-    st.session_state.setdefault("feed_sort_order", "Least optimistic first")
+    st.session_state.setdefault("lookback_days", LOOKBACK_OPTIONS[2])
+    st.session_state.setdefault("feed_sort_order", "Most optimistic first")
     st.session_state.setdefault("selected_languages", [])
     st.session_state.setdefault("selected_geographies", [])
-    st.session_state.setdefault("selected_serving_date", "All")
     st.session_state.setdefault("cached_rows", [])
     st.session_state.setdefault("cached_lookback_days", None)
 
@@ -77,11 +76,11 @@ def main() -> None:
     current_page = str(st.session_state.get("current_page", PAGE_BRIEF))
     lookback_days = int(st.session_state.get("lookback_days", LOOKBACK_OPTIONS[0]))
     feed_sort_order = str(
-        st.session_state.get("feed_sort_order", "Least optimistic first")
+        st.session_state.get("feed_sort_order", "Most optimistic first")
     )
-    if lookback_days == 1 and feed_sort_order in {"Most recent news", "Oldest news"}:
-        st.session_state["feed_sort_order"] = "Least optimistic first"
-        feed_sort_order = "Least optimistic first"
+    if feed_sort_order not in {"Most optimistic first", "Least optimistic first"}:
+        st.session_state["feed_sort_order"] = "Most optimistic first"
+        feed_sort_order = "Most optimistic first"
     rows: list[dict[str, object]] = []
 
     def _row_language(row: dict[str, object]) -> str:
@@ -100,7 +99,6 @@ def main() -> None:
         rows = _load_cached_brief_rows(lookback_days)
         selected_languages = list(st.session_state.get("selected_languages", []))
         selected_geographies = list(st.session_state.get("selected_geographies", []))
-        selected_serving_date = str(st.session_state.get("selected_serving_date", "All"))
 
         language_options = sorted(
             {lang for lang in (_row_language(row) for row in rows) if lang != "Unknown"}
@@ -108,29 +106,20 @@ def main() -> None:
         geography_options = sorted(
             {geo for geo in (_row_geography(row) for row in rows) if geo != "Unknown"}
         )
-        serving_date_options = sorted(
-            {
-                str(row.get("serving_date"))
-                for row in rows
-                if row.get("serving_date") is not None
-            },
-            reverse=True,
-        )
         st.session_state["selected_languages"] = [
             lang for lang in selected_languages if lang in language_options
         ]
         st.session_state["selected_geographies"] = [
             geo for geo in selected_geographies if geo in geography_options
         ]
-        if selected_serving_date != "All" and selected_serving_date not in serving_date_options:
-            st.session_state["selected_serving_date"] = "All"
-            selected_serving_date = "All"
+        selected_languages = list(st.session_state["selected_languages"])
+        selected_geographies = list(st.session_state["selected_geographies"])
 
         filter_signature = (
             lookback_days,
             tuple(sorted(selected_languages)),
             tuple(sorted(selected_geographies)),
-            selected_serving_date,
+            feed_sort_order,
         )
         if st.session_state.get("filter_signature") != filter_signature:
             st.session_state["filter_signature"] = filter_signature
@@ -138,7 +127,8 @@ def main() -> None:
     else:
         selected_languages = []
         selected_geographies = []
-        selected_serving_date = "All"
+        language_options = []
+        geography_options = []
 
     pulse_dashboard = None
     if current_page == PAGE_PULSE:
@@ -168,10 +158,6 @@ def main() -> None:
         filtered_rows = [
             row for row in filtered_rows if _row_geography(row) in selected_geo_set
         ]
-    if selected_serving_date != "All":
-        filtered_rows = [
-            row for row in filtered_rows if str(row.get("serving_date")) == selected_serving_date
-        ]
 
     visible_feed_state = build_visible_feed_state(
         filtered_rows,
@@ -180,8 +166,8 @@ def main() -> None:
 
     if current_page == PAGE_BRIEF:
         render_brief(
-            lookback_days=lookback_days,
-            feed_sort_order=feed_sort_order,
+            language_options=language_options,
+            geography_options=geography_options,
             summary=visible_feed_state.summary,
             recommended_rows=visible_feed_state.recommended_rows,
         )

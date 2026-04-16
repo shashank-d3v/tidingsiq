@@ -3,7 +3,7 @@
 This directory contains the first infrastructure slice for TidingsIQ. It provisions the minimum GCP resources needed to support the data pipeline and app:
 
 - BigQuery datasets: `bronze`, `silver`, `gold`
-- operational BigQuery dataset: `bronze_staging`
+- operational BigQuery datasets: `bronze_staging`, `gold_staging`
 - Bronze archive bucket with lifecycle deletion after the retention window
 - pipeline service account for Bruin workloads
 - app service account for Streamlit reads
@@ -108,7 +108,7 @@ terraform apply
 
 Pipeline service account:
 - project role: `roles/bigquery.jobUser`
-- dataset role on `bronze`, `bronze_staging`, `silver`, `gold`: `roles/bigquery.dataEditor`
+- dataset role on `bronze`, `bronze_staging`, `silver`, `gold`, `gold_staging`: `roles/bigquery.dataEditor`
 - bucket role on Bronze archive bucket: `roles/storage.objectAdmin`
 
 App service account:
@@ -119,7 +119,7 @@ This is the minimum working split for the planned architecture:
 - the pipeline can create and update warehouse objects
 - the app can run query jobs but only read the serving dataset
 
-`bronze_staging` exists only to support the Bronze merge load path used by the current Bruin ingestion flow. It is not part of the logical Bronze/Silver/Gold contract exposed in the docs and app.
+`bronze_staging` and `gold_staging` exist only to support operational merge/staging load paths. They are not part of the logical Bronze/Silver/Gold contract exposed in the docs and app.
 
 Terraform operator or CI identity still needs permission to create and manage the archive bucket and lifecycle rules.
 
@@ -172,7 +172,7 @@ Current applied automation state in this project:
 
 - This repository currently targets a single active environment.
 - Logical dataset IDs are intentionally plain: `bronze`, `silver`, and `gold`.
-- `bronze_staging` is a supporting operational dataset used by the Bronze load path.
+- `bronze_staging` and `gold_staging` are supporting operational datasets used by the current merge load paths.
 - `delete_contents_on_destroy` is disabled to avoid accidental dataset deletion behavior.
 - If stricter IAM boundaries are required later, move from dataset-wide editor access to more specific table or routine permissions after the first end-to-end slice is working.
 - If you revisit a multi-environment setup later, see `future_multi_environment.md`.

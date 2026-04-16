@@ -36,15 +36,27 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import os
+from pathlib import Path
+import sys
 from typing import Any
 
 import pandas as pd
 
-from pipeline.bruin.url_validation_v3 import (
-    is_recheck_due,
-    is_syntactically_valid_url,
-    validate_url,
-)
+try:
+    from pipeline.bruin.url_validation_v3 import (
+        is_recheck_due,
+        is_syntactically_valid_url,
+        validate_url,
+    )
+except ModuleNotFoundError:
+    BRUIN_ROOT = Path(__file__).resolve().parents[2]
+    if str(BRUIN_ROOT) not in sys.path:
+        sys.path.insert(0, str(BRUIN_ROOT))
+    from url_validation_v3 import (  # type: ignore[no-redef]
+        is_recheck_due,
+        is_syntactically_valid_url,
+        validate_url,
+    )
 
 
 DEFAULT_SILVER_TABLE = "silver.gdelt_news_refined"
@@ -110,7 +122,7 @@ def materialize(**kwargs: Any) -> pd.DataFrame:
             }
         )
 
-    return pd.DataFrame.from_records(rows)
+    return _records_dataframe(rows)
 
 
 def _import_bigquery():
@@ -218,7 +230,12 @@ from `{results_table_fqn}`
 
 
 def _empty_dataframe() -> pd.DataFrame:
-    return pd.DataFrame(
+    return _records_dataframe([])
+
+
+def _records_dataframe(rows: list[dict[str, object]]) -> pd.DataFrame:
+    dataframe = pd.DataFrame.from_records(
+        rows,
         columns=[
             "normalized_url",
             "checked_at",
@@ -226,5 +243,8 @@ def _empty_dataframe() -> pd.DataFrame:
             "http_status_code",
             "redirect_count",
             "status",
-        ]
+        ],
     )
+    for column in ("http_status_code", "redirect_count"):
+        dataframe[column] = dataframe[column].astype("Int64")
+    return dataframe

@@ -123,7 +123,7 @@ variable "pipeline_job_parallelism" {
 variable "pipeline_job_memory_limit" {
   description = "Memory limit for the Cloud Run Job container."
   type        = string
-  default     = "2Gi"
+  default     = "4Gi"
 }
 
 variable "pipeline_gdelt_max_files" {

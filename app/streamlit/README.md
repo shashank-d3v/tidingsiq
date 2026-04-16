@@ -6,12 +6,12 @@ This app is the local-first frontend for TidingsIQ. It queries only `gold.positi
 - `Pulse` for warehouse-wide pipeline and feed health analytics
 - `Methodology` for the warehouse and scoring explainer
 
-The filter rail currently exposes a small set of user-facing controls:
+The Brief filter and sorting controls are intended to live inline with the `Recommended` section header. The compact control bar should expose:
 
 - lookback window in days
-- date within the currently loaded lookback window
 - detected language
 - mentioned geography
+- presentation sort order
 
 Current serving constraint:
 
@@ -22,8 +22,8 @@ Current serving constraint:
 - the Brief now surfaces only the warehouse-defined eligible feed
 - the app no longer exposes a minimum `happy_factor` slider in the Brief because Gold eligibility already defines the feed floor
 - the previous `More To Explore` section has been intentionally retired from the Brief after repeated UX and test-case failures, and is not part of the current product path
-- feed cards are ordered from least optimistic to most optimistic unless the active sort changes that display order
-- the filter rail now applies to `The Brief` browsing experience only
+- feed cards default to most optimistic first unless the active sort changes that display order
+- the inline compact controls apply to `The Brief` browsing experience only
 - `Pulse` no longer reuses the Brief's filtered row set and instead reads warehouse-wide aggregates from Gold operational metrics plus Gold serving-table summaries
 
 ## Local Run
@@ -91,8 +91,8 @@ The app queries only Gold-layer tables and does not reach into Bronze or Silver 
 
 Current serving behavior:
 
-- `The Brief` fetches the current lookback window from Gold's eligible feed, then applies date, language, and geography filters locally in the Streamlit layer to keep browsing interactions responsive
-- `Pulse` reads warehouse-wide Gold aggregates and `gold.pipeline_run_metrics` snapshots, so its charts are intentionally independent from the Brief filter rail
+- `The Brief` fetches the current lookback window from Gold's eligible feed, then applies language and geography filters plus presentation sorting locally in the Streamlit layer to keep browsing interactions responsive
+- `Pulse` reads warehouse-wide Gold aggregates and `gold.pipeline_run_metrics` snapshots, so its charts are intentionally independent from the Brief's inline compact controls
 
 Current implementation intentionally stays local-first for Brief browsing responsiveness. The planned future direction is documented in [Authoritative Fetching With Controlled Query Cost](../../docs/authoritative_fetching_query_cost.md): move truth-defining Brief filters, counts, pagination, and filter-option generation into authoritative BigQuery queries while keeping Gold as the only serving source and keeping query cost bounded with short-lived caching.
 

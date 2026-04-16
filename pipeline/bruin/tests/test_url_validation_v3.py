@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 import unittest
 from urllib.error import HTTPError
 
+from pipeline.bruin.assets.gold.url_validation_results import _records_dataframe
 from pipeline.bruin.url_validation_v3 import (
     STATUS_BROKEN,
     STATUS_REDIRECT_LOOP,
@@ -137,6 +138,31 @@ class UrlValidationV3Test(unittest.TestCase):
         outcome = validate_url("https://example.com/slow", opener=opener)
 
         self.assertEqual(outcome.status, STATUS_TIMEOUT)
+
+    def test_records_dataframe_keeps_nullable_integer_columns(self) -> None:
+        dataframe = _records_dataframe(
+            [
+                {
+                    "normalized_url": "https://example.com/a",
+                    "checked_at": datetime(2026, 4, 16, tzinfo=timezone.utc),
+                    "final_url": "https://example.com/a",
+                    "http_status_code": 200,
+                    "redirect_count": 0,
+                    "status": STATUS_VALID,
+                },
+                {
+                    "normalized_url": "https://example.com/b",
+                    "checked_at": datetime(2026, 4, 16, tzinfo=timezone.utc),
+                    "final_url": None,
+                    "http_status_code": None,
+                    "redirect_count": 1,
+                    "status": STATUS_TIMEOUT,
+                },
+            ]
+        )
+
+        self.assertEqual(str(dataframe["http_status_code"].dtype), "Int64")
+        self.assertEqual(str(dataframe["redirect_count"].dtype), "Int64")
 
 
 if __name__ == "__main__":

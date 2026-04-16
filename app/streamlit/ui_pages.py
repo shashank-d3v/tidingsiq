@@ -4,7 +4,7 @@ import html
 
 import streamlit as st
 
-from constants import RECOMMENDED_PAGE_SIZE
+from constants import LOOKBACK_OPTIONS, RECOMMENDED_PAGE_SIZE
 from query_builder import paginate_rows
 from ui_helpers import (
     format_float,
@@ -98,10 +98,131 @@ def _render_page_masthead(
         # Date intentionally hidden for now pending the next masthead iteration.
 
 
+def _format_lookback_option(days: int) -> str:
+    if days == 1:
+        return "24h"
+    return f"{days}d"
+
+
+def _format_sort_option(sort_order: str) -> str:
+    return {
+        "Most optimistic first": "Most Optimism",
+        "Least optimistic first": "Least Optimism",
+    }.get(sort_order, sort_order)
+
+
+def _format_filter_trigger(
+    *,
+    prefix: str,
+    placeholder: str,
+    selected: list[str],
+) -> str:
+    if len(selected) == 1:
+        value = selected[0]
+    elif selected:
+        value = f"{len(selected)} selected"
+    else:
+        value = placeholder
+    return f"{prefix}  {value}"
+
+
+def _render_multi_filter_popover(
+    *,
+    label: str,
+    options: list[str],
+    state_key: str,
+    trigger_prefix: str,
+    placeholder: str,
+) -> None:
+    option_set = set(options)
+    selected = [
+        str(value)
+        for value in st.session_state.get(state_key, [])
+        if str(value) in option_set
+    ]
+    trigger_label = _format_filter_trigger(
+        prefix=trigger_prefix,
+        placeholder=placeholder,
+        selected=selected,
+    )
+
+    with st.popover(
+        trigger_label,
+        use_container_width=True,
+        disabled=not options,
+    ):
+        st.multiselect(
+            label,
+            options=options,
+            key=state_key,
+            placeholder=placeholder,
+            label_visibility="collapsed",
+        )
+        if selected and st.button(
+            f"Clear {label.lower()}",
+            key=f"{state_key}_clear",
+            width="stretch",
+        ):
+            st.session_state[state_key] = []
+            st.rerun()
+
+
+def _render_brief_filter_bar(
+    *,
+    language_options: list[str],
+    geography_options: list[str],
+) -> None:
+    sort_options = ["Most optimistic first", "Least optimistic first"]
+
+    st.markdown('<div class="tiq-brief-filter-bar-anchor"></div>', unsafe_allow_html=True)
+    lookback_col, language_col, geography_col, sort_col = st.columns(
+        [1.22, 1.18, 1.18, 1.72],
+        gap="small",
+    )
+    with lookback_col:
+        st.markdown('<div class="tiq-lookback-control-anchor"></div>', unsafe_allow_html=True)
+        st.segmented_control(
+            "Lookback",
+            options=LOOKBACK_OPTIONS,
+            key="lookback_days",
+            format_func=_format_lookback_option,
+            label_visibility="collapsed",
+            width="stretch",
+        )
+    with language_col:
+        st.markdown('<div class="tiq-language-control-anchor"></div>', unsafe_allow_html=True)
+        _render_multi_filter_popover(
+            label="Language",
+            options=language_options,
+            state_key="selected_languages",
+            trigger_prefix="A",
+            placeholder="All Languages",
+        )
+    with geography_col:
+        st.markdown('<div class="tiq-geography-control-anchor"></div>', unsafe_allow_html=True)
+        _render_multi_filter_popover(
+            label="Region",
+            options=geography_options,
+            state_key="selected_geographies",
+            trigger_prefix="G",
+            placeholder="All Regions",
+        )
+    with sort_col:
+        st.markdown('<div class="tiq-feed-sort-control-anchor"></div>', unsafe_allow_html=True)
+        st.segmented_control(
+            "Sort feed",
+            options=sort_options,
+            key="feed_sort_order",
+            format_func=_format_sort_option,
+            label_visibility="collapsed",
+            width="stretch",
+        )
+
+
 def render_brief(
     *,
-    lookback_days: int,
-    feed_sort_order: str,
+    language_options: list[str],
+    geography_options: list[str],
     summary: dict[str, float | int],
     recommended_rows: list[dict[str, object]],
 ) -> None:
@@ -141,7 +262,7 @@ def render_brief(
 
     st.markdown("<div style='height:0.8rem;'></div>", unsafe_allow_html=True)
 
-    header_left, header_right = st.columns([6.5, 3.5], gap="medium")
+    header_left, header_right = st.columns([3.0, 7.0], gap="large")
     with header_left:
         st.markdown(
             f"""
@@ -149,7 +270,7 @@ def render_brief(
               <div>
                 <div class="tiq-section-title">Recommended <span class="tiq-pill">Trusted</span></div>
                 <div class="tiq-section-subtitle">
-                  Best positive picks from the last {lookback_days} day{'s' if lookback_days != 1 else ''}.
+                  Best positive picks right now
                 </div>
               </div>
             </div>
@@ -157,53 +278,10 @@ def render_brief(
             unsafe_allow_html=True,
         )
     with header_right:
-        st.markdown('<div class="tiq-sort-control-anchor"></div>', unsafe_allow_html=True)
-        sort_label_col, sort_input_col = st.columns([1.15, 2.85], gap="small")
-        with sort_label_col:
-            st.markdown(
-                '<div class="tiq-sort-inline-label">Sort feed</div>',
-                unsafe_allow_html=True,
-            )
-        with sort_input_col:
-            st.selectbox(
-                "Sort feed",
-                options=(
-                    ["Least optimistic first", "Most optimistic first"]
-                    if lookback_days == 1
-                    else [
-                        "Least optimistic first",
-                        "Most optimistic first",
-                        "Most recent news",
-                        "Oldest news",
-                    ]
-                ),
-                index=(
-                    ["Least optimistic first", "Most optimistic first"]
-                    if lookback_days == 1
-                    else [
-                        "Least optimistic first",
-                        "Most optimistic first",
-                        "Most recent news",
-                        "Oldest news",
-                    ]
-                ).index(
-                    feed_sort_order
-                    if feed_sort_order
-                    in (
-                        {"Least optimistic first", "Most optimistic first"}
-                        if lookback_days == 1
-                        else {
-                            "Least optimistic first",
-                            "Most optimistic first",
-                            "Most recent news",
-                            "Oldest news",
-                        }
-                    )
-                    else "Least optimistic first"
-                ),
-                key="feed_sort_order",
-                label_visibility="collapsed",
-            )
+        _render_brief_filter_bar(
+            language_options=language_options,
+            geography_options=geography_options,
+        )
     st.markdown('<div class="tiq-section-divider"></div>', unsafe_allow_html=True)
 
     paginated_recommended, current_page, total_pages, total_rows = paginate_rows(

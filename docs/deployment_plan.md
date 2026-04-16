@@ -71,7 +71,7 @@ Expected components:
 Pipeline service account responsibilities:
 
 - run BigQuery jobs
-- read and write the `bronze`, `silver`, and `gold` datasets
+- read and write the `bronze`, `silver`, and `gold` datasets plus the supporting `bronze_staging` and `gold_staging` datasets used by merge load paths
 - read any required runtime secrets
 - write logs to Cloud Logging
 
@@ -88,7 +88,9 @@ Current rollout boundary:
 - the scheduler is now active on the configured cadence
 - a manual Cloud Run execution succeeded on `2026-04-06`, confirming the deployed pipeline can run end to end when the job image is current
 - a manual Cloud Run execution also succeeded after the warehouse reset on `2026-04-07`, confirming the active scheduled image can rebuild the warehouse from empty state
+- a manual Cloud Run execution succeeded on `2026-04-16` after pre-creating `gold_staging` for the `dlt` merge load path, redeploying the `gold.url_validation_results` dtype fix, and recreating `gold.positive_news_feed_v3_shadow` with the expected partitioning
 - manual Cloud Run execution should still stay the first smoke check after image changes
+- the reporting and Bronze archive schedulers are separate automation paths and should not be paused for a pipeline-only rollout unless their own runtime is being changed
 - the pipeline now defaults to the documented HTTP GDELT feed, so SSL-verify overrides should not be the normal runtime path
 - a warehouse reset should happen before regular scheduled execution is activated for the clean-start rollout
 

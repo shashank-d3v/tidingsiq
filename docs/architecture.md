@@ -27,7 +27,7 @@ Out of scope for v1:
 
 Terraform owns reproducible cloud setup. The first version should provision only what the pipeline requires to run:
 - BigQuery datasets
-- an operational Bronze staging dataset for merge loads
+- operational Bronze and Gold staging datasets for merge loads
 - a GCS bucket for Bronze archive once retention is implemented
 - service accounts
 - IAM bindings
@@ -68,7 +68,7 @@ Bruin SQL assets will materialize three logical layers:
 - `silver`: cleaned, normalized, and deduplicated article records
 - `gold`: application-facing scored records plus feed-eligibility metadata
 
-Supporting infrastructure also includes `bronze_staging`, which is an operational dataset used by the Bronze load path and is not part of the consumer-facing warehouse contract.
+Supporting infrastructure also includes `bronze_staging` and `gold_staging`, which are operational datasets used by merge load paths and are not part of the consumer-facing warehouse contract.
 
 BigQuery is both the storage layer and the compute layer. No separate processing engine is required for v1.
 
@@ -100,11 +100,13 @@ The Streamlit app queries only the Gold model in v1. It is not responsible for b
 
 Current UI controls:
 - lookback window in days
-- date within the currently loaded lookback window
 - detected language filter
 - mentioned geography filter
+- presentation sort order
 
-The app should remain thin. It can apply lightweight local filters and presentation ordering over the current lookback window, but warehouse scoring and eligibility decisions still belong in Gold. The Brief now reads only the warehouse-defined eligible feed; the app-side minimum-score slider and the `More To Explore` section were intentionally retired after proving too noisy and too brittle in practice. The current Pulse page is intentionally warehouse-wide and no longer depends on the Brief filter rail. Any future scheduled execution of the Bruin pipeline belongs in GCP batch infrastructure rather than the Streamlit runtime.
+These controls belong inline with the Brief's `Recommended` section header as a compact control bar.
+
+The app should remain thin. It can apply lightweight local filters and presentation ordering over the current lookback window, but warehouse scoring and eligibility decisions still belong in Gold. The Brief now reads only the warehouse-defined eligible feed; the app-side minimum-score slider and the `More To Explore` section were intentionally retired after proving too noisy and too brittle in practice. The current Pulse page is intentionally warehouse-wide and no longer depends on the Brief's inline controls. Any future scheduled execution of the Bruin pipeline belongs in GCP batch infrastructure rather than the Streamlit runtime.
 
 ## End-to-End Flow
 

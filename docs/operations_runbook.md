@@ -13,6 +13,11 @@ Current project and region assumptions:
 - reporting scheduler: `tidingsiq-pipeline-report-schedule`
 - Bronze archive scheduler: `tidingsiq-bronze-archive-schedule`
 
+Operational dataset assumptions:
+
+- `bronze_staging` supports Bronze merge and archive validation paths
+- `gold_staging` supports `dlt` merge loads for Gold Python assets such as `gold.url_validation_results`
+
 ## Warehouse Reset
 
 Warehouse-only reset. This preserves:
@@ -78,7 +83,22 @@ bq query --use_legacy_sql=false "select count(*) as gold_rows, countif(is_positi
 bq query --use_legacy_sql=false "select audit_run_at, bronze_row_count, silver_row_count, silver_canonical_row_count, gold_row_count from \`tidingsiq-dev.gold.pipeline_run_metrics\` order by audit_run_at desc limit 5"
 ```
 
+If the smoke test is for a Gold Python load or a `dlt` merge-path regression, also verify the staging dataset and downstream assets explicitly:
+
+```bash
+bq show tidingsiq-dev:gold_staging
+bq query --use_legacy_sql=false "select count(*) as url_validation_rows from \`tidingsiq-dev.gold.url_validation_results\`"
+bq query --use_legacy_sql=false "select count(*) as source_quality_rows from \`tidingsiq-dev.gold.source_quality_snapshot\`"
+bq query --use_legacy_sql=false "select count(*) as positive_news_shadow_rows from \`tidingsiq-dev.gold.positive_news_feed_v3_shadow\`"
+```
+
 ## Scheduler Operations
+
+Rollout note:
+
+- pausing `tidingsiq-pipeline-schedule` pauses only the main Bruin pipeline cadence
+- it does not pause `tidingsiq-pipeline-report-schedule` or `tidingsiq-bronze-archive-schedule`
+- pause those separate schedulers only when their own job image, runtime config, or downstream contract is being changed
 
 Describe the current pipeline scheduler:
 

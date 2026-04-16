@@ -29,6 +29,9 @@ locals {
     gold = {
       description = "Application-facing positive news feed and serving models."
     }
+    gold_staging = {
+      description = "Operational staging dataset used by dlt merge loads for Gold assets."
+    }
   }
 }
 
