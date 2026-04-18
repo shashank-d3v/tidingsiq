@@ -10,7 +10,7 @@ locals {
     || var.enable_pipeline_reporting
     || var.enable_bronze_archive_automation
   )
-  pipeline_container_image = trimspace(var.pipeline_container_image) != "" ? trimspace(var.pipeline_container_image) : "${local.artifact_registry_location}-docker.pkg.dev/${var.project_id}/${var.pipeline_artifact_repository_id}/tidingsiq-bruin:latest"
+  pipeline_container_image = trimspace(var.pipeline_container_image)
   pipeline_job_run_uri     = "https://run.googleapis.com/v2/projects/${var.project_id}/locations/${local.automation_region}/jobs/${var.pipeline_job_name}:run"
   cloud_run_service_agent  = "service-${data.google_project.current.number}@serverless-robot-prod.iam.gserviceaccount.com"
 }
@@ -62,6 +62,15 @@ resource "google_cloud_run_v2_job" "pipeline" {
       service_account = google_service_account.pipeline.email
       max_retries     = var.pipeline_job_max_retries
       timeout         = var.pipeline_job_timeout
+
+      dynamic "vpc_access" {
+        for_each = var.enable_restricted_egress ? [1] : []
+
+        content {
+          connector = google_vpc_access_connector.restricted_egress[0].id
+          egress    = "ALL_TRAFFIC"
+        }
+      }
 
       containers {
         image = local.pipeline_container_image

@@ -14,11 +14,58 @@ OPTIONAL_STRING_COLUMNS = {
     "mentioned_country_resolution_status",
 }
 
+BRIEF_SORT_ORDERS = {
+    "Most optimistic first",
+    "Least optimistic first",
+}
+
+
 @dataclass(frozen=True)
 class FeedQueryConfig:
     table_fqn: str
     lookback_days: int = 7
     row_limit: int = 25
+
+
+@dataclass(frozen=True)
+class QueryParameterSpec:
+    name: str
+    type_name: str
+    value: object
+    is_array: bool = False
+
+
+@dataclass(frozen=True)
+class BriefScopeQueryConfig:
+    table_fqn: str
+    lookback_days: int = 7
+    selected_languages: tuple[str, ...] = ()
+    selected_geographies: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class BriefRowsQueryConfig:
+    table_fqn: str
+    lookback_days: int = 7
+    selected_languages: tuple[str, ...] = ()
+    selected_geographies: tuple[str, ...] = ()
+    sort_order: str = "Most optimistic first"
+    page_number: int = 1
+    page_size: int = 10
+
+
+@dataclass(frozen=True)
+class BriefLanguageOptionsQueryConfig:
+    table_fqn: str
+    lookback_days: int = 7
+    selected_geographies: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class BriefGeographyOptionsQueryConfig:
+    table_fqn: str
+    lookback_days: int = 7
+    selected_languages: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -61,32 +108,183 @@ limit @row_limit
     return sql.strip(), parameters
 
 
-def _build_select_columns(available_columns: set[str] | None) -> str:
-    ordered_columns = [
-        "source_record_id",
-        "article_id",
-        "serving_date",
-        "published_at",
-        "source_name",
-        "language",
-        "language_resolution_status",
-        "mentioned_country_code",
-        "mentioned_country_name",
-        "mentioned_country_resolution_status",
-        "title",
-        "url",
-        "tone_score",
-        "base_happy_factor",
-        "happy_factor",
-        "happy_factor_version",
-        "is_positive_feed_eligible",
-        "positive_guardrail_version",
-        "exclusion_reason",
-        "allow_hit_count",
-        "soft_deny_hit_count",
-        "hard_deny_hit_count",
-        "ingested_at",
-    ]
+def build_brief_rows_query(
+    config: BriefRowsQueryConfig,
+    *,
+    available_columns: set[str] | None = None,
+) -> tuple[str, list[QueryParameterSpec]]:
+    lookback_days = _clamp_int(config.lookback_days, 1, 30)
+    page_number = max(1, int(config.page_number))
+    page_size = _clamp_int(config.page_size, 1, 200)
+    offset_rows = (page_number - 1) * page_size
+    sort_order = _normalize_brief_sort_order(config.sort_order)
+    selected_languages = _normalize_brief_values(config.selected_languages)
+    selected_geographies = _normalize_brief_values(config.selected_geographies)
+
+    select_columns = _build_select_columns(
+        available_columns,
+        ordered_columns=[
+            "article_id",
+            "serving_date",
+            "published_at",
+            "source_name",
+            "language",
+            "mentioned_country_name",
+            "title",
+            "url",
+            "tone_score",
+            "happy_factor",
+            "ingested_at",
+        ],
+    )
+    where_sql, parameters = _build_brief_scope_clause(
+        lookback_days=lookback_days,
+        selected_languages=selected_languages,
+        selected_geographies=selected_geographies,
+        available_columns=available_columns,
+    )
+
+    sql = f"""
+select
+{select_columns}
+from `{config.table_fqn}`
+where {where_sql}
+order by {_build_brief_order_by(sort_order)}
+limit @page_size
+offset @offset_rows
+"""
+    parameters.extend(
+        [
+            QueryParameterSpec("page_size", "INT64", page_size),
+            QueryParameterSpec("offset_rows", "INT64", offset_rows),
+        ]
+    )
+    return sql.strip(), parameters
+
+
+def build_brief_scope_summary_query(
+    config: BriefScopeQueryConfig,
+    *,
+    available_columns: set[str] | None = None,
+) -> tuple[str, list[QueryParameterSpec]]:
+    lookback_days = _clamp_int(config.lookback_days, 1, 30)
+    selected_languages = _normalize_brief_values(config.selected_languages)
+    selected_geographies = _normalize_brief_values(config.selected_geographies)
+    where_sql, parameters = _build_brief_scope_clause(
+        lookback_days=lookback_days,
+        selected_languages=selected_languages,
+        selected_geographies=selected_geographies,
+        available_columns=available_columns,
+    )
+
+    sql = f"""
+select
+  count(*) as row_count,
+  coalesce(round(avg(happy_factor), 2), 0.0) as avg_happy_factor,
+  coalesce(round(max(happy_factor), 2), 0.0) as max_happy_factor,
+  count(distinct nullif(trim(source_name), '')) as source_count
+from `{config.table_fqn}`
+where {where_sql}
+"""
+    return sql.strip(), parameters
+
+
+def build_brief_language_options_query(
+    config: BriefLanguageOptionsQueryConfig,
+    *,
+    available_columns: set[str] | None = None,
+) -> tuple[str, list[QueryParameterSpec]]:
+    lookback_days = _clamp_int(config.lookback_days, 1, 30)
+    selected_geographies = _normalize_brief_values(config.selected_geographies)
+    language_expr = _column_expression("language", available_columns)
+    where_sql, parameters = _build_brief_scope_clause(
+        lookback_days=lookback_days,
+        selected_languages=(),
+        selected_geographies=selected_geographies,
+        available_columns=available_columns,
+    )
+
+    sql = f"""
+with scoped_rows as (
+  select
+    upper(trim({language_expr})) as language
+  from `{config.table_fqn}`
+  where {where_sql}
+)
+select distinct
+  language
+from scoped_rows
+where language is not null
+  and language != ''
+  and language != 'UND'
+order by language asc
+"""
+    return sql.strip(), parameters
+
+
+def build_brief_geography_options_query(
+    config: BriefGeographyOptionsQueryConfig,
+    *,
+    available_columns: set[str] | None = None,
+) -> tuple[str, list[QueryParameterSpec]]:
+    lookback_days = _clamp_int(config.lookback_days, 1, 30)
+    selected_languages = _normalize_brief_values(config.selected_languages)
+    geography_expr = _column_expression("mentioned_country_name", available_columns)
+    where_sql, parameters = _build_brief_scope_clause(
+        lookback_days=lookback_days,
+        selected_languages=selected_languages,
+        selected_geographies=(),
+        available_columns=available_columns,
+    )
+
+    sql = f"""
+with scoped_rows as (
+  select
+    trim({geography_expr}) as geography
+  from `{config.table_fqn}`
+  where {where_sql}
+)
+select distinct
+  geography
+from scoped_rows
+where geography is not null
+  and geography != ''
+  and lower(geography) != 'unknown'
+order by geography asc
+"""
+    return sql.strip(), parameters
+
+
+def _build_select_columns(
+    available_columns: set[str] | None,
+    ordered_columns: list[str] | None = None,
+) -> str:
+    if ordered_columns is None:
+        ordered_columns = [
+            "source_record_id",
+            "article_id",
+            "serving_date",
+            "published_at",
+            "source_name",
+            "language",
+            "language_resolution_status",
+            "mentioned_country_code",
+            "mentioned_country_name",
+            "mentioned_country_resolution_status",
+            "title",
+            "url",
+            "tone_score",
+            "base_happy_factor",
+            "happy_factor",
+            "happy_factor_version",
+            "is_positive_feed_eligible",
+            "positive_guardrail_version",
+            "exclusion_reason",
+            "allow_hit_count",
+            "soft_deny_hit_count",
+            "hard_deny_hit_count",
+            "ingested_at",
+        ]
     lines = []
     for column in ordered_columns:
         if available_columns is None or column in available_columns:
@@ -96,6 +294,83 @@ def _build_select_columns(available_columns: set[str] | None) -> str:
         else:
             lines.append(f"  {column}")
     return ",\n".join(lines)
+
+
+def _build_brief_scope_clause(
+    *,
+    lookback_days: int,
+    selected_languages: tuple[str, ...],
+    selected_geographies: tuple[str, ...],
+    available_columns: set[str] | None = None,
+) -> tuple[str, list[QueryParameterSpec]]:
+    clauses = [
+        'serving_date >= date_sub(current_date("UTC"), interval @lookback_days day)',
+        "is_positive_feed_eligible = true",
+    ]
+    parameters = [QueryParameterSpec("lookback_days", "INT64", lookback_days)]
+
+    if selected_languages:
+        clauses.append(
+            f"upper(trim({_column_expression('language', available_columns)})) in unnest(@selected_languages)"
+        )
+        parameters.append(
+            QueryParameterSpec(
+                "selected_languages",
+                "STRING",
+                selected_languages,
+                is_array=True,
+            )
+        )
+
+    if selected_geographies:
+        clauses.append(
+            f"trim({_column_expression('mentioned_country_name', available_columns)}) in unnest(@selected_geographies)"
+        )
+        parameters.append(
+            QueryParameterSpec(
+                "selected_geographies",
+                "STRING",
+                selected_geographies,
+                is_array=True,
+            )
+        )
+
+    return "\n  and ".join(clauses), parameters
+
+
+def _column_expression(
+    column: str,
+    available_columns: set[str] | None,
+) -> str:
+    if available_columns is None or column in available_columns:
+        return column
+    if column in OPTIONAL_STRING_COLUMNS:
+        return "cast(null as string)"
+    return column
+
+
+def _normalize_brief_values(values: tuple[str, ...] | list[str]) -> tuple[str, ...]:
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        text = str(value).strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        normalized.append(text)
+    return tuple(sorted(normalized))
+
+
+def _normalize_brief_sort_order(sort_order: str) -> str:
+    if sort_order in BRIEF_SORT_ORDERS:
+        return sort_order
+    return "Most optimistic first"
+
+
+def _build_brief_order_by(sort_order: str) -> str:
+    if sort_order == "Least optimistic first":
+        return "happy_factor asc, coalesce(published_at, ingested_at) desc, article_id desc"
+    return "happy_factor desc, coalesce(published_at, ingested_at) desc, article_id desc"
 
 
 def summarize_feed(rows: list[dict[str, object]]) -> dict[str, float | int]:

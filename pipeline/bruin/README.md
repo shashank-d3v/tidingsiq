@@ -35,8 +35,8 @@ environments:
     connections:
       google_cloud_platform:
         - name: "bigquery-default"
-          project_id: "your-gcp-project-id"
-          location: "asia-south1"
+          project_id: "<GCP_PROJECT_ID>"
+          location: "<BIGQUERY_LOCATION>"
           use_application_default_credentials: true
 ```
 
@@ -59,9 +59,20 @@ Important runtime defaults:
 
 Optional environment variables:
 
-- `GDELT_BASE_URL`: override the base GKG feed endpoint
+- `GDELT_BASE_URL`: override the base GKG feed endpoint; deployed Cloud Run runtimes only allow the documented GDELT host
 - `GDELT_MAX_FILES`: override the per-run file cap
 - `GDELT_TIMEOUT_SECONDS`: HTTP timeout for downloading GDELT files
+- `GDELT_MAX_MALFORMED_RATIO`: fail the run when malformed parsed rows exceed this ratio
+- `GDELT_MIN_ACCEPTED_ROW_RATIO`: fail the run when accepted rows collapse sharply versus recent Bronze history
+- `GDELT_BASELINE_RUNS`: number of recent Bronze ingestions used for row-count collapse detection
+
+Containment guardrails:
+
+- the default transport stays the documented HTTP endpoint: `http://data.gdeltproject.org/gdeltv2`
+- deployed runtimes reject `GDELT_BASE_URL` overrides that do not resolve to `data.gdeltproject.org`
+- downloaded files must resolve to the expected host and `*.gkg.csv.zip` filename pattern
+- ZIPs must open successfully, contain a readable first member, and produce the expected 27-column GKG 2.1 row shape
+- malformed-row ratio and sudden accepted-row collapse now fail the Bronze run instead of limping through parsing
 
 Current validated mappings:
 
@@ -111,6 +122,10 @@ Current implementation notes:
 - Gold computes `base_happy_factor`, final `happy_factor`, and `is_positive_feed_eligible`.
 - Gold uses `gold.positive_feed_guardrail_terms` for allow, soft deny, and hard deny title rules.
 - Gold Python merge loads such as `gold.url_validation_results` use `dlt` and require the operational `gold_staging` dataset to exist in the same BigQuery location as `gold`.
+- `gold.url_validation_results` now applies an SSRF safety gate before any network request and before every followed redirect.
+- URL validation only attempts `http` and `https` targets whose hostname resolves exclusively to global public IP space.
+- URL validation blocks metadata hosts such as `metadata.google.internal`, blocks all IP-literal hosts by default, and fails closed to `status = "unavailable"` without issuing the request.
+- Blocked URL targets are logged with a clear reason so Cloud Run logs can distinguish SSRF hardening from remote-site failures.
 - Silver retains unresolved positive and negative signal placeholders internally, but Gold does not expose them until the mappings are validated.
 - Bronze and Silver now treat `language` as native-first and inferred-second, with explicit resolution status
 - Bronze and Silver use `mentioned_country` for article geography from `V2Locations`; they do not model publisher country
@@ -119,38 +134,25 @@ Current implementation notes:
 - Gold retains the most recent 180 days in-model.
 - Silver partitions on `ingested_at` and clusters by `dedup_key`, `source_domain`, and `language`.
 - Gold partitions on `serving_date = DATE(COALESCE(published_at, ingested_at))` and clusters by `source_name`.
-- `gold.pipeline_run_metrics` is an append-history operational table for warehouse row counts, duplicate-rate visibility, and score distribution monitoring.
+- Bronze repeats run-level containment stats on landed rows so downstream operational metrics can expose the latest accepted-row count and malformed-row ratio.
+- `gold.pipeline_run_metrics` is an append-history operational table for warehouse row counts, duplicate-rate visibility, score distribution monitoring, and Bronze containment visibility.
+- If `gold.pipeline_run_metrics` is ever dropped during a schema reset, recreate the empty partitioned table before rerunning the asset; the append materialization does not bootstrap a missing destination table.
 
-## Current Validation Finding
+## Validation Notes
 
-Most recent verified end-to-end cloud validation on `2026-04-06`:
+Representative validation should confirm:
 
-- direct Bronze downloader validation succeeded against `http://data.gdeltproject.org/gdeltv2/...`
-- a manual Cloud Run full-refresh execution completed successfully after redeploying the enriched pipeline image
-- Bronze row count: `644`
-- Silver row count: `644`
-- Silver canonical row count: `628`
-- Bronze rows with populated `TranslationInfo`: `0`
-- Bronze rows with populated resolved `language`: `644`
-- Bronze rows with populated `mentioned_country_code`: `644`
-- Silver rows with populated `source_domain`: `644`
-- Silver rows with populated `language`: `644`
-- Silver rows with populated `mentioned_country_code`: `644`
-- current Gold row count after removing the language gate: `626`
-
-Current conclusion:
-
-- the current Bronze parser is not obviously dropping language data
-- the landed GKG rows themselves do not provide usable `TranslationInfo` in the tested sample
-- `source_domain` is already a working derived field in Silver
-- `language` now uses native `TranslationInfo` first and title-based inference second
-- `mentioned_country` now represents article geography from `V2Locations`
-- Gold can carry language and article-geography metadata without using them as serving-layer dependencies
-- those Gold metadata fields should not be presented as publisher country or source language
-- the deployed Cloud Run path is now validated end to end; the current quality gap is upstream metadata sparsity, not pipeline execution
-- the `dlt`-backed Gold Python load path is now also validated end to end after provisioning `gold_staging` and correcting nullable integer load dtypes for `gold.url_validation_results`
-- the default app-facing feed should now use `is_positive_feed_eligible = true`, not score alone
-- the current default serving threshold is `65`, softened from the initial `70`
+- the Bronze downloader can fetch a bounded GDELT window
+- the Bronze downloader keeps the documented HTTP default path rather than treating this as an HTTPS migration
+- deployed runtimes reject arbitrary `GDELT_BASE_URL` hosts before download
+- URL validation rejects non-public targets before request dispatch, including metadata hosts, loopback/private/link-local/reserved resolutions, and blocked redirect targets
+- URL validation logs blocked targets with an explicit reason and preserves strict timeout and redirect caps
+- corrupt ZIPs, unreadable ZIP members, bad row widths, and malformed timestamps fail closed
+- sudden accepted-row collapse and elevated malformed-row ratios fail the Bronze run and surface through the existing pipeline failure alert path
+- Silver produces deterministic canonical rows
+- Gold exposes `is_positive_feed_eligible = true` as the default app-facing feed
+- the `dlt`-backed Gold Python load path can materialize into `gold_staging` and merge into `gold`
+- language and article-geography metadata remain informational rather than serving gates
 
 ## Container Runtime
 
@@ -162,16 +164,16 @@ The pipeline now includes the container path used by the deployed Cloud Run Job:
 Build from the repository root:
 
 ```bash
-docker build -f pipeline/bruin/Dockerfile -t tidingsiq-bruin:local .
+docker build --platform linux/amd64 -f pipeline/bruin/Dockerfile -t tidingsiq-bruin:local .
 ```
 
 Run locally with ADC mounted or otherwise available to the container runtime:
 
 ```bash
 docker run --rm \
-  -e BRUIN_PROJECT_ID=tidingsiq-dev \
-  -e BRUIN_BIGQUERY_LOCATION=asia-south1 \
-  -v "$HOME/.config/gcloud:/root/.config/gcloud:ro" \
+  -e BRUIN_PROJECT_ID=<GCP_PROJECT_ID> \
+  -e BRUIN_BIGQUERY_LOCATION=<BIGQUERY_LOCATION> \
+  -v "$HOME/.config/gcloud:/home/tidingsiq/.config/gcloud:ro" \
   tidingsiq-bruin:local \
   validate pipeline/bruin/pipeline.yml
 ```
@@ -182,9 +184,11 @@ Default container command:
 run pipeline/bruin/pipeline.yml
 ```
 
-The entrypoint writes a local `.bruin.yml` inside the container from environment variables and uses Application Default Credentials. This matches the current Cloud Run Job deployment model, where the runtime identity comes from the attached service account.
+The entrypoint writes a local `.bruin.yml` inside the container from environment variables and uses Application Default Credentials. This matches the Cloud Run Job deployment model, where the runtime identity comes from the attached service account.
 
-The image now initializes its own minimal git repository at build time so Bruin can resolve the workspace root without requiring the host repository to be bind-mounted at runtime.
+The image installs Bruin from a pinned GitHub release tarball with SHA-256 verification, ships pinned `uv` binaries for Bruin-managed Python assets, installs Python dependencies from the committed lock export, and runs as a dedicated non-root user.
+
+At runtime, the entrypoint initializes a minimal git repository inside `/workspace` when needed so Bruin can resolve the workspace root without requiring the host repository to be bind-mounted.
 
 The same image now also supports the daily reporting Cloud Run Job, which runs:
 
@@ -192,6 +196,6 @@ The same image now also supports the daily reporting Cloud Run Job, which runs:
 python3 scripts/daily_pipeline_report.py
 ```
 
-Current cloud runtime note:
+Cloud runtime note:
 
-- if Cloud Run still shows source-fetch issues, review the configured base feed URL before reintroducing any SSL workaround
+- if Cloud Run shows source-fetch issues, review the configured base feed URL before reintroducing any SSL workaround

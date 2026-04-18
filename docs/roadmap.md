@@ -35,6 +35,7 @@ Operational notes:
 - the current Gold default feed is `is_positive_feed_eligible = true` with `happy_factor >= 65`
 - Monitoring email delivery may still require the recipient to confirm the verification email from GCP
 - the current `Pulse` page now reads warehouse-wide Gold aggregates and is no longer tied to the Brief's inline compact controls
+- the current Streamlit app now shows explicit loading screens during BigQuery-backed Brief refreshes and section switches to keep warehouse latency visible to the user
 
 ## Next Steps
 

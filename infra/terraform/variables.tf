@@ -78,6 +78,37 @@ variable "artifact_registry_location" {
   default     = null
 }
 
+variable "enable_restricted_egress" {
+  description = "When true, provisions a dedicated VPC egress path for the pipeline and Bronze archive Cloud Run jobs."
+  type        = bool
+  default     = false
+}
+
+variable "restricted_egress_subnet_cidr" {
+  description = "CIDR range for the dedicated subnet used by the restricted-egress VPC."
+  type        = string
+  default     = "10.240.0.0/24"
+
+  validation {
+    condition     = can(cidrhost(var.restricted_egress_subnet_cidr, 0))
+    error_message = "restricted_egress_subnet_cidr must be a valid IPv4 CIDR block."
+  }
+}
+
+variable "restricted_egress_connector_cidr" {
+  description = "CIDR range for the Serverless VPC Access connector used by the restricted-egress path. GCP requires a /28."
+  type        = string
+  default     = "10.240.1.0/28"
+
+  validation {
+    condition = (
+      can(cidrhost(var.restricted_egress_connector_cidr, 0))
+      && tonumber(split("/", var.restricted_egress_connector_cidr)[1]) == 28
+    )
+    error_message = "restricted_egress_connector_cidr must be a valid /28 IPv4 CIDR block."
+  }
+}
+
 variable "pipeline_artifact_repository_id" {
   description = "Artifact Registry repository ID for the Bruin pipeline image."
   type        = string
@@ -85,9 +116,17 @@ variable "pipeline_artifact_repository_id" {
 }
 
 variable "pipeline_container_image" {
-  description = "Full container image URI for the pipeline job. Leave empty to use the conventional Artifact Registry path."
+  description = "Full container image URI for the shared pipeline image consumed by the pipeline, reporting, and archive jobs."
   type        = string
   default     = ""
+
+  validation {
+    condition = (
+      !(var.enable_pipeline_automation || var.enable_pipeline_reporting || var.enable_bronze_archive_automation)
+      || length(trimspace(var.pipeline_container_image)) > 0
+    )
+    error_message = "pipeline_container_image must be set explicitly whenever pipeline automation, reporting, or Bronze archive automation is enabled."
+  }
 }
 
 variable "pipeline_job_name" {
@@ -255,6 +294,11 @@ variable "enable_app_hosting" {
   description = "When true, provisions Artifact Registry and a Cloud Run service for the Streamlit app."
   type        = bool
   default     = false
+
+  validation {
+    condition     = !var.enable_app_edge || var.enable_app_hosting
+    error_message = "enable_app_edge requires enable_app_hosting to also be true."
+  }
 }
 
 variable "app_artifact_repository_id" {
@@ -303,4 +347,63 @@ variable "app_allow_unauthenticated" {
   description = "When true, grants public unauthenticated invoke access to the Cloud Run Streamlit app."
   type        = bool
   default     = true
+}
+
+variable "enable_app_edge" {
+  description = "When true, provisions an external HTTPS load balancer, Cloud Armor policy, and app observability resources in front of the Streamlit app."
+  type        = bool
+  default     = false
+}
+
+variable "app_domain_name" {
+  description = "DNS hostname served by the external HTTPS load balancer for the Streamlit app."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = !var.enable_app_edge || length(trimspace(var.app_domain_name)) > 0
+    error_message = "app_domain_name must be set when enable_app_edge is true."
+  }
+}
+
+variable "app_rate_limit_count" {
+  description = "Per-IP Cloud Armor throttle threshold for the Streamlit app."
+  type        = number
+  default     = 120
+
+  validation {
+    condition     = var.app_rate_limit_count > 0
+    error_message = "app_rate_limit_count must be positive."
+  }
+}
+
+variable "app_rate_limit_interval_sec" {
+  description = "Interval in seconds for the Streamlit app Cloud Armor throttle threshold."
+  type        = number
+  default     = 60
+
+  validation {
+    condition = contains(
+      [10, 30, 60, 120, 180, 240, 300, 600, 900, 1200, 1800, 2700, 3600],
+      var.app_rate_limit_interval_sec,
+    )
+    error_message = "app_rate_limit_interval_sec must use a Cloud Armor supported interval value."
+  }
+}
+
+variable "app_rate_limit_preview" {
+  description = "When true, keeps the Streamlit app Cloud Armor throttle rule in preview mode for monitor-first rollout."
+  type        = bool
+  default     = true
+}
+
+variable "app_backend_log_sample_rate" {
+  description = "Logging sample rate for the Streamlit app external HTTPS load balancer backend service."
+  type        = number
+  default     = 1.0
+
+  validation {
+    condition     = var.app_backend_log_sample_rate >= 0 && var.app_backend_log_sample_rate <= 1
+    error_message = "app_backend_log_sample_rate must be between 0.0 and 1.0."
+  }
 }

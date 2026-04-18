@@ -31,11 +31,11 @@ resource "google_cloud_run_v2_service" "app" {
   location            = local.automation_region
   name                = var.app_service_name
   deletion_protection = false
-  ingress             = "INGRESS_TRAFFIC_ALL"
+  ingress             = local.app_edge_enabled ? "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER" : "INGRESS_TRAFFIC_ALL"
   labels              = local.common_labels
 
   template {
-    service_account = google_service_account.app.email
+    service_account = google_service_account.app[0].email
 
     scaling {
       min_instance_count = var.app_min_instance_count

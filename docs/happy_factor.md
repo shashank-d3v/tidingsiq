@@ -8,7 +8,7 @@ The scoring layer now separates:
 - ranking score
 - feed eligibility
 
-This is the key design change from the earlier tone-only version.
+This separation is the key design change from the earlier tone-only version and is the main reason the current methodology is more explainable in both the Brief and Pulse.
 
 ## Output Contract
 
@@ -25,6 +25,7 @@ Interpretation:
 - `base_happy_factor` is the tone-only score
 - `happy_factor` is the final guardrailed score
 - `is_positive_feed_eligible` decides whether the row belongs in the default positive feed
+- `exclusion_reason` explains why a scored Gold row is retained but not served
 
 ## Implemented Versions
 
@@ -89,12 +90,14 @@ happy_factor = clamp(base_happy_factor + positive_bonus - soft_penalty, 0, 100)
 
 ```sql
 is_positive_feed_eligible = true only when:
+- title is present
+- url is present
 - happy_factor >= 65
 - hard_deny_hit = false
 - not (soft_deny_hit = true and allow_hit = false)
 ```
 
-This means the score ranks, but eligibility decides whether the article is shown in the default positive feed.
+This means the score ranks, but eligibility decides whether the article is shown in the default positive feed. A row can remain in Gold with a persisted score and still be excluded from the feed by design.
 
 ## Why This Is Better
 
@@ -102,6 +105,11 @@ The guardrail layer addresses a real failure mode from the earlier implementatio
 - tone-only scoring could let obituary, explosion, probe, or similar titles remain highly ranked
 
 The current model improves that without pretending to solve sentiment with custom NLP.
+
+It also makes the warehouse easier to interpret operationally:
+- Pulse can show the full scored Gold population, not only served rows
+- exclusion buckets can be read as deliberate serving decisions, not as warehouse loss
+- feed narrowing from Bronze to eligible Gold remains inspectable stage by stage
 
 ## Rule Source
 
@@ -116,11 +124,9 @@ This allows:
 
 ## UI Usage
 
-The app should default to:
-- `is_positive_feed_eligible = true`
-- `happy_factor >= 65`
-
-The threshold slider remains useful, but the positive-feed gate is now more than just a score cutoff.
+- The Brief should read only rows where `is_positive_feed_eligible = true`
+- Pulse should read the broader Gold population plus operational aggregates so score distribution and exclusion reasons remain visible warehouse-wide
+- app-side browsing controls should not redefine warehouse eligibility logic
 
 ## Validation Expectations
 
@@ -129,8 +135,16 @@ The current scoring layer should satisfy these checks:
 1. high-score rows with hard deny terms should not be eligible
 2. soft deny titles should be excluded unless an allow term or phrase applies
 3. hard deny terms should override allow terms
-4. the eligible feed should remain meaningfully non-empty
-5. score and eligibility should remain explainable from persisted fields
+4. missing title or URL should prevent default-feed eligibility
+5. the eligible feed should remain meaningfully non-empty
+6. score and eligibility should remain explainable from persisted fields
+
+## Interpretation Boundaries
+
+- `happy_factor` is a positivity-oriented ranking score, not a claim of objective happiness
+- the model uses upstream metadata and title rules, not full-article semantic understanding
+- the current implementation does not perform factual verification or source-trust scoring
+- geography metadata should not be read as publisher-country attribution
 
 ## Future Direction
 

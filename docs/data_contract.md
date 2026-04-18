@@ -74,13 +74,20 @@ One ingested source record per row.
 | tone_raw | FLOAT64 | No | Validated from GKG | First component of `V2Tone` before normalization |
 | positive_signal_raw | FLOAT64 | No | Pending GDELT validation | Optional raw positive signal if a reliable source field exists |
 | negative_signal_raw | FLOAT64 | No | Pending GDELT validation | Optional raw negative signal if retained |
+| bronze_run_total_row_count | INT64 | No | Internal | Repeated run-level count of parsed source rows seen in the latest Bronze ingestion |
+| bronze_run_accepted_row_count | INT64 | No | Internal | Repeated run-level count of Bronze rows accepted after containment checks |
+| bronze_run_malformed_row_count | INT64 | No | Internal | Repeated run-level count of malformed source rows rejected during containment checks |
+| bronze_run_malformed_ratio | FLOAT64 | No | Internal | Repeated run-level malformed-row ratio for the latest Bronze ingestion |
 | raw_payload | STRING | No | Internal | JSON-encoded payload retained for audit and debugging |
 
 ### Bronze quality expectations
 
 - `ingestion_id` and `ingested_at` must always be populated
 - the same replay window should be safe to rerun without losing traceability
+- the default transport remains the documented HTTP GDELT endpoint, while deployed runtime overrides are restricted to the expected GDELT host
+- source files should fail closed when the resolved host, filename pattern, ZIP structure, row width, or timestamp parsing is suspicious
 - `language`, `language_resolution_status`, `mentioned_country_code`, `mentioned_country_name`, and `mentioned_country_resolution_status` should never be blank after Bronze resolution
+- `bronze_run_total_row_count`, `bronze_run_accepted_row_count`, `bronze_run_malformed_row_count`, and `bronze_run_malformed_ratio` should preserve run-level containment visibility on successful ingestions
 - `raw_payload` currently stores selected raw GKG fields rather than the entire original row to keep Bronze practical and debuggable without retaining unnecessary volume
 - Bronze rows older than 45 days should be exportable to GCS without losing row-level traceability
 - archived Bronze objects should be retained for 365 days before deletion
@@ -245,6 +252,7 @@ One appended operational run snapshot row.
 - preserve a simple warehouse health snapshot history
 - expose Bronze, Silver, and Gold row counts over time
 - expose score distribution drift at the Gold layer
+- expose the latest Bronze containment stats for accepted-row count and malformed-row ratio
 - support later freshness and regression alerting without querying the app table directly
 
 ### Fields
@@ -256,6 +264,8 @@ One appended operational run snapshot row.
 | silver_row_count | INT64 | Yes | Derived | Current total row count in Silver |
 | silver_canonical_row_count | INT64 | Yes | Derived | Current canonical Silver row count |
 | silver_duplicate_row_count | INT64 | Yes | Derived | Current duplicate Silver row count |
+| latest_bronze_ingestion_accepted_row_count | INT64 | Yes | Derived | Accepted-row count for the latest successful Bronze ingestion |
+| latest_bronze_ingestion_malformed_ratio | FLOAT64 | Yes | Derived | Malformed-row ratio recorded for the latest successful Bronze ingestion |
 | gold_row_count | INT64 | Yes | Derived | Current serving-table row count |
 | gold_min_happy_factor | FLOAT64 | No | Derived | Current minimum `happy_factor` |
 | gold_avg_happy_factor | FLOAT64 | No | Derived | Current average `happy_factor` |

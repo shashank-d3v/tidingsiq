@@ -1,6 +1,7 @@
 #!/bin/sh
 set -eu
 
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-/workspace}"
 BRUIN_CONFIG_PATH="${BRUIN_CONFIG_PATH:-/workspace/.bruin.yml}"
 BRUIN_ENVIRONMENT="${BRUIN_ENVIRONMENT:-default}"
 BRUIN_CONNECTION_NAME="${BRUIN_CONNECTION_NAME:-bigquery-default}"
@@ -10,6 +11,16 @@ BRUIN_BIGQUERY_LOCATION="${BRUIN_BIGQUERY_LOCATION:-${BIGQUERY_LOCATION:-US}}"
 if [ -z "${BRUIN_PROJECT_ID}" ]; then
   echo "BRUIN_PROJECT_ID or GOOGLE_CLOUD_PROJECT must be set." >&2
   exit 1
+fi
+
+mkdir -p "${WORKSPACE_ROOT}" "$(dirname "${BRUIN_CONFIG_PATH}")"
+
+if ! git -C "${WORKSPACE_ROOT}" rev-parse --show-toplevel >/dev/null 2>&1; then
+  git init "${WORKSPACE_ROOT}" >/dev/null 2>&1
+fi
+
+if ! git config --global --get-all safe.directory | grep -Fx "${WORKSPACE_ROOT}" >/dev/null 2>&1; then
+  git config --global --add safe.directory "${WORKSPACE_ROOT}"
 fi
 
 cat > "${BRUIN_CONFIG_PATH}" <<EOF
@@ -25,4 +36,3 @@ environments:
 EOF
 
 exec bruin "$@"
-

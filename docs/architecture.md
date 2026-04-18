@@ -104,9 +104,15 @@ Current UI controls:
 - mentioned geography filter
 - presentation sort order
 
-These controls belong inline with the Brief's `Recommended` section header as a compact control bar.
+These controls belong inline with the Brief's `Recommended` section header as a compact control bar. The language and geography controls now present as summarized popover triggers in the closed state, keeping the toolbar single-line while moving multi-select editing plus `Apply` and `Clear` actions into the popover panel.
 
-The app should remain thin. It can apply lightweight local filters and presentation ordering over the current lookback window, but warehouse scoring and eligibility decisions still belong in Gold. The Brief now reads only the warehouse-defined eligible feed; the app-side minimum-score slider and the `More To Explore` section were intentionally retired after proving too noisy and too brittle in practice. The current Pulse page is intentionally warehouse-wide and no longer depends on the Brief's inline controls. Any future scheduled execution of the Bruin pipeline belongs in GCP batch infrastructure rather than the Streamlit runtime.
+The app should remain thin. It can apply lightweight local filters and presentation ordering over the current lookback window, but warehouse scoring and eligibility decisions still belong in Gold. The Brief reads only the warehouse-defined eligible feed, while Pulse is intentionally warehouse-wide and independent from the Brief's browsing state. The current app also renders an explicit page-level loading state during BigQuery-backed Brief refreshes and section switches so reruns do not present as a frozen interface. Any future scheduled execution of the Bruin pipeline belongs in GCP batch infrastructure rather than the Streamlit runtime.
+
+Current Pulse serving shape:
+- one consolidated dashboard query path reads `gold.pipeline_run_metrics` for latest stage counts and recent trend history
+- a second consolidated query path reads `gold.positive_news_feed` for eligibility counts, exclusion reasons, and score-distribution buckets
+- the frontend renders these warehouse results directly and does not recompute Pulse logic client-side
+- the dashboard is meant to explain warehouse state, narrowing, and exclusions rather than editorial browsing output
 
 ## End-to-End Flow
 
@@ -128,6 +134,10 @@ Bronze is append-oriented and traceable. It should preserve the source record sh
 
 Silver is the normalization boundary. URL cleanup, title cleanup, timestamp normalization, and deterministic deduplication belong here.
 
+Canonical meaning:
+- Silver keeps one retained canonical row for each story candidate
+- additional matching records are marked as duplicates rather than treated as missing downstream data
+
 Current metadata posture:
 - `source_domain` is a derived publisher/source-domain field
 - `mentioned_country` means article-mentioned geography, not publisher origin
@@ -143,6 +153,7 @@ Current implementation choice:
 - `happy_factor_version = 'v2_1_guardrailed_tone'`
 - `happy_factor` is the guardrailed score derived from `base_happy_factor`, title allow bonuses, and title deny penalties
 - `is_positive_feed_eligible` is the serving gate for the default app feed
+- `exclusion_reason` records why a scored row is retained in Gold but excluded from the default feed
 - title rules come from `gold.positive_feed_guardrail_terms`
 
 ## Operational Principles
@@ -153,6 +164,7 @@ Current implementation choice:
 - Treat uncertain GDELT mappings as explicit implementation decisions, not hidden assumptions.
 - Keep the active BigQuery footprint intentionally small through explicit retention windows.
 - Archive Bronze before deletion so replay and audit remain possible without keeping all history in BigQuery.
+- Preserve enough metadata in Gold and operational aggregates so Pulse can explain narrowing, exclusion, and score distribution without inventing client-side logic.
 
 ## Known Decisions
 
@@ -166,6 +178,8 @@ Current implementation choice:
 - Bronze archive should land in GCS rather than remain indefinitely in BigQuery.
 - Archived Bronze objects should expire after 365 days in GCS.
 - Bronze export and cleanup currently run as a manual operation rather than a scheduled job.
+- Language and article geography are informational metadata, not publisher-origin claims or serving gates.
+- The current methodology is intentionally bounded: no full-article semantic model, no factual verification layer, and no source-trust scoring layer.
 
 ## Open Items
 

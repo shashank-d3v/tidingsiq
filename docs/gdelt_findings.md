@@ -4,6 +4,10 @@
 
 TidingsIQ currently ingests raw GDELT GKG 2.1 15-minute export files from the `gdeltv2` feed.
 
+The validated default transport path remains the documented HTTP endpoint:
+
+- `http://data.gdeltproject.org/gdeltv2`
+
 The verified row layout is:
 
 1. `GKGRECORDID`
@@ -105,8 +109,27 @@ Historical contrast from the old English-only Gold contract:
 - article geography is available from `V2Locations` for a substantial subset of landed rows and is the right source-backed path for country enrichment
 - publisher country is still not a direct source field in the current Bronze path and should not be inferred from domains in this contract
 - The GDELT transport path should default to the documented HTTP feed rather than forcing HTTPS with an SSL override.
+- The current containment posture is to keep HTTP as the validated default while failing closed on suspicious payloads instead of accepting arbitrary endpoints or malformed source files.
 - The deployed Cloud Run pipeline path is now proven end to end; the remaining weakness is source-field completeness, not orchestration.
 - the Bronze and Silver contracts can now avoid blank language and country fields by using explicit sentinel values plus resolution-status columns
+
+## Containment Controls
+
+The Bronze downloader now treats the GDELT transport path as a containment boundary:
+
+- deployed runtimes accept `GDELT_BASE_URL` overrides only when the host remains `data.gdeltproject.org`
+- the resolved download URL must keep the expected GDELT host and `*.gkg.csv.zip` filename pattern
+- ZIPs must open successfully, contain a readable first member, and yield the expected 27-column GKG 2.1 row shape
+- malformed-row ratio and sudden accepted-row collapse now fail the Bronze run instead of silently landing suspicious partial data
+- the existing Cloud Monitoring pipeline failure alert remains the alerting path for these failures
+
+## Residual Risk
+
+Accepted upstream residual risk for public release:
+
+- TidingsIQ intentionally keeps the documented HTTP GDELT feed as the validated default path
+- this remains an upstream transport trust risk that is contained, not eliminated
+- the repo now relies on host restriction, payload validation, anomaly detection, and fail-closed execution to limit the blast radius of malformed or unexpected upstream responses
 
 ## Implication For Downstream Modeling
 

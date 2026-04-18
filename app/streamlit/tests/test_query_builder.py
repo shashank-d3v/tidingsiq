@@ -1,13 +1,19 @@
 from __future__ import annotations
 
 import unittest
-from datetime import datetime, timezone
 
 from app.streamlit.query_builder import (
+    BriefGeographyOptionsQueryConfig,
+    BriefLanguageOptionsQueryConfig,
+    BriefRowsQueryConfig,
+    BriefScopeQueryConfig,
     FeedQueryConfig,
-    build_visible_feed_state,
     build_eligibility_breakdown,
     build_feed_query,
+    build_brief_geography_options_query,
+    build_brief_language_options_query,
+    build_brief_rows_query,
+    build_brief_scope_summary_query,
     build_score_distribution,
     build_source_rankings,
     build_timeline_data,
@@ -15,73 +21,80 @@ from app.streamlit.query_builder import (
     paginate_rows,
     summarize_feed,
 )
-
-
-def _make_row(
-    article_id: str,
-    *,
-    happy_factor: float,
-    is_positive_feed_eligible: bool,
-    exclusion_reason: str | None = None,
-    serving_date: str = "2026-04-01",
-    source_name: str = "Source A",
-    title: str | None = None,
-    tone_score: float = 1.5,
-    hard_deny_hit_count: int = 0,
-) -> dict[str, object]:
-    return {
-        "article_id": article_id,
-        "source_name": source_name,
-        "title": title or f"Story {article_id}",
-        "url": f"https://example.com/{article_id}",
-        "serving_date": serving_date,
-        "happy_factor": happy_factor,
-        "tone_score": tone_score,
-        "hard_deny_hit_count": hard_deny_hit_count,
-        "soft_deny_hit_count": 0,
-        "is_positive_feed_eligible": is_positive_feed_eligible,
-        "exclusion_reason": exclusion_reason,
-    }
-
-
 class QueryBuilderTest(unittest.TestCase):
-    def test_build_feed_query_clamps_lookback_and_row_limit_for_eligible_feed(self) -> None:
+    def test_build_feed_query_clamps_lookback_and_row_limit(self) -> None:
         sql, parameters = build_feed_query(
             FeedQueryConfig(
-                table_fqn="tidingsiq-dev.gold.positive_news_feed",
+                table_fqn="example-project.gold.positive_news_feed",
                 lookback_days=90,
-                row_limit=500,
-            ),
+                row_limit=999,
+            )
         )
 
         parameter_map = {name: value for name, _, value in parameters}
 
-        self.assertIn('serving_date >= date_sub(current_date("utc")', sql.lower())
-        self.assertIn("is_positive_feed_eligible = true", sql)
-        self.assertEqual(parameter_map["row_limit"], 200)
+        self.assertIn("limit @row_limit", sql.lower())
         self.assertEqual(parameter_map["lookback_days"], 30)
-        self.assertIn("language", sql.lower())
-        self.assertIn("mentioned_country_name", sql.lower())
-        self.assertIn("exclusion_reason", sql.lower())
-        self.assertNotIn("below_threshold", sql.lower())
-        self.assertNotIn("min_happy_factor", parameter_map)
+        self.assertEqual(parameter_map["row_limit"], 200)
 
-    def test_build_feed_query_has_metadata_columns_but_no_metadata_parameters(self) -> None:
-        sql, parameters = build_feed_query(
-            FeedQueryConfig(table_fqn="tidingsiq-dev.gold.positive_news_feed")
+    def test_build_brief_rows_query_clamps_scope_and_applies_filters_sort_and_pagination(self) -> None:
+        sql, parameters = build_brief_rows_query(
+            BriefRowsQueryConfig(
+                table_fqn="example-project.gold.positive_news_feed",
+                lookback_days=90,
+                selected_languages=("FR", "EN"),
+                selected_geographies=("India", "France"),
+                sort_order="Least optimistic first",
+                page_number=3,
+                page_size=10,
+            ),
         )
 
-        parameter_names = [name for name, _, _ in parameters]
+        parameter_map = {parameter.name: parameter.value for parameter in parameters}
 
-        self.assertIn("language", sql.lower())
-        self.assertIn("mentioned_country_name", sql.lower())
-        self.assertNotIn("language", parameter_names)
+        self.assertIn('serving_date >= date_sub(current_date("utc")', sql.lower())
+        self.assertIn("is_positive_feed_eligible = true", sql.lower())
+        self.assertIn("selected_languages", sql)
+        self.assertIn("selected_geographies", sql)
+        self.assertIn("limit @page_size", sql.lower())
+        self.assertIn("offset @offset_rows", sql.lower())
+        self.assertIn("order by happy_factor asc", sql.lower())
+        self.assertEqual(parameter_map["lookback_days"], 30)
+        self.assertEqual(parameter_map["selected_languages"], ("EN", "FR"))
+        self.assertEqual(parameter_map["selected_geographies"], ("France", "India"))
+        self.assertEqual(parameter_map["page_size"], 10)
+        self.assertEqual(parameter_map["offset_rows"], 20)
 
-    def test_build_feed_query_falls_back_for_missing_optional_metadata_columns(self) -> None:
-        sql, _ = build_feed_query(
-            FeedQueryConfig(table_fqn="tidingsiq-dev.gold.positive_news_feed"),
+    def test_build_brief_rows_query_clamps_page_size_upper_bound(self) -> None:
+        _, parameters = build_brief_rows_query(
+            BriefRowsQueryConfig(
+                table_fqn="example-project.gold.positive_news_feed",
+                page_size=500,
+            )
+        )
+
+        parameter_map = {parameter.name: parameter.value for parameter in parameters}
+
+        self.assertEqual(parameter_map["page_size"], 200)
+
+    def test_build_brief_rows_query_defaults_to_most_optimistic_order(self) -> None:
+        sql, parameters = build_brief_rows_query(
+            BriefRowsQueryConfig(
+                table_fqn="example-project.gold.positive_news_feed",
+                sort_order="not-a-real-option",
+            )
+        )
+
+        parameter_map = {parameter.name: parameter.value for parameter in parameters}
+
+        self.assertIn("order by happy_factor desc", sql.lower())
+        self.assertEqual(parameter_map["page_size"], 10)
+        self.assertEqual(parameter_map["offset_rows"], 0)
+
+    def test_build_brief_rows_query_falls_back_for_missing_optional_metadata_columns(self) -> None:
+        sql, _ = build_brief_rows_query(
+            BriefRowsQueryConfig(table_fqn="example-project.gold.positive_news_feed"),
             available_columns={
-                "source_record_id",
                 "article_id",
                 "serving_date",
                 "published_at",
@@ -89,21 +102,69 @@ class QueryBuilderTest(unittest.TestCase):
                 "title",
                 "url",
                 "tone_score",
-                "base_happy_factor",
                 "happy_factor",
-                "happy_factor_version",
-                "is_positive_feed_eligible",
-                "positive_guardrail_version",
-                "exclusion_reason",
-                "allow_hit_count",
-                "soft_deny_hit_count",
-                "hard_deny_hit_count",
                 "ingested_at",
             },
         )
 
         self.assertIn("cast(null as string) as language", sql.lower())
         self.assertIn("cast(null as string) as mentioned_country_name", sql.lower())
+
+    def test_build_brief_scope_summary_query_excludes_sort_and_pagination(self) -> None:
+        sql, parameters = build_brief_scope_summary_query(
+            BriefScopeQueryConfig(
+                table_fqn="example-project.gold.positive_news_feed",
+                lookback_days=7,
+                selected_languages=("EN",),
+                selected_geographies=("India",),
+            )
+        )
+
+        parameter_names = [parameter.name for parameter in parameters]
+
+        self.assertIn("count(*) as row_count", sql.lower())
+        self.assertIn("avg_happy_factor", sql.lower())
+        self.assertIn("max_happy_factor", sql.lower())
+        self.assertIn("source_count", sql.lower())
+        self.assertNotIn("order by", sql.lower())
+        self.assertNotIn("limit", sql.lower())
+        self.assertNotIn("offset", sql.lower())
+        self.assertNotIn("page_size", parameter_names)
+        self.assertNotIn("offset_rows", parameter_names)
+
+    def test_build_brief_language_options_query_depends_only_on_geography_scope(self) -> None:
+        sql, parameters = build_brief_language_options_query(
+            BriefLanguageOptionsQueryConfig(
+                table_fqn="example-project.gold.positive_news_feed",
+                lookback_days=7,
+                selected_geographies=("India",),
+            )
+        )
+
+        parameter_names = [parameter.name for parameter in parameters]
+
+        self.assertIn("select distinct", sql.lower())
+        self.assertIn("language", sql.lower())
+        self.assertIn("selected_geographies", sql)
+        self.assertNotIn("selected_languages", parameter_names)
+        self.assertIn("language != 'UND'".lower(), sql.lower())
+
+    def test_build_brief_geography_options_query_depends_only_on_language_scope(self) -> None:
+        sql, parameters = build_brief_geography_options_query(
+            BriefGeographyOptionsQueryConfig(
+                table_fqn="example-project.gold.positive_news_feed",
+                lookback_days=7,
+                selected_languages=("EN",),
+            )
+        )
+
+        parameter_names = [parameter.name for parameter in parameters]
+
+        self.assertIn("select distinct", sql.lower())
+        self.assertIn("geography", sql.lower())
+        self.assertIn("selected_languages", sql)
+        self.assertNotIn("selected_geographies", parameter_names)
+        self.assertIn("lower(geography) != 'unknown'", sql.lower())
 
     def test_summarize_feed_returns_expected_metrics(self) -> None:
         summary = summarize_feed(
@@ -287,214 +348,6 @@ class QueryBuilderTest(unittest.TestCase):
         self.assertEqual(total_pages, 2)
         self.assertEqual(current_page, 2)
         self.assertEqual(page_rows, [{"id": "10"}])
-
-    def test_build_visible_feed_state_returns_empty_state_for_no_rows(self) -> None:
-        state = build_visible_feed_state(
-            [],
-            feed_sort_order="Least optimistic first",
-        )
-
-        self.assertEqual(state.recommended_rows, [])
-        self.assertEqual(state.visible_rows, [])
-        self.assertEqual(state.summary["row_count"], 0)
-        self.assertEqual(build_timeline_data(state.visible_rows), [])
-        self.assertEqual(build_score_distribution(state.visible_rows)[0]["story_count"], 0)
-
-    def test_build_visible_feed_state_only_recommended_rows_match_pulse_totals(self) -> None:
-        state = build_visible_feed_state(
-            [
-                _make_row("a", happy_factor=68.0, is_positive_feed_eligible=True),
-                _make_row("b", happy_factor=81.0, is_positive_feed_eligible=True),
-            ],
-            feed_sort_order="Least optimistic first",
-        )
-
-        self.assertEqual([row["article_id"] for row in state.recommended_rows], ["a", "b"])
-        self.assertEqual(len(state.visible_rows), 2)
-        self.assertEqual(state.summary["row_count"], len(state.visible_rows))
-        self.assertEqual(
-            sum(point["story_count"] for point in build_timeline_data(state.visible_rows)),
-            len(state.visible_rows),
-        )
-
-    def test_build_visible_feed_state_hides_non_eligible_rows(self) -> None:
-        state = build_visible_feed_state(
-            [
-                _make_row(
-                    "x",
-                    happy_factor=48.0,
-                    is_positive_feed_eligible=False,
-                    exclusion_reason="below_threshold",
-                ),
-                _make_row(
-                    "y",
-                    happy_factor=52.0,
-                    is_positive_feed_eligible=False,
-                    exclusion_reason="below_threshold",
-                    source_name="Source B",
-                ),
-            ],
-            feed_sort_order="Least optimistic first",
-        )
-
-        self.assertEqual(state.recommended_rows, [])
-        self.assertEqual(state.visible_rows, [])
-        self.assertEqual(state.summary["row_count"], len(state.visible_rows))
-        self.assertEqual(build_source_rankings(state.visible_rows), [])
-        self.assertEqual(
-            sum(bucket["story_count"] for bucket in build_score_distribution(state.visible_rows)),
-            len(state.visible_rows),
-        )
-
-    def test_build_visible_feed_state_mixed_rows_keeps_only_recommended_rows_in_sync(self) -> None:
-        state = build_visible_feed_state(
-            [
-                _make_row(
-                    "rec-1",
-                    happy_factor=72.0,
-                    is_positive_feed_eligible=True,
-                    serving_date="2026-04-01",
-                ),
-                _make_row(
-                    "rec-2",
-                    happy_factor=83.0,
-                    is_positive_feed_eligible=True,
-                    serving_date="2026-04-02",
-                    source_name="Source B",
-                ),
-                _make_row(
-                    "exp-1",
-                    happy_factor=58.0,
-                    is_positive_feed_eligible=False,
-                    exclusion_reason="below_threshold",
-                    serving_date="2026-04-02",
-                ),
-            ],
-            feed_sort_order="Least optimistic first",
-        )
-
-        self.assertEqual([row["article_id"] for row in state.visible_rows], ["rec-1", "rec-2"])
-        self.assertEqual(state.summary["row_count"], len(state.visible_rows))
-        self.assertEqual(
-            sum(point["story_count"] for point in build_timeline_data(state.visible_rows)),
-            len(state.visible_rows),
-        )
-        self.assertEqual(
-            sum(bucket["story_count"] for bucket in build_score_distribution(state.visible_rows)),
-            len(state.visible_rows),
-        )
-
-    def test_build_visible_feed_state_reverses_sort_order_for_recommended_rows(self) -> None:
-        state = build_visible_feed_state(
-            [
-                _make_row("rec-1", happy_factor=72.0, is_positive_feed_eligible=True),
-                _make_row("rec-2", happy_factor=84.0, is_positive_feed_eligible=True),
-            ],
-            feed_sort_order="Most optimistic first",
-        )
-
-        self.assertEqual([row["article_id"] for row in state.recommended_rows], ["rec-2", "rec-1"])
-
-    def test_build_visible_feed_state_sorts_by_most_recent_news(self) -> None:
-        state = build_visible_feed_state(
-            [
-                _make_row(
-                    "rec-older",
-                    happy_factor=88.0,
-                    is_positive_feed_eligible=True,
-                    title="Older",
-                )
-                | {"published_at": datetime(2026, 4, 1, 8, 0, tzinfo=timezone.utc)},
-                _make_row(
-                    "rec-newer",
-                    happy_factor=70.0,
-                    is_positive_feed_eligible=True,
-                    title="Newer",
-                )
-                | {"published_at": datetime(2026, 4, 2, 8, 0, tzinfo=timezone.utc)},
-            ],
-            feed_sort_order="Most recent news",
-        )
-
-        self.assertEqual([row["article_id"] for row in state.recommended_rows], ["rec-newer", "rec-older"])
-
-    def test_build_visible_feed_state_sorts_by_oldest_news(self) -> None:
-        state = build_visible_feed_state(
-            [
-                _make_row(
-                    "rec-newer",
-                    happy_factor=75.0,
-                    is_positive_feed_eligible=True,
-                    title="Newer",
-                )
-                | {"published_at": datetime(2026, 4, 2, 8, 0, tzinfo=timezone.utc)},
-                _make_row(
-                    "rec-older",
-                    happy_factor=71.0,
-                    is_positive_feed_eligible=True,
-                    title="Older",
-                )
-                | {"published_at": datetime(2026, 4, 1, 8, 0, tzinfo=timezone.utc)},
-            ],
-            feed_sort_order="Oldest news",
-        )
-
-        self.assertEqual([row["article_id"] for row in state.recommended_rows], ["rec-older", "rec-newer"])
-
-    def test_build_visible_feed_state_sorts_by_recent_news_using_string_dates_and_fallbacks(self) -> None:
-        state = build_visible_feed_state(
-            [
-                _make_row(
-                    "fallback-serving-date",
-                    happy_factor=78.0,
-                    is_positive_feed_eligible=True,
-                )
-                | {"published_at": None, "ingested_at": None, "serving_date": "2026-04-01"},
-                _make_row(
-                    "string-published-at",
-                    happy_factor=66.0,
-                    is_positive_feed_eligible=True,
-                )
-                | {"published_at": "2026-04-02T08:00:00+00:00"},
-            ],
-            feed_sort_order="Most recent news",
-        )
-
-        self.assertEqual(
-            [row["article_id"] for row in state.recommended_rows],
-            ["string-published-at", "fallback-serving-date"],
-        )
-
-    def test_build_visible_feed_state_keeps_pulse_scope_to_visible_eligible_rows(self) -> None:
-        state = build_visible_feed_state(
-            [
-                _make_row("rec-1", happy_factor=74.0, is_positive_feed_eligible=True),
-                _make_row(
-                    "exp-hidden",
-                    happy_factor=58.0,
-                    is_positive_feed_eligible=False,
-                    exclusion_reason="below_threshold",
-                ),
-                _make_row(
-                    "hard-deny",
-                    happy_factor=90.0,
-                    is_positive_feed_eligible=False,
-                    exclusion_reason="hard_deny_term",
-                ),
-            ],
-            feed_sort_order="Least optimistic first",
-        )
-
-        self.assertEqual([row["article_id"] for row in state.visible_rows], ["rec-1"])
-        self.assertEqual(state.summary["row_count"], len(state.visible_rows))
-        self.assertLessEqual(
-            sum(point["story_count"] for point in build_timeline_data(state.visible_rows)),
-            len(state.visible_rows),
-        )
-        self.assertLessEqual(
-            sum(bucket["story_count"] for bucket in build_score_distribution(state.visible_rows)),
-            len(state.visible_rows),
-        )
 
 
 if __name__ == "__main__":

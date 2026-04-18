@@ -70,6 +70,67 @@ custom_checks:
           1
         )
       )
+  - name: latest_bronze_ingestion_row_count_has_no_recent_drop
+    description: The latest Bronze ingestion accepted-row count should stay within a reasonable recent band.
+    query: |
+      with bronze_ingestions as (
+        select
+          ingestion_id,
+          count(*) as accepted_row_count,
+          max(ingested_at) as latest_ingested_at
+        from bronze.gdelt_news_raw
+        group by ingestion_id
+      ),
+      ordered as (
+        select
+          accepted_row_count,
+          row_number() over (order by latest_ingested_at desc, ingestion_id desc) as run_rank
+        from bronze_ingestions
+      ),
+      latest as (
+        select accepted_row_count
+        from ordered
+        where run_rank = 1
+      ),
+      history as (
+        select avg(accepted_row_count) as avg_bronze_ingestion_accepted_row_count
+        from ordered
+        where run_rank between 2 and 8
+      )
+      select if(
+        (select avg_bronze_ingestion_accepted_row_count from history) is null,
+        0,
+        if(
+          (select accepted_row_count from latest) >= 0.7 * (select avg_bronze_ingestion_accepted_row_count from history),
+          0,
+          1
+        )
+      )
+  - name: latest_bronze_ingestion_malformed_ratio_is_low
+    description: The latest Bronze ingestion malformed-row ratio should remain low.
+    query: |
+      with latest_ingestion as (
+        select
+          ingestion_id
+        from bronze.gdelt_news_raw
+        group by ingestion_id
+        order by max(ingested_at) desc, ingestion_id desc
+        limit 1
+      ),
+      latest_ratio as (
+        select
+          coalesce(
+            max(safe_cast(json_value(raw_payload, '$.bronze_run_malformed_ratio') as float64)),
+            0.0
+          ) as malformed_ratio
+        from bronze.gdelt_news_raw
+        where ingestion_id = (select ingestion_id from latest_ingestion)
+      )
+      select if(
+        (select malformed_ratio from latest_ratio) <= 0.02,
+        0,
+        1
+      )
   - name: latest_gold_timestamp_in_metrics_is_recent
     description: The latest metrics snapshot should reflect fresh Gold data.
     query: |
@@ -112,6 +173,14 @@ columns:
     type: integer
     checks:
       - name: not_null
+  - name: latest_bronze_ingestion_accepted_row_count
+    type: integer
+    checks:
+      - name: not_null
+  - name: latest_bronze_ingestion_malformed_ratio
+    type: float
+    checks:
+      - name: not_null
   - name: gold_row_count
     type: integer
     checks:
@@ -132,6 +201,28 @@ with bronze_metrics as (
   select
     count(*) as bronze_row_count
   from bronze.gdelt_news_raw
+),
+
+latest_bronze_ingestion as (
+  select ingestion_id
+  from bronze.gdelt_news_raw
+  group by ingestion_id
+  order by max(ingested_at) desc, ingestion_id desc
+  limit 1
+),
+
+latest_bronze_ingestion_metrics as (
+  select
+    coalesce(
+      max(safe_cast(json_value(raw_payload, '$.bronze_run_accepted_row_count') as int64)),
+      count(*)
+    ) as latest_bronze_ingestion_accepted_row_count,
+    coalesce(
+      max(safe_cast(json_value(raw_payload, '$.bronze_run_malformed_ratio') as float64)),
+      0.0
+    ) as latest_bronze_ingestion_malformed_ratio
+  from bronze.gdelt_news_raw
+  where ingestion_id = (select ingestion_id from latest_bronze_ingestion)
 ),
 
 silver_metrics as (
@@ -159,6 +250,8 @@ select
   silver_metrics.silver_row_count,
   silver_metrics.silver_canonical_row_count,
   silver_metrics.silver_duplicate_row_count,
+  latest_bronze_ingestion_metrics.latest_bronze_ingestion_accepted_row_count,
+  latest_bronze_ingestion_metrics.latest_bronze_ingestion_malformed_ratio,
   gold_metrics.gold_row_count,
   gold_metrics.gold_min_happy_factor,
   gold_metrics.gold_avg_happy_factor,
@@ -167,4 +260,5 @@ select
   gold_metrics.latest_gold_published_at
 from bronze_metrics
 cross join silver_metrics
+cross join latest_bronze_ingestion_metrics
 cross join gold_metrics

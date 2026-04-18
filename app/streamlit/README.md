@@ -13,6 +13,14 @@ The Brief filter and sorting controls are intended to live inline with the `Reco
 - mentioned geography
 - presentation sort order
 
+Current Brief control-bar behavior:
+
+- language and region render as compact inline popover triggers rather than always-open multiselect fields
+- each closed trigger summarizes the applied state as `Label: Value`, for example `Language: All` or `Region: Angola +4`
+- when multiple values are selected, the trigger shows the first selected value plus the count of additional selections
+- `Apply` and `Clear` live inside each popover footer instead of below the toolbar
+- language and region popovers are expected to close after `Apply` or `Clear`
+
 Current serving constraint:
 
 - Gold serves the canonical scored feed and now carries detected language plus article-mentioned geography as informational metadata
@@ -25,6 +33,7 @@ Current serving constraint:
 - feed cards default to most optimistic first unless the active sort changes that display order
 - the inline compact controls apply to `The Brief` browsing experience only
 - `Pulse` no longer reuses the Brief's filtered row set and instead reads warehouse-wide aggregates from Gold operational metrics plus Gold serving-table summaries
+- the app now shows a page-level loading screen during BigQuery-backed Brief refreshes and section switches so navigation does not appear frozen while warehouse reads are in flight
 
 ## Local Run
 
@@ -32,7 +41,18 @@ From the repository root:
 
 ```bash
 python3 -m pip install -r app/streamlit/requirements.txt
+export TIDINGSIQ_GCP_PROJECT=<GCP_PROJECT_ID>
 streamlit run app/streamlit/app.py
+```
+
+The current filter interaction requires Streamlit `1.55.0` or newer because the app relies on controlled `st.popover` state to close language and region popovers after `Apply` and `Clear`.
+
+`TIDINGSIQ_GCP_PROJECT` is required. If `TIDINGSIQ_GOLD_TABLE` is unset, the app derives `<GCP_PROJECT_ID>.gold.positive_news_feed`.
+
+If you use the repository `Makefile`, set the project explicitly for that invocation as well:
+
+```bash
+TIDINGSIQ_GCP_PROJECT=<GCP_PROJECT_ID> make streamlit
 ```
 
 ## Container Runtime
@@ -47,8 +67,8 @@ Run locally:
 
 ```bash
 docker run --rm -p 8501:8080 \
-  -e TIDINGSIQ_GCP_PROJECT=tidingsiq-dev \
-  -e TIDINGSIQ_GOLD_TABLE=tidingsiq-dev.gold.positive_news_feed \
+  -e TIDINGSIQ_GCP_PROJECT=<GCP_PROJECT_ID> \
+  -e TIDINGSIQ_GOLD_TABLE=<GOLD_TABLE_FQN> \
   -v "$HOME/.config/gcloud:/root/.config/gcloud:ro" \
   tidingsiq-streamlit:local
 ```
@@ -76,13 +96,21 @@ Typical local setup:
 
 ```bash
 gcloud auth application-default login
-export TIDINGSIQ_GCP_PROJECT=tidingsiq-dev
+export TIDINGSIQ_GCP_PROJECT=<GCP_PROJECT_ID>
 ```
 
 Optional override:
 
 ```bash
-export TIDINGSIQ_GOLD_TABLE=tidingsiq-dev.gold.positive_news_feed
+export TIDINGSIQ_GOLD_TABLE=<GOLD_TABLE_FQN>
+```
+
+Full local run with an explicit table override:
+
+```bash
+export TIDINGSIQ_GCP_PROJECT=<GCP_PROJECT_ID>
+export TIDINGSIQ_GOLD_TABLE=<GOLD_TABLE_FQN>
+streamlit run app/streamlit/app.py
 ```
 
 ## Query Contract
@@ -92,7 +120,15 @@ The app queries only Gold-layer tables and does not reach into Bronze or Silver 
 Current serving behavior:
 
 - `The Brief` fetches the current lookback window from Gold's eligible feed, then applies language and geography filters plus presentation sorting locally in the Streamlit layer to keep browsing interactions responsive
+- the language and geography controls stay inline with the Brief header as summarized popover triggers so the toolbar remains single-line in the common desktop layout
 - `Pulse` reads warehouse-wide Gold aggregates and `gold.pipeline_run_metrics` snapshots, so its charts are intentionally independent from the Brief's inline compact controls
+- `Pulse` currently loads through a consolidated dashboard path: one metrics-history query for stage snapshots and trends, plus one Gold-summary query for eligibility counts, exclusion reasons, and score buckets
+- article cards render clickable links only when the URL scheme is exactly `http` or `https`; `javascript:`, `data:`, `file:`, `mailto:`, `tel:`, blank, and malformed or no-scheme values are rendered as plain text instead of anchors
+
+Loading behavior:
+
+- a page-level loading screen appears on initial Brief load, Brief filter changes, Brief sort changes, Brief pagination changes, and section switches such as `The Brief -> Pulse`
+- the loading screen is presentation-only; it does not change the underlying Gold contract or Pulse chart definitions
 
 Current implementation intentionally stays local-first for Brief browsing responsiveness. The planned future direction is documented in [Authoritative Fetching With Controlled Query Cost](../../docs/authoritative_fetching_query_cost.md): move truth-defining Brief filters, counts, pagination, and filter-option generation into authoritative BigQuery queries while keeping Gold as the only serving source and keeping query cost bounded with short-lived caching.
 
@@ -121,6 +157,12 @@ Current expected columns:
 - `soft_deny_hit_count`
 - `hard_deny_hit_count`
 - `ingested_at`
+
+UI note:
+
+- the app does not mutate the warehouse `url` field
+- link safety is enforced at render time in the Streamlit layer
+- unsupported or unsafe URL schemes are shown as non-clickable text so the browser never receives them as `href` values
 
 ## Future Operations Horizon
 

@@ -1,28 +1,46 @@
 from __future__ import annotations
 
 import html
+import inspect
+from collections.abc import Callable
+from urllib.parse import urlsplit, urlunsplit
 
 import streamlit as st
 
-from constants import LOOKBACK_OPTIONS, RECOMMENDED_PAGE_SIZE
-from query_builder import paginate_rows
-from ui_helpers import (
-    format_float,
-    format_geography,
-    format_language,
-    format_relative_time,
-    render_empty_state,
-    render_metric_card,
-    render_pagination,
-    score_badge_class,
-)
+try:  # pragma: no cover - import path varies between app runtime and tests
+    from .brief_state import normalize_brief_selection
+    from .constants import LOOKBACK_OPTIONS, RECOMMENDED_PAGE_SIZE
+    from .ui_helpers import (
+        format_float,
+        format_geography,
+        format_language,
+        format_relative_time,
+        format_timestamp,
+        render_empty_state,
+        render_metric_card,
+        render_pagination,
+        score_badge_class,
+    )
+except ImportError:  # pragma: no cover - script entrypoint fallback
+    from brief_state import normalize_brief_selection
+    from constants import LOOKBACK_OPTIONS, RECOMMENDED_PAGE_SIZE
+    from ui_helpers import (
+        format_float,
+        format_geography,
+        format_language,
+        format_relative_time,
+        format_timestamp,
+        render_empty_state,
+        render_metric_card,
+        render_pagination,
+        score_badge_class,
+    )
 
 
 def render_article_card(row: dict[str, object], *, compact: bool = False) -> None:
     title = html.escape(str(row.get("title") or "Untitled article"))
     source_name = html.escape(str(row.get("source_name") or "Unknown source"))
-    url = str(row.get("url") or "").strip()
-    link_target = html.escape(url) if url else ""
+    link_target = _normalize_safe_article_url(row.get("url"))
     published_value = row.get("published_at") or row.get("ingested_at")
     published_display = format_relative_time(published_value)
     language_value = format_language(row.get("language"))
@@ -36,7 +54,7 @@ def render_article_card(row: dict[str, object], *, compact: bool = False) -> Non
     )
     compact_class = " tiq-card-compact" if compact else ""
 
-    if url:
+    if link_target:
         headline_html = (
             f'<a class="tiq-card-headline" href="{link_target}" '
             f'target="_blank" rel="noopener noreferrer">{title}</a>'
@@ -84,6 +102,34 @@ def render_article_card(row: dict[str, object], *, compact: bool = False) -> Non
     )
 
 
+def _normalize_safe_article_url(value: object) -> str:
+    raw_url = str(value or "").strip()
+    if not raw_url:
+        return ""
+
+    try:
+        parts = urlsplit(raw_url)
+    except ValueError:
+        return ""
+
+    scheme = parts.scheme.lower()
+    if scheme not in {"http", "https"}:
+        return ""
+    if not parts.netloc:
+        return ""
+
+    normalized_url = urlunsplit(
+        (
+            scheme,
+            parts.netloc,
+            parts.path or "",
+            parts.query or "",
+            parts.fragment or "",
+        )
+    )
+    return html.escape(normalized_url, quote=True)
+
+
 def _render_page_masthead(
     *,
     title: str,
@@ -126,45 +172,126 @@ def _format_filter_trigger(
     return f"{prefix}  {value}"
 
 
-def _render_multi_filter_popover(
+def _format_multi_filter_summary(
+    *,
+    label: str,
+    selected: list[str],
+    empty_value: str,
+    value_formatter: Callable[[object], str],
+) -> str:
+    normalized_selection = normalize_brief_selection(selected)
+    if not normalized_selection:
+        return f"{label}: {empty_value}"
+
+    first_value = value_formatter(normalized_selection[0])
+    if len(normalized_selection) == 1:
+        return f"{label}: {first_value}"
+    return f"{label}: {first_value} +{len(normalized_selection) - 1}"
+
+
+def _popover_supports_controlled_state() -> bool:
+    try:
+        parameters = inspect.signature(st.popover).parameters
+    except (TypeError, ValueError):
+        return False
+    return "key" in parameters and "on_change" in parameters
+
+
+def _close_multi_filter_popover(popover_state_key: str | None) -> None:
+    if popover_state_key is None:
+        return
+    st.session_state[popover_state_key] = False
+
+
+def _apply_multi_filter_draft_state(
+    applied_state_key: str,
+    draft_state_key: str,
+    popover_state_key: str | None = None,
+) -> None:
+    st.session_state[applied_state_key] = normalize_brief_selection(
+        st.session_state.get(draft_state_key, [])
+    )
+    _close_multi_filter_popover(popover_state_key)
+
+
+def _clear_multi_filter_draft_state(
+    applied_state_key: str,
+    draft_state_key: str,
+    popover_state_key: str | None = None,
+) -> None:
+    st.session_state[applied_state_key] = []
+    st.session_state[draft_state_key] = []
+    _close_multi_filter_popover(popover_state_key)
+
+
+def _render_multi_filter_control(
     *,
     label: str,
     options: list[str],
-    state_key: str,
-    trigger_prefix: str,
+    applied_state_key: str,
+    draft_state_key: str,
     placeholder: str,
+    value_formatter: Callable[[object], str],
 ) -> None:
-    option_set = set(options)
-    selected = [
-        str(value)
-        for value in st.session_state.get(state_key, [])
-        if str(value) in option_set
-    ]
-    trigger_label = _format_filter_trigger(
-        prefix=trigger_prefix,
-        placeholder=placeholder,
-        selected=selected,
+    draft_selection = normalize_brief_selection(
+        st.session_state.get(draft_state_key, [])
     )
+    applied_selection = normalize_brief_selection(
+        st.session_state.get(applied_state_key, [])
+    )
+    has_options = bool(options)
+    trigger_label = _format_multi_filter_summary(
+        label=label,
+        selected=applied_selection,
+        empty_value="All",
+        value_formatter=value_formatter,
+    )
+    popover_state_key: str | None = None
+    popover_kwargs: dict[str, object] = {"use_container_width": True}
+    if _popover_supports_controlled_state():
+        popover_state_key = f"{draft_state_key}_popover_open"
+        st.session_state.setdefault(popover_state_key, False)
+        popover_kwargs["key"] = popover_state_key
+        popover_kwargs["on_change"] = "rerun"
 
-    with st.popover(
-        trigger_label,
-        use_container_width=True,
-        disabled=not options,
-    ):
-        st.multiselect(
-            label,
-            options=options,
-            key=state_key,
-            placeholder=placeholder,
-            label_visibility="collapsed",
+    with st.popover(trigger_label, **popover_kwargs):
+        st.markdown(
+            '<div class="tiq-filter-popover-panel-anchor"></div>',
+            unsafe_allow_html=True,
         )
-        if selected and st.button(
-            f"Clear {label.lower()}",
-            key=f"{state_key}_clear",
-            width="stretch",
-        ):
-            st.session_state[state_key] = []
-            st.rerun()
+        st.markdown(
+            f'<div class="tiq-filter-popover-title">{html.escape(label)}</div>',
+            unsafe_allow_html=True,
+        )
+        with st.form(f"{draft_state_key}_form", border=False, enter_to_submit=False):
+            st.multiselect(
+                label,
+                options=options,
+                key=draft_state_key,
+                placeholder=f"Select {label.lower()}",
+                disabled=not has_options and not draft_selection,
+                label_visibility="collapsed",
+            )
+            st.markdown(
+                '<div class="tiq-filter-popover-footer-anchor"></div>',
+                unsafe_allow_html=True,
+            )
+            clear_col, apply_col = st.columns([1, 1], gap="small")
+            with clear_col:
+                st.form_submit_button(
+                    "Clear",
+                    on_click=_clear_multi_filter_draft_state,
+                    args=(applied_state_key, draft_state_key, popover_state_key),
+                    width="stretch",
+                )
+            with apply_col:
+                st.form_submit_button(
+                    "Apply",
+                    on_click=_apply_multi_filter_draft_state,
+                    args=(applied_state_key, draft_state_key, popover_state_key),
+                    type="primary",
+                    width="stretch",
+                )
 
 
 def _render_brief_filter_bar(
@@ -176,11 +303,14 @@ def _render_brief_filter_bar(
 
     st.markdown('<div class="tiq-brief-filter-bar-anchor"></div>', unsafe_allow_html=True)
     lookback_col, language_col, geography_col, sort_col = st.columns(
-        [1.22, 1.18, 1.18, 1.72],
+        [1.15, 1.55, 1.55, 1.45],
         gap="small",
     )
     with lookback_col:
-        st.markdown('<div class="tiq-lookback-control-anchor"></div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="tiq-lookback-control-anchor"></div>',
+            unsafe_allow_html=True,
+        )
         st.segmented_control(
             "Lookback",
             options=LOOKBACK_OPTIONS,
@@ -190,25 +320,36 @@ def _render_brief_filter_bar(
             width="stretch",
         )
     with language_col:
-        st.markdown('<div class="tiq-language-control-anchor"></div>', unsafe_allow_html=True)
-        _render_multi_filter_popover(
+        st.markdown(
+            '<div class="tiq-language-control-anchor"></div>',
+            unsafe_allow_html=True,
+        )
+        _render_multi_filter_control(
             label="Language",
             options=language_options,
-            state_key="selected_languages",
-            trigger_prefix="A",
+            applied_state_key="selected_languages",
+            draft_state_key="draft_selected_languages",
             placeholder="All Languages",
+            value_formatter=format_language,
         )
     with geography_col:
-        st.markdown('<div class="tiq-geography-control-anchor"></div>', unsafe_allow_html=True)
-        _render_multi_filter_popover(
+        st.markdown(
+            '<div class="tiq-geography-control-anchor"></div>',
+            unsafe_allow_html=True,
+        )
+        _render_multi_filter_control(
             label="Region",
             options=geography_options,
-            state_key="selected_geographies",
-            trigger_prefix="G",
+            applied_state_key="selected_geographies",
+            draft_state_key="draft_selected_geographies",
             placeholder="All Regions",
+            value_formatter=format_geography,
         )
     with sort_col:
-        st.markdown('<div class="tiq-feed-sort-control-anchor"></div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="tiq-feed-sort-control-anchor"></div>',
+            unsafe_allow_html=True,
+        )
         st.segmented_control(
             "Sort feed",
             options=sort_options,
@@ -225,6 +366,9 @@ def render_brief(
     geography_options: list[str],
     summary: dict[str, float | int],
     recommended_rows: list[dict[str, object]],
+    current_page: int,
+    total_pages: int,
+    total_rows: int,
 ) -> None:
     _render_page_masthead(
         title="Today's Global Optimism",
@@ -284,17 +428,12 @@ def render_brief(
         )
     st.markdown('<div class="tiq-section-divider"></div>', unsafe_allow_html=True)
 
-    paginated_recommended, current_page, total_pages, total_rows = paginate_rows(
-        recommended_rows,
-        page_number=int(st.session_state.get("recommended_page", 1)),
-        page_size=RECOMMENDED_PAGE_SIZE,
-    )
-    st.session_state["recommended_page"] = current_page
-
     if not recommended_rows:
-        render_empty_state("No recommended stories matched the current filters.")
+        render_empty_state(
+            "No recommended stories matched the current filters for this lookback window."
+        )
     else:
-        for row in paginated_recommended:
+        for row in recommended_rows:
             render_article_card(row)
         render_pagination(
             state_key="recommended_page",
@@ -710,45 +849,56 @@ def render_methodology() -> None:
         (
             "What TidingsIQ Measures",
             """
-            <strong>TidingsIQ ranks constructive stories.</strong> The app is not claiming to measure
-            objective happiness or emotional truth. It is a positive-news intelligence feed built to surface
-            stories that are more constructive and more suitable for a positive experience.
+            <strong>TidingsIQ ranks constructive stories for positive-feed suitability.</strong> It does not
+            claim to measure objective happiness, emotional truth, or factual certainty. The current model is
+            designed to be practical, deterministic, and explainable from persisted warehouse fields.
             """,
         ),
         (
-            "How The Score Works",
+            "How The Pipeline Narrows Stories",
             """
-            <strong>base_happy_factor</strong> is a tone-normalized score on a 0 to 100 scale. The final
-            <strong>happy_factor</strong> applies title allow bonuses and deny penalties on top of that base score.
-            The current persisted score version is the guardrailed tone model, so the app reads a warehouse result
-            rather than recalculating sentiment in the frontend.
+            <strong>Bronze</strong> lands GDELT metadata, <strong>Silver</strong> cleans and deduplicates it,
+            and <strong>Gold</strong> scores only canonical rows for application use. A canonical row is the
+            single retained version of a story after Silver cleanup, while duplicate candidates remain visible
+            operationally rather than being mistaken for missing data.
             """,
         ),
         (
-            "How Feed Eligibility Works",
+            "How Scoring And Eligibility Work",
             """
-            <strong>Score and eligibility are separate.</strong> An article can have a persisted score and still be excluded
-            from the Brief. The current feed reads the warehouse-defined eligible set directly, without an app-side
-            minimum happy-factor slider and without a separate below-threshold exploration section. In practice that
-            means the Brief shows only the stories Gold has already marked as positive-feed eligible.
+            <strong>Score and eligibility are separate.</strong> <strong>base_happy_factor</strong> is a
+            tone-normalized score on a 0 to 100 scale, and the final <strong>happy_factor</strong> applies
+            title-based allow bonuses and deny penalties on top of that base score. Gold persists scored rows
+            even when they are not served, so <strong>is_positive_feed_eligible</strong> and
+            <strong>exclusion_reason</strong> explain why a record stays in the warehouse but does not appear
+            in the default feed.
             """,
         ),
         (
-            "How The Data Pipeline Works",
+            "How Pulse Should Be Read",
             """
-            <strong>Bronze</strong> lands GDELT article metadata. <strong>Silver</strong> normalizes and deduplicates it.
-            <strong>Gold</strong> computes the final happy factor, guardrail metadata, eligibility state, and the detected
-            language plus article-mentioned geography that the app now displays. <strong>Streamlit</strong> then reads only
-            the Gold serving table and presents the feed locally on your device.
+            <strong>Pulse is warehouse-wide.</strong> It does not inherit the Brief's browsing filters or narrow
+            itself to the current user selection. Instead it shows how records narrow from Bronze to Silver to Gold,
+            why some Gold rows are excluded, how cleanup behaves over time, and how the full scored Gold population
+            is distributed across happy-factor buckets.
+            """,
+        ),
+        (
+            "Interpretation Rules",
+            """
+            <strong>Detected language is article-language metadata</strong> and may be inferred when source-native
+            values are unavailable. <strong>Mentioned geography reflects article geography</strong>, not publisher
+            origin or country of publication. These fields help the user browse and inspect the feed, but they are
+            not current serving gates.
             """,
         ),
         (
             "Known Limitations",
             """
-            <strong>Language can be inferred.</strong> The detected language metadata is useful, but it should not be presented
-            as guaranteed source language. <strong>Mentioned geography reflects article geography</strong>, not publisher origin.
-            The feed is batch-oriented rather than real-time, and title guardrails improve explainability without pretending
-            to fully understand every article context.
+            The current model uses upstream metadata and title guardrails rather than full-article semantic
+            understanding. It does not infer publisher country, provide real-time guarantees, verify factual accuracy,
+            or apply a source-trust scoring layer. The system is batch-oriented and intentionally transparent about
+            those boundaries.
             """,
         ),
     ]

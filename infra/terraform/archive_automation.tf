@@ -1,3 +1,36 @@
+resource "google_service_account" "bronze_archive" {
+  count = var.enable_bronze_archive_automation ? 1 : 0
+
+  project      = var.project_id
+  account_id   = "tidingsiq-archive-${var.environment}"
+  display_name = "TidingsIQ Archive ${upper(var.environment)}"
+  description  = "Runs the TidingsIQ Bronze archive worker with Bronze-only warehouse and bucket access."
+}
+
+resource "google_project_iam_member" "bronze_archive_job_user" {
+  count = var.enable_bronze_archive_automation ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/bigquery.jobUser"
+  member  = "serviceAccount:${google_service_account.bronze_archive[0].email}"
+}
+
+resource "google_bigquery_dataset_iam_member" "bronze_archive_bronze_editor" {
+  count = var.enable_bronze_archive_automation ? 1 : 0
+
+  dataset_id = google_bigquery_dataset.datasets["bronze"].dataset_id
+  role       = "roles/bigquery.dataEditor"
+  member     = "serviceAccount:${google_service_account.bronze_archive[0].email}"
+}
+
+resource "google_storage_bucket_iam_member" "bronze_archive_object_admin" {
+  count = var.enable_bronze_archive_automation ? 1 : 0
+
+  bucket = google_storage_bucket.bronze_archive.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.bronze_archive[0].email}"
+}
+
 resource "google_cloud_run_v2_job" "bronze_archive" {
   count = var.enable_bronze_archive_automation ? 1 : 0
 
@@ -12,9 +45,18 @@ resource "google_cloud_run_v2_job" "bronze_archive" {
     parallelism = 1
 
     template {
-      service_account = google_service_account.pipeline.email
+      service_account = google_service_account.bronze_archive[0].email
       max_retries     = 1
       timeout         = var.pipeline_job_timeout
+
+      dynamic "vpc_access" {
+        for_each = var.enable_restricted_egress ? [1] : []
+
+        content {
+          connector = google_vpc_access_connector.restricted_egress[0].id
+          egress    = "ALL_TRAFFIC"
+        }
+      }
 
       containers {
         image   = local.pipeline_container_image
@@ -55,6 +97,9 @@ resource "google_cloud_run_v2_job" "bronze_archive" {
 
   depends_on = [
     google_artifact_registry_repository_iam_member.cloud_run_service_agent_reader,
+    google_bigquery_dataset_iam_member.bronze_archive_bronze_editor,
+    google_project_iam_member.bronze_archive_job_user,
+    google_storage_bucket_iam_member.bronze_archive_object_admin,
   ]
 }
 
@@ -155,7 +200,7 @@ resource "google_monitoring_alert_policy" "bronze_archive_repeated_failures" {
     display_name = "Bronze archive failed twice within 24 hours"
 
     condition_threshold {
-      filter          = "metric.type=\"logging.googleapis.com/user/${google_logging_metric.bronze_archive_failures[0].name}\""
+      filter          = "resource.type=\"cloud_run_job\" AND metric.type=\"logging.googleapis.com/user/${google_logging_metric.bronze_archive_failures[0].name}\""
       comparison      = "COMPARISON_GT"
       threshold_value = 1.5
       duration        = "0s"
@@ -175,10 +220,6 @@ resource "google_monitoring_alert_policy" "bronze_archive_repeated_failures" {
 
   alert_strategy {
     auto_close = "86400s"
-
-    notification_rate_limit {
-      period = "3600s"
-    }
   }
 
   documentation {
@@ -200,7 +241,7 @@ resource "google_monitoring_alert_policy" "bronze_archive_backlog" {
     display_name = "Bronze archive backlog detected twice within 24 hours"
 
     condition_threshold {
-      filter          = "metric.type=\"logging.googleapis.com/user/${google_logging_metric.bronze_archive_backlog_runs[0].name}\""
+      filter          = "resource.type=\"cloud_run_job\" AND metric.type=\"logging.googleapis.com/user/${google_logging_metric.bronze_archive_backlog_runs[0].name}\""
       comparison      = "COMPARISON_GT"
       threshold_value = 1.5
       duration        = "0s"
@@ -220,10 +261,6 @@ resource "google_monitoring_alert_policy" "bronze_archive_backlog" {
 
   alert_strategy {
     auto_close = "86400s"
-
-    notification_rate_limit {
-      period = "3600s"
-    }
   }
 
   documentation {

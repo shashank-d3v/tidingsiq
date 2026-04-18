@@ -6,6 +6,13 @@ provider "google" {
 locals {
   bronze_archive_bucket_name = trimspace(var.bronze_archive_bucket_name) != "" ? trimspace(var.bronze_archive_bucket_name) : "${var.project_id}-tidingsiq-bronze-archive"
   archive_bucket_location    = coalesce(var.archive_bucket_location, var.bigquery_location)
+  pipeline_dataset_editor_ids = toset([
+    "bronze",
+    "bronze_staging",
+    "silver",
+    "gold",
+    "gold_staging",
+  ])
 
   common_labels = merge(
     {
@@ -73,6 +80,8 @@ resource "google_service_account" "pipeline" {
 }
 
 resource "google_service_account" "app" {
+  count = var.enable_app_hosting ? 1 : 0
+
   project      = var.project_id
   account_id   = "tidingsiq-app-${var.environment}"
   display_name = "TidingsIQ App ${upper(var.environment)}"
@@ -86,27 +95,25 @@ resource "google_project_iam_member" "pipeline_job_user" {
 }
 
 resource "google_project_iam_member" "app_job_user" {
+  count = var.enable_app_hosting ? 1 : 0
+
   project = var.project_id
   role    = "roles/bigquery.jobUser"
-  member  = "serviceAccount:${google_service_account.app.email}"
+  member  = "serviceAccount:${google_service_account.app[0].email}"
 }
 
 resource "google_bigquery_dataset_iam_member" "pipeline_dataset_editor" {
-  for_each = google_bigquery_dataset.datasets
+  for_each = local.pipeline_dataset_editor_ids
 
-  dataset_id = each.value.dataset_id
+  dataset_id = google_bigquery_dataset.datasets[each.key].dataset_id
   role       = "roles/bigquery.dataEditor"
   member     = "serviceAccount:${google_service_account.pipeline.email}"
 }
 
 resource "google_bigquery_dataset_iam_member" "app_gold_viewer" {
+  count = var.enable_app_hosting ? 1 : 0
+
   dataset_id = google_bigquery_dataset.datasets["gold"].dataset_id
   role       = "roles/bigquery.dataViewer"
-  member     = "serviceAccount:${google_service_account.app.email}"
-}
-
-resource "google_storage_bucket_iam_member" "pipeline_bronze_archive_object_admin" {
-  bucket = google_storage_bucket.bronze_archive.name
-  role   = "roles/storage.objectAdmin"
-  member = "serviceAccount:${google_service_account.pipeline.email}"
+  member     = "serviceAccount:${google_service_account.app[0].email}"
 }

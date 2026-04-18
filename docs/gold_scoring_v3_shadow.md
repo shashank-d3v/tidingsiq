@@ -24,6 +24,8 @@ Current `v3` defaults intentionally leave upstream GDELT-derived signal adjustme
 ## Validation Notes
 
 - Unit tests cover deterministic score math, URL-status handling, and rollout-script SQL builders.
+- URL validation now includes SSRF hardening before request dispatch and before every followed redirect, with blocked targets logged and surfaced as `unavailable`.
+- Live validation for this path should combine a manual Cloud Run job execution with warehouse checks on `gold.url_validation_results` and a log search for `Blocked URL target`.
 - Full `bruin validate` still depends on live BigQuery access and could not complete in the sandboxed environment used for implementation.
 
 ## Known Follow-Ups

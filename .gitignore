@@ -136,7 +136,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+.env*
 .envrc
 .venv
 env/
@@ -202,9 +202,17 @@ cython_debug/
 
 # Terraform local configuration
 *.tfvars
+*.tfvars.json
 .bruin.yml
+*credentials*.json
+*service-account*.json
+*.pem
+*.key
+*.p12
+*.pfx
 .cursorignore
 .cursorindexingignore
+!.env.example
 
 # Marimo
 marimo/_static/

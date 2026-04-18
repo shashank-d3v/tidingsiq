@@ -31,8 +31,9 @@ Serving model:
 
 Primary user controls:
 
-- Brief lookback, date, language, and geography filters in the Streamlit UI
+- Brief lookback plus inline language, region, and sort controls in the Streamlit UI
 - a warehouse-wide `Pulse` page backed by Gold operational aggregates
+- page-level loading states during BigQuery-backed Brief refreshes and section switches in the Streamlit UI
 
 ## Repository Layout
 
@@ -72,6 +73,30 @@ Primary user controls:
 - [Operations Scripts](scripts/README.md): manual archive and retention helpers
 - [Operations Runbook](docs/operations_runbook.md): reset, smoke test, scheduler, image, and warehouse debug commands
 
+## Local App Run
+
+The Streamlit app requires an explicit project id at startup:
+
+```bash
+python3 -m pip install -r app/streamlit/requirements.txt
+export TIDINGSIQ_GCP_PROJECT=<GCP_PROJECT_ID>
+streamlit run app/streamlit/app.py
+```
+
+The current Brief filter UI depends on controlled `st.popover` behavior, so the app now requires Streamlit `1.55.0` or newer.
+
+Optional override:
+
+```bash
+export TIDINGSIQ_GOLD_TABLE=<GOLD_TABLE_FQN>
+```
+
+If you prefer the repository `Makefile`, pass the project explicitly for that run:
+
+```bash
+TIDINGSIQ_GCP_PROJECT=<GCP_PROJECT_ID> make streamlit
+```
+
 ## Design Principles
 
 - Keep the first release batch-oriented, deterministic, and inexpensive to run.
@@ -82,11 +107,9 @@ Primary user controls:
 
 ## Current Status
 
-The repository has an applied Terraform foundation, a working Bronze ingestion slice in Bruin, a deterministic Silver normalization layer, a versioned Gold scoring model, a Streamlit app that queries Gold only, an initial retention/archive operations slice, and an applied GCP automation path for the pipeline.
+The repository includes the Terraform foundation, a working Bronze ingestion slice in Bruin, a deterministic Silver normalization layer, a versioned Gold scoring model, a Streamlit app that queries Gold only, and supporting retention/archive automation paths.
 
-The Cloud Run job path, reporting path, and app hosting path are all implemented in the repo. In the current environment, the 6-hour pipeline scheduler is active, the hosted Streamlit service remains intentionally disabled until reactivated, and the Monitoring email channel may still need inbox verification before notifications start arriving.
-The infrastructure also includes an operational `bronze_staging` dataset used only by the Bronze merge load path.
-The current Gold serving contract now separates score from eligibility: `happy_factor` ranks records, while `is_positive_feed_eligible` keeps obvious non-uplifting titles out of the default feed. The current default serving threshold is `65`.
+The Cloud Run job path, reporting path, and app-hosting path are implemented in the repo as reusable deployment options rather than hard-coded operator state. The infrastructure also includes the operational `bronze_staging` dataset used only by the Bronze merge load path. The current Gold serving contract separates score from eligibility: `happy_factor` ranks records, while `is_positive_feed_eligible` keeps obvious non-uplifting titles out of the default feed. The default serving threshold is `65`. In the Streamlit UI, article cards now render clickable outbound links only for exact `http` and `https` URLs; unsupported, blank, or malformed values are displayed as plain text. The current app also shows explicit loading screens during BigQuery-backed Brief refreshes and page switches so the warehouse-backed UI does not appear frozen during reruns.
 
 ## Next Build Order
 

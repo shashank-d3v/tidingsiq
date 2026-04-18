@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+import ipaddress
+import logging
 import socket
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -15,6 +17,9 @@ STATUS_FORBIDDEN = "forbidden"
 STATUS_REDIRECT_LOOP = "redirect_loop"
 STATUS_UNAVAILABLE = "unavailable"
 STATUS_UNCHECKED = "unchecked"
+
+LOGGER = logging.getLogger(__name__)
+BLOCKED_METADATA_HOSTS = {"metadata", "metadata.google.internal"}
 
 RECHECK_WINDOWS = {
     STATUS_VALID: timedelta(days=30),
@@ -30,6 +35,13 @@ class UrlValidationOutcome:
     http_status_code: int | None
     redirect_count: int
     status: str
+
+
+@dataclass(frozen=True)
+class _UrlSafetyDecision:
+    allowed: bool
+    final_url: str
+    reason: str | None = None
 
 
 class _NoRedirectHandler(HTTPRedirectHandler):
@@ -80,6 +92,88 @@ def classify_http_status(status_code: int | None) -> str:
     return STATUS_UNAVAILABLE
 
 
+def _normalize_hostname(hostname: str | None) -> str:
+    return str(hostname or "").strip().rstrip(".").lower()
+
+
+def _blocked_outcome(*, url: str, redirect_count: int) -> UrlValidationOutcome:
+    return UrlValidationOutcome(
+        final_url=url,
+        http_status_code=None,
+        redirect_count=redirect_count,
+        status=STATUS_UNAVAILABLE,
+    )
+
+
+def _log_blocked_target(*, url: str, hostname: str, reason: str) -> None:
+    LOGGER.warning("Blocked URL target url=%s hostname=%s reason=%s", url, hostname, reason)
+
+
+def _classify_blocked_address(address) -> str:
+    if address.is_loopback:
+        return "blocked_loopback_ip"
+    if address.is_private:
+        return "blocked_private_ip"
+    if address.is_link_local:
+        return "blocked_link_local_ip"
+    if address.is_multicast:
+        return "blocked_multicast_ip"
+    if address.is_unspecified:
+        return "blocked_unspecified_ip"
+    if address.is_reserved:
+        return "blocked_reserved_ip"
+    if not address.is_global:
+        return "blocked_non_global_ip"
+    return "blocked_non_global_ip"
+
+
+def _is_ip_literal(hostname: str) -> bool:
+    try:
+        ipaddress.ip_address(hostname)
+    except ValueError:
+        return False
+    return True
+
+
+def _is_safe_request_target(url: str) -> _UrlSafetyDecision:
+    parts = urlparse(str(url).strip())
+    normalized_url = parts.geturl() or str(url).strip()
+    hostname = _normalize_hostname(parts.hostname)
+
+    if parts.scheme not in {"http", "https"}:
+        return _UrlSafetyDecision(False, normalized_url, "blocked_non_http_scheme")
+    if not hostname:
+        return _UrlSafetyDecision(False, normalized_url, "blocked_missing_hostname")
+    if _is_ip_literal(hostname):
+        return _UrlSafetyDecision(False, normalized_url, "blocked_ip_literal")
+    if hostname in BLOCKED_METADATA_HOSTS:
+        return _UrlSafetyDecision(False, normalized_url, "blocked_metadata_host")
+
+    try:
+        resolved = socket.getaddrinfo(hostname, parts.port or None, type=socket.SOCK_STREAM)
+    except socket.gaierror:
+        return _UrlSafetyDecision(False, normalized_url, "blocked_dns_resolution_failed")
+    except OSError:
+        return _UrlSafetyDecision(False, normalized_url, "blocked_dns_resolution_failed")
+
+    if not resolved:
+        return _UrlSafetyDecision(False, normalized_url, "blocked_dns_resolution_failed")
+
+    for result in resolved:
+        sockaddr = result[4] if len(result) > 4 else None
+        address_text = sockaddr[0] if isinstance(sockaddr, tuple) and sockaddr else None
+        if not address_text:
+            return _UrlSafetyDecision(False, normalized_url, "blocked_invalid_resolution")
+        try:
+            address = ipaddress.ip_address(address_text)
+        except ValueError:
+            return _UrlSafetyDecision(False, normalized_url, "blocked_invalid_resolution")
+        if not address.is_global:
+            return _UrlSafetyDecision(False, normalized_url, _classify_blocked_address(address))
+
+    return _UrlSafetyDecision(True, normalized_url)
+
+
 def _open_with_method(
     *,
     url: str,
@@ -115,8 +209,19 @@ def _resolve_url(
     current_url = url
     seen_urls = {url}
     redirect_count = 0
+    pending_safety_decision: _UrlSafetyDecision | None = None
 
     while True:
+        safety_decision = pending_safety_decision or _is_safe_request_target(current_url)
+        pending_safety_decision = None
+        if not safety_decision.allowed:
+            _log_blocked_target(
+                url=safety_decision.final_url,
+                hostname=_normalize_hostname(urlparse(current_url).hostname),
+                reason=str(safety_decision.reason),
+            )
+            return _blocked_outcome(url=safety_decision.final_url, redirect_count=redirect_count)
+
         final_url, status_code, headers, is_redirect = _open_with_method(
             url=current_url,
             method=method,
@@ -140,8 +245,20 @@ def _resolve_url(
                     redirect_count=redirect_count + 1,
                     status=STATUS_REDIRECT_LOOP,
                 )
+            redirect_safety_decision = _is_safe_request_target(next_url)
+            if not redirect_safety_decision.allowed:
+                _log_blocked_target(
+                    url=redirect_safety_decision.final_url,
+                    hostname=_normalize_hostname(urlparse(next_url).hostname),
+                    reason=str(redirect_safety_decision.reason),
+                )
+                return _blocked_outcome(
+                    url=redirect_safety_decision.final_url,
+                    redirect_count=redirect_count,
+                )
             seen_urls.add(next_url)
             current_url = next_url
+            pending_safety_decision = redirect_safety_decision
             redirect_count += 1
             continue
 

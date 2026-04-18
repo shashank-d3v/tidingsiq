@@ -3,7 +3,19 @@ from __future__ import annotations
 from google.cloud import bigquery
 import streamlit as st
 
-from query_builder import FeedQueryConfig, build_feed_query
+from query_builder import (
+    BriefGeographyOptionsQueryConfig,
+    BriefLanguageOptionsQueryConfig,
+    BriefRowsQueryConfig,
+    BriefScopeQueryConfig,
+    FeedQueryConfig,
+    QueryParameterSpec,
+    build_brief_geography_options_query,
+    build_brief_language_options_query,
+    build_brief_rows_query,
+    build_brief_scope_summary_query,
+    build_feed_query,
+)
 
 
 @st.cache_resource
@@ -12,12 +24,36 @@ def get_bigquery_client(project_id: str) -> bigquery.Client:
 
 
 def _to_query_parameters(
-    parameters: list[tuple[str, str, object]],
-) -> list[bigquery.ScalarQueryParameter]:
-    return [
-        bigquery.ScalarQueryParameter(name, type_name, value)
-        for name, type_name, value in parameters
-    ]
+    parameters: list[tuple[str, str, object]] | list[QueryParameterSpec],
+) -> list[bigquery.ArrayQueryParameter | bigquery.ScalarQueryParameter]:
+    query_parameters: list[
+        bigquery.ArrayQueryParameter | bigquery.ScalarQueryParameter
+    ] = []
+    for parameter in parameters:
+        if isinstance(parameter, QueryParameterSpec):
+            if parameter.is_array:
+                query_parameters.append(
+                    bigquery.ArrayQueryParameter(
+                        parameter.name,
+                        parameter.type_name,
+                        list(parameter.value),
+                    )
+                )
+            else:
+                query_parameters.append(
+                    bigquery.ScalarQueryParameter(
+                        parameter.name,
+                        parameter.type_name,
+                        parameter.value,
+                    )
+                )
+            continue
+
+        name, type_name, value = parameter
+        query_parameters.append(
+            bigquery.ScalarQueryParameter(name, type_name, value)
+        )
+    return query_parameters
 
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -64,6 +100,101 @@ def load_feed(
     )
     rows = [dict(row.items()) for row in query_job.result()]
     return rows, sql
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def load_brief_rows(
+    project_id: str,
+    config: BriefRowsQueryConfig,
+) -> tuple[list[dict[str, object]], str]:
+    client = get_bigquery_client(project_id)
+    available_columns = get_table_columns(project_id, config.table_fqn)
+    sql, parameter_specs = build_brief_rows_query(
+        config,
+        available_columns=available_columns,
+    )
+    query_job = client.query(
+        sql,
+        job_config=bigquery.QueryJobConfig(
+            query_parameters=_to_query_parameters(parameter_specs)
+        ),
+    )
+    rows = [dict(row.items()) for row in query_job.result()]
+    return rows, sql
+
+
+@st.cache_data(ttl=120, show_spinner=False)
+def load_brief_scope_summary(
+    project_id: str,
+    config: BriefScopeQueryConfig,
+) -> dict[str, float | int]:
+    client = get_bigquery_client(project_id)
+    available_columns = get_table_columns(project_id, config.table_fqn)
+    sql, parameter_specs = build_brief_scope_summary_query(
+        config,
+        available_columns=available_columns,
+    )
+    rows = [dict(row.items()) for row in client.query(
+        sql,
+        job_config=bigquery.QueryJobConfig(
+            query_parameters=_to_query_parameters(parameter_specs)
+        ),
+    ).result()]
+    if not rows:
+        return {
+            "row_count": 0,
+            "avg_happy_factor": 0.0,
+            "max_happy_factor": 0.0,
+            "source_count": 0,
+        }
+
+    summary_row = rows[0]
+    return {
+        "row_count": int(summary_row.get("row_count") or 0),
+        "avg_happy_factor": float(summary_row.get("avg_happy_factor") or 0.0),
+        "max_happy_factor": float(summary_row.get("max_happy_factor") or 0.0),
+        "source_count": int(summary_row.get("source_count") or 0),
+    }
+
+
+@st.cache_data(ttl=120, show_spinner=False)
+def load_brief_language_options(
+    project_id: str,
+    config: BriefLanguageOptionsQueryConfig,
+) -> list[str]:
+    client = get_bigquery_client(project_id)
+    available_columns = get_table_columns(project_id, config.table_fqn)
+    sql, parameter_specs = build_brief_language_options_query(
+        config,
+        available_columns=available_columns,
+    )
+    rows = client.query(
+        sql,
+        job_config=bigquery.QueryJobConfig(
+            query_parameters=_to_query_parameters(parameter_specs)
+        ),
+    ).result()
+    return [str(row["language"]) for row in rows if row.get("language")]
+
+
+@st.cache_data(ttl=120, show_spinner=False)
+def load_brief_geography_options(
+    project_id: str,
+    config: BriefGeographyOptionsQueryConfig,
+) -> list[str]:
+    client = get_bigquery_client(project_id)
+    available_columns = get_table_columns(project_id, config.table_fqn)
+    sql, parameter_specs = build_brief_geography_options_query(
+        config,
+        available_columns=available_columns,
+    )
+    rows = client.query(
+        sql,
+        job_config=bigquery.QueryJobConfig(
+            query_parameters=_to_query_parameters(parameter_specs)
+        ),
+    ).result()
+    return [str(row["geography"]) for row in rows if row.get("geography")]
 
 
 @st.cache_data(ttl=300, show_spinner=False)

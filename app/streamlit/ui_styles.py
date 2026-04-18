@@ -422,14 +422,18 @@ div[data-testid="stVerticalBlock"]:has(.tiq-brief-filter-bar-anchor) > div[data-
 div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor),
 div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor),
 div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor),
-div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) {
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor),
+div[data-testid="stVerticalBlock"]:has(.tiq-inline-filter-action-anchor) {
   position: relative;
 }
 
 div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) [data-testid="stSegmentedControl"],
 div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) [data-testid="stSegmentedControl"],
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stMultiSelect"],
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stMultiSelect"],
 div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"],
-div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] {
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"],
+div[data-testid="stVerticalBlock"]:has(.tiq-inline-filter-action-anchor) .stButton {
   margin-bottom: 0;
 }
 
@@ -468,38 +472,270 @@ div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) [data-basew
   color: var(--tiq-charcoal) !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] button,
-div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] button {
-  align-items: center !important;
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-baseweb="select"] > div,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-baseweb="select"] > div {
   background: #f5f6fa !important;
   border: 1px solid #eaedf3 !important;
-  border-radius: 999px !important;
+  border-radius: 18px !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 8px 24px rgba(21, 21, 21, 0.035) !important;
-  color: #8f97a4 !important;
+  min-height: 2.18rem !important;
+  padding: 0.06rem 0.32rem !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-baseweb="select"] span,
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-baseweb="select"] input,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-baseweb="select"] span,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-baseweb="select"] input {
+  font-family: "Inter", sans-serif !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] > button,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] > button,
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] button[kind],
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] button[kind] {
+  align-items: center !important;
+  background: #ffffff !important;
+  border: 1px solid #dfe4ea !important;
+  border-radius: 999px !important;
+  box-shadow: 0 6px 18px rgba(21, 21, 21, 0.05) !important;
+  color: var(--tiq-charcoal) !important;
   display: inline-flex !important;
   font-family: "Inter", sans-serif !important;
-  font-size: 0.82rem !important;
+  font-size: 0.78rem !important;
   font-weight: 800 !important;
-  height: 2.34rem !important;
-  justify-content: center !important;
-  line-height: 1 !important;
-  padding: 0 0.86rem !important;
-  transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease !important;
+  gap: 0.5rem !important;
+  justify-content: space-between !important;
+  min-height: 2.08rem !important;
+  min-width: 13.5rem !important;
+  padding: 0.06rem 0.9rem !important;
+  text-align: left !important;
   white-space: nowrap !important;
   width: 100% !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] button:hover,
-div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] button:hover {
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] > button > div,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] > button > div,
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] button[kind] > div,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] button[kind] > div {
+  align-items: center !important;
+  display: flex !important;
+  gap: 0.5rem !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] > button:hover,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] > button:hover,
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] button[kind]:hover,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] button[kind]:hover {
+  border-color: #cfd8e3 !important;
+  color: var(--tiq-charcoal) !important;
+  box-shadow: 0 8px 22px rgba(21, 21, 21, 0.08) !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] svg,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] svg {
+  fill: currentColor !important;
+  flex-shrink: 0 !important;
+  margin-left: auto !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-baseweb="tag"],
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-baseweb="tag"] {
+  align-items: center !important;
+  background: var(--tiq-mint-soft) !important;
+  border: 1px solid #cdeedc !important;
+  border-radius: 999px !important;
+  gap: 0.2rem !important;
+  padding-right: 0.18rem !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-baseweb="tag"] span,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-baseweb="tag"] span {
+  color: #13573a !important;
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-baseweb="tag"] button,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-baseweb="tag"] button {
+  align-items: center !important;
   background: #ffffff !important;
-  box-shadow: 0 5px 14px rgba(21, 21, 21, 0.1) !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  color: #13573a !important;
+  display: inline-flex !important;
+  height: 1rem !important;
+  justify-content: center !important;
+  min-height: 1rem !important;
+  min-width: 1rem !important;
+  padding: 0 !important;
+  width: 1rem !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-baseweb="tag"] button:hover,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-baseweb="tag"] button:hover {
+  background: #d5f5e4 !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-baseweb="tag"] button svg,
+div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-baseweb="tag"] button svg {
+  fill: currentColor !important;
+  height: 0.66rem !important;
+  width: 0.66rem !important;
+}
+
+.tiq-filter-popover-panel-anchor,
+.tiq-filter-popover-footer-anchor {
+  display: block;
+  min-height: 0.1rem;
+}
+
+.tiq-filter-popover-title {
+  color: var(--tiq-charcoal);
+  font-family: "Inter", sans-serif;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.45rem;
+  text-transform: uppercase;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-panel-anchor) {
+  min-width: 16rem;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-panel-anchor) [data-baseweb="select"] > div {
+  background: #ffffff !important;
+  border: 1px solid #dfe4ea !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+  min-height: 2.55rem !important;
+  padding: 0.18rem 0.38rem !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-panel-anchor) [data-baseweb="select"] span,
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-panel-anchor) [data-baseweb="select"] input {
+  font-family: "Inter", sans-serif !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-panel-anchor) [data-baseweb="tag"] {
+  align-items: center !important;
+  background: var(--tiq-mint-soft) !important;
+  border: 1px solid #cdeedc !important;
+  border-radius: 999px !important;
+  gap: 0.2rem !important;
+  padding-right: 0.18rem !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-panel-anchor) [data-baseweb="tag"] span {
+  color: #13573a !important;
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-panel-anchor) [data-baseweb="tag"] button {
+  align-items: center !important;
+  background: #ffffff !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  color: #13573a !important;
+  display: inline-flex !important;
+  height: 1rem !important;
+  justify-content: center !important;
+  min-height: 1rem !important;
+  min-width: 1rem !important;
+  padding: 0 !important;
+  width: 1rem !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-panel-anchor) [data-baseweb="tag"] button:hover {
+  background: #d5f5e4 !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-panel-anchor) [data-baseweb="tag"] button svg {
+  fill: currentColor !important;
+  height: 0.66rem !important;
+  width: 0.66rem !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-footer-anchor) {
+  padding-top: 0.25rem;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-footer-anchor) .stButton button {
+  align-items: center !important;
+  border-radius: 999px !important;
+  box-shadow: 0 6px 16px rgba(21, 21, 21, 0.05) !important;
+  display: inline-flex !important;
+  font-family: "Inter", sans-serif !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  height: 1.95rem !important;
+  justify-content: center !important;
+  padding: 0 0.72rem !important;
+  width: 100% !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-footer-anchor) .stButton button[kind="primary"] {
+  background: var(--tiq-mint) !important;
+  border: 1px solid #00b96b !important;
+  color: #ffffff !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-footer-anchor) .stButton button[kind="secondary"] {
+  background: #ffffff !important;
+  border: 1px solid #ddd8ca !important;
   color: var(--tiq-charcoal) !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] button:disabled,
-div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] button:disabled {
-  color: #bcc2ca !important;
-  opacity: 1 !important;
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) [data-baseweb="segmented-control"] {
+  width: 100% !important;
+}
+
+.tiq-inline-filter-action-anchor {
+  display: block;
+  min-height: 0.16rem;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-inline-filter-action-anchor) .stButton button {
+  align-items: center !important;
+  border-radius: 999px !important;
+  box-shadow: 0 6px 16px rgba(21, 21, 21, 0.05) !important;
+  display: inline-flex !important;
+  font-family: "Inter", sans-serif !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  height: 1.82rem !important;
+  justify-content: center !important;
+  padding: 0 0.62rem !important;
+  width: 100% !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-inline-filter-action-anchor) .stButton button[kind="primary"] {
+  background: var(--tiq-mint) !important;
+  border: 1px solid #00b96b !important;
+  color: #ffffff !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-inline-filter-action-anchor) .stButton button[kind="primary"]:hover {
+  background: #00b96b !important;
+  box-shadow: 0 8px 18px rgba(0, 201, 117, 0.18) !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-inline-filter-action-anchor) .stButton button[kind="secondary"] {
+  background: #ffffff !important;
+  border: 1px solid #ddd8ca !important;
+  color: var(--tiq-charcoal) !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-inline-filter-action-anchor) .stButton button[kind="secondary"]:hover {
+  background: #f7f8fb !important;
+  box-shadow: 0 8px 18px rgba(21, 21, 21, 0.07) !important;
 }
 
 div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) [data-baseweb="segmented-control"] {
@@ -781,16 +1017,34 @@ div[data-testid="stVerticalBlock"]:has(.tiq-pagination-anchor) .stButton button 
   writing-mode: horizontal-tb !important;
 }
 
+.tiq-loading-screen {
+  align-items: stretch;
+  display: flex;
+  justify-content: center;
+  min-height: calc(100vh - var(--tiq-global-header-height) - 2rem);
+  padding: 2.5rem 0 1.25rem;
+  width: 100%;
+}
+
 .tiq-loading-state {
   align-items: center;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   justify-content: center;
-  margin: 12vh auto 0;
   max-width: 32rem;
-  min-height: 40vh;
   text-align: center;
+}
+
+.tiq-loading-state-inline {
+  margin: 12vh auto 0;
+  min-height: 40vh;
+}
+
+.tiq-loading-state-page {
+  margin: 0 auto;
+  min-height: min(30rem, 68vh);
+  width: 100%;
 }
 
 .tiq-loading-graphic {
@@ -993,10 +1247,18 @@ div[data-testid="stVerticalBlock"]:has(.tiq-pagination-anchor) .stButton button 
     padding: 0 0.46rem !important;
   }
 
-  div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] button,
-  div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] button {
-    font-size: 0.78rem !important;
-    height: 2.26rem !important;
+  div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] > button,
+  div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] > button,
+  div[data-testid="stVerticalBlock"]:has(.tiq-inline-filter-action-anchor) .stButton button,
+  div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-footer-anchor) .stButton button {
+    min-height: 2.02rem !important;
+  }
+
+  div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-testid="stPopover"] > button,
+  div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-testid="stPopover"] > button,
+  div[data-testid="stVerticalBlock"]:has(.tiq-inline-filter-action-anchor) .stButton button,
+  div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-footer-anchor) .stButton button {
+    font-size: 0.74rem !important;
   }
 
   .tiq-status-chip {

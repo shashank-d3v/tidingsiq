@@ -13,22 +13,22 @@ They should remain separate in both infrastructure and IAM.
 
 ## Current State
 
-Implemented now:
+Implemented in the repository:
 
 - Terraform-managed GCP foundation
 - Bruin pipeline running locally against BigQuery
 - Streamlit app running locally against `gold.positive_news_feed`
 - pipeline container path for Cloud Run Job execution
-- applied Terraform automation for Artifact Registry, Cloud Run Job, and Cloud Scheduler
+- Terraform automation for Artifact Registry, Cloud Run Job, and Cloud Scheduler
+- Terraform-managed restricted-egress path for the main pipeline and Bronze archive Cloud Run jobs
 - reporting Cloud Run Job path and Monitoring-based email notifications
-- Bronze archive Cloud Run Job, scheduler, and Monitoring scaffolding in repository, designed to reuse the pipeline image and service account during rollout
-- pipeline scheduler activated after a warehouse reset and successful post-reset smoke test
+- Bronze archive Cloud Run Job, scheduler, and Monitoring scaffolding in repository, designed to reuse the pipeline image while running under a dedicated archive service account
 - Streamlit app container and Terraform hosting scaffold for Cloud Run service
-- app hosting path validated once in Cloud Run and then disabled again in the active environment
+- app hosting path available as an optional deployment target
 
-Not implemented yet:
+Not implemented as a public, always-on deployment contract:
 
-- active hosted cloud deployment for the Streamlit app
+- active hosted cloud deployment for the Streamlit app behind the hardened public edge
 - container build and release flow in GCP
 
 ## Deployment Targets
@@ -47,10 +47,10 @@ Recommended flow:
 
 `Cloud Scheduler -> Cloud Run Job -> bruin run pipeline/bruin/pipeline.yml -> BigQuery`
 
-Current cadence target:
+Example cadence target:
 
 - every 6 hours
-- timezone: `Asia/Kolkata`
+- timezone: `<SCHEDULE_TIME_ZONE>`
 - target run times: `00:00`, `06:00`, `12:00`, `18:00` IST
 
 Why this fits:
@@ -65,6 +65,7 @@ Expected components:
 - Artifact Registry repository for the pipeline container image
 - Cloud Run Job for Bruin execution
 - Cloud Scheduler job for cadence
+- dedicated VPC, subnet, Serverless VPC Access connector, Cloud Router, and Cloud NAT path for restricted outbound traffic
 - dedicated pipeline service account
 - Secret Manager or environment-based runtime configuration
 
@@ -81,15 +82,14 @@ Current prep work already in the repo:
 - a container entrypoint that writes `.bruin.yml` from environment variables
 - a default container command that runs `bruin run pipeline/bruin/pipeline.yml`
 - Terraform resources for the Artifact Registry repository, Cloud Run Job, and Cloud Scheduler trigger
-- an applied Cloud Run Job and an active Cloud Scheduler job in the current project
+- Terraform resources for a dedicated egress VPC, connector, NAT path, deny rules, and blocked-egress monitoring
+- a reusable Cloud Run Job and Cloud Scheduler configuration path
 
-Current rollout boundary:
+Rollout guidance:
 
-- the scheduler is now active on the configured cadence
-- a manual Cloud Run execution succeeded on `2026-04-06`, confirming the deployed pipeline can run end to end when the job image is current
-- a manual Cloud Run execution also succeeded after the warehouse reset on `2026-04-07`, confirming the active scheduled image can rebuild the warehouse from empty state
-- a manual Cloud Run execution succeeded on `2026-04-16` after pre-creating `gold_staging` for the `dlt` merge load path, redeploying the `gold.url_validation_results` dtype fix, and recreating `gold.positive_news_feed_v3_shadow` with the expected partitioning
 - manual Cloud Run execution should still stay the first smoke check after image changes
+- when restricted egress is enabled, keep the pipeline and Bronze archive schedulers paused until public article validation still succeeds through the connector-backed path
+- review blocked firewall logs after the first manual run and first scheduled run; unusual publisher redirects may need rule tuning before steady-state activation
 - the reporting and Bronze archive schedulers are separate automation paths and should not be paused for a pipeline-only rollout unless their own runtime is being changed
 - the pipeline now defaults to the documented HTTP GDELT feed, so SSL-verify overrides should not be the normal runtime path
 - a warehouse reset should happen before regular scheduled execution is activated for the clean-start rollout
@@ -110,16 +110,17 @@ Current implementation choice:
   - immediate pipeline failure alerts
   - daily summary delivery
 - avoid a third-party email API dependency in this project phase
+- keep reporting on default Cloud Run outbound networking because it does not need article-fetching egress
 
 ### 2. Application Runtime
 
 Recommended target:
 
-- Cloud Run service
+- external HTTPS load balancer + Cloud Armor + Cloud Run service
 
 Recommended flow:
 
-`Browser -> Cloud Run service -> Streamlit app -> BigQuery gold.positive_news_feed`
+`Browser -> external HTTPS load balancer -> Cloud Armor -> Cloud Run service -> Streamlit app -> BigQuery gold.positive_news_feed`
 
 Why this fits:
 
@@ -132,8 +133,12 @@ Expected components:
 
 - Artifact Registry repository for the app container image
 - Cloud Run service for Streamlit
+- serverless NEG for the Cloud Run backend
+- external HTTPS load balancer with HTTP-to-HTTPS redirect
+- Google-managed certificate for the app hostname
+- Cloud Armor security policy with per-IP throttle
 - dedicated app service account
-- optional load balancer, custom domain, or auth layer if needed later
+- load-balancer request logging, logs-based metrics, dashboarding, and an instance-pressure alert
 
 App service account responsibilities:
 
@@ -142,6 +147,27 @@ App service account responsibilities:
 - write logs to Cloud Logging
 
 The app should not need write access to Bronze or Silver.
+
+Current serving safety posture:
+
+- keep the app public and unauthenticated
+- force internet traffic through the external HTTPS load balancer by switching Cloud Run ingress to load-balancer-only mode
+- keep `app_max_instance_count` conservative so abusive traffic cannot scale far
+- preserve the current bounded query model:
+  - fixed lookback options only
+  - fixed brief page size
+  - no free-form query/search inputs
+  - no unbounded row or page parameters
+
+Rollout guidance:
+
+- start the Cloud Armor throttle rule in preview mode for the first 7 days
+- inspect preview exceed logs before enforcing the rule
+- keep the initial threshold at `120 requests / 60 seconds / IP` while the preview window is active
+- if normal traffic from shared office or home NATs stays clean, turn preview off before tightening thresholds
+- only after a second observation window should the threshold be considered for tightening toward `90 requests / 60 seconds / IP`
+- re-test page refreshes, pagination, filter changes, and multiple users behind the same NAT before enforcing tighter settings
+- expect very frequent refreshes from a single IP to be the first legitimate behavior that may see throttling after enforcement
 
 ## Recommended Separation
 
@@ -154,6 +180,7 @@ Keep these separate:
 - service accounts
 - environment variables
 - deployment cadence
+- egress posture for workloads that fetch external URLs versus workloads that only query first-party services
 
 This keeps the architecture easier to reason about and easier to explain in a portfolio review.
 
@@ -164,22 +191,23 @@ When cloud deployment work starts, Terraform should likely add:
 - Artifact Registry repositories
 - Cloud Run Job for Bruin
 - Cloud Scheduler job for the pipeline cadence
+- controlled VPC egress for Cloud Run jobs that fetch external URLs
 - Cloud Run service for Streamlit
+- external HTTPS load balancer and Cloud Armor for the public app
 - service-account IAM for both runtimes
 - Secret Manager bindings if secrets are introduced
 
-The app hosting slice is implemented and can be reactivated quickly, but it is intentionally disabled in the current environment until the UI and security posture are finalized.
+The app hosting and app-edge slices are implemented and can be enabled together once the target hostname is ready.
 
 ## Suggested Delivery Order
 
 1. Retention and archive operations for Bronze, Silver, and Gold
 1. Verify the Monitoring email recipient has confirmed any verification email
-2. Review whether the hosted Streamlit app should stay public or gain an auth layer
+2. Provision the public app edge with load balancer, Cloud Armor preview mode, and monitoring
 3. CI or release workflow for image build and deployment
 
 ## Open Questions
 
 - how often should the pipeline run in cloud automation
-- whether the app should be public, authenticated, or limited to a portfolio demo audience
 - whether the pipeline and app should live in the same GCP project or be split later
 - what level of monitoring and alerting is worth adding for a portfolio project

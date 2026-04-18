@@ -31,8 +31,8 @@ Each environment should have its own variable file.
 
 Typical difference:
 
-- `project_id = "tidingsiq-dev"` for dev
-- `project_id = "tidingsiq-prod"` for prod
+- `project_id = "<DEV_GCP_PROJECT_ID>"` for dev
+- `project_id = "<PROD_GCP_PROJECT_ID>"` for prod
 
 If both environments ever share one GCP project, dataset names would need environment-specific prefixes such as:
 
@@ -56,10 +56,10 @@ The safest approach is a remote backend, typically a GCS bucket, with a separate
 Mental model:
 
 ```text
-GCS bucket: gs://tidingsiq-terraform-state
+GCS bucket: gs://<TERRAFORM_STATE_BUCKET>
 
-dev state:  gs://tidingsiq-terraform-state/tidingsiq/dev/terraform.tfstate
-prod state: gs://tidingsiq-terraform-state/tidingsiq/prod/terraform.tfstate
+dev state:  gs://<TERRAFORM_STATE_BUCKET>/<STATE_PREFIX>/dev/terraform.tfstate
+prod state: gs://<TERRAFORM_STATE_BUCKET>/<STATE_PREFIX>/prod/terraform.tfstate
 ```
 
 This means:
@@ -73,15 +73,15 @@ This means:
 `env/dev/backend.hcl`
 
 ```hcl
-bucket = "tidingsiq-terraform-state"
-prefix = "tidingsiq/dev"
+bucket = "<TERRAFORM_STATE_BUCKET>"
+prefix = "<STATE_PREFIX>/dev"
 ```
 
 `env/prod/backend.hcl`
 
 ```hcl
-bucket = "tidingsiq-terraform-state"
-prefix = "tidingsiq/prod"
+bucket = "<TERRAFORM_STATE_BUCKET>"
+prefix = "<STATE_PREFIX>/prod"
 ```
 
 ## Example Commands

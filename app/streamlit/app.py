@@ -11,19 +11,36 @@ st.set_page_config(
 )
 
 from constants import (  # noqa: E402
-    DEFAULT_PROJECT_ID,
-    DEFAULT_TABLE_FQN,
     LOOKBACK_OPTIONS,
     PAGE_BRIEF,
     PAGE_METHODOLOGY,
     PAGE_PULSE,
-    QUERY_ROW_LIMIT,
+    RECOMMENDED_PAGE_SIZE,
+    resolve_runtime_config,
 )
-from data_access import load_feed, load_pipeline_status, load_pulse_dashboard  # noqa: E402
+from brief_state import (  # noqa: E402
+    build_geography_options_signature,
+    build_language_options_signature,
+    build_rows_signature,
+    build_scope_signature,
+    clamp_page_number,
+    compute_total_pages,
+    reset_page_on_scope_change,
+    resolve_brief_filter_state,
+)
+from data_access import (  # noqa: E402
+    load_brief_geography_options,
+    load_brief_language_options,
+    load_brief_rows,
+    load_brief_scope_summary,
+    load_pipeline_status,
+    load_pulse_dashboard,
+)
 from query_builder import (  # noqa: E402
-    FeedQueryConfig,
-    build_visible_feed_state,
-    dedupe_story_rows,
+    BriefGeographyOptionsQueryConfig,
+    BriefLanguageOptionsQueryConfig,
+    BriefRowsQueryConfig,
+    BriefScopeQueryConfig,
 )
 from ui_helpers import (  # noqa: E402
     render_global_header,
@@ -40,37 +57,56 @@ def _initialize_state() -> None:
     st.session_state.setdefault("lookback_days", LOOKBACK_OPTIONS[2])
     st.session_state.setdefault("feed_sort_order", "Most optimistic first")
     st.session_state.setdefault("selected_languages", [])
+    st.session_state.setdefault(
+        "draft_selected_languages",
+        list(st.session_state["selected_languages"]),
+    )
     st.session_state.setdefault("selected_geographies", [])
-    st.session_state.setdefault("cached_rows", [])
-    st.session_state.setdefault("cached_lookback_days", None)
+    st.session_state.setdefault(
+        "draft_selected_geographies",
+        list(st.session_state["selected_geographies"]),
+    )
+    st.session_state.setdefault("brief_last_lookback_days", None)
+    st.session_state.setdefault("brief_scope_signature", None)
+    st.session_state.setdefault("last_loaded_page", None)
+    st.session_state.setdefault("last_loaded_brief_scope_signature", None)
+    st.session_state.setdefault("last_loaded_brief_rows_signature", None)
 
 
-def _load_cached_brief_rows(lookback_days: int) -> list[dict[str, object]]:
-    if st.session_state.get("cached_lookback_days") != lookback_days:
-        config = FeedQueryConfig(
-            table_fqn=DEFAULT_TABLE_FQN,
-            lookback_days=lookback_days,
-            row_limit=QUERY_ROW_LIMIT,
-        )
-        loading_placeholder = st.empty()
-        render_loading_state(
-            "Refreshing the brief and calibrating the latest trend line.",
-            container=loading_placeholder,
-        )
-        try:
-            rows, _ = load_feed(DEFAULT_PROJECT_ID, config)
-        except Exception as exc:  # pragma: no cover - UI fallback
-            loading_placeholder.empty()
-            st.error(f"Query failed: {exc}")
-            st.stop()
-        loading_placeholder.empty()
-        st.session_state["cached_rows"] = dedupe_story_rows(rows)
-        st.session_state["cached_lookback_days"] = lookback_days
+def _resolve_loading_message(
+    *,
+    current_page: str,
+    brief_scope_signature: tuple[int, tuple[str, ...], tuple[str, ...]] | None,
+    brief_rows_signature: tuple[
+        tuple[int, tuple[str, ...], tuple[str, ...]], str, int, int
+    ]
+    | None,
+) -> str | None:
+    last_loaded_page = st.session_state.get("last_loaded_page")
+    if last_loaded_page != current_page:
+        if current_page == PAGE_PULSE:
+            return "Loading the latest pipeline pulse from the warehouse."
+        if current_page == PAGE_BRIEF:
+            return "Refreshing the brief and calibrating the latest trend line."
+        return "Loading the next section."
 
-    return list(st.session_state.get("cached_rows", []))
+    if current_page != PAGE_BRIEF:
+        return None
+
+    if st.session_state.get("last_loaded_brief_scope_signature") != brief_scope_signature:
+        return "Refreshing the brief and calibrating the latest trend line."
+    if st.session_state.get("last_loaded_brief_rows_signature") != brief_rows_signature:
+        return "Refreshing the brief and calibrating the latest trend line."
+    return None
 
 
 def main() -> None:
+    try:
+        project_id, table_fqn = resolve_runtime_config()
+    except RuntimeError as exc:
+        st.error(str(exc))
+        st.stop()
+
     _initialize_state()
     st.markdown(APP_CSS, unsafe_allow_html=True)
     current_page = str(st.session_state.get("current_page", PAGE_BRIEF))
@@ -82,64 +118,193 @@ def main() -> None:
         st.session_state["feed_sort_order"] = "Most optimistic first"
         feed_sort_order = "Most optimistic first"
     rows: list[dict[str, object]] = []
-
-    def _row_language(row: dict[str, object]) -> str:
-        value = row.get("language")
-        text = str(value or "").strip()
-        if not text or text.lower() == "und":
-            return "Unknown"
-        return text.upper()
-
-    def _row_geography(row: dict[str, object]) -> str:
-        value = row.get("mentioned_country_name")
-        text = str(value or "").strip()
-        return text if text else "Unknown"
+    summary: dict[str, float | int] = {
+        "row_count": 0,
+        "avg_happy_factor": 0.0,
+        "max_happy_factor": 0.0,
+        "source_count": 0,
+    }
+    total_rows = 0
+    total_pages = 1
+    loading_placeholder = None
+    scope_signature = None
+    rows_signature = None
 
     if current_page == PAGE_BRIEF:
-        rows = _load_cached_brief_rows(lookback_days)
         selected_languages = list(st.session_state.get("selected_languages", []))
         selected_geographies = list(st.session_state.get("selected_geographies", []))
-
-        language_options = sorted(
-            {lang for lang in (_row_language(row) for row in rows) if lang != "Unknown"}
-        )
-        geography_options = sorted(
-            {geo for geo in (_row_geography(row) for row in rows) if geo != "Unknown"}
-        )
-        st.session_state["selected_languages"] = [
-            lang for lang in selected_languages if lang in language_options
-        ]
-        st.session_state["selected_geographies"] = [
-            geo for geo in selected_geographies if geo in geography_options
-        ]
-        selected_languages = list(st.session_state["selected_languages"])
-        selected_geographies = list(st.session_state["selected_geographies"])
-
-        filter_signature = (
+        current_page_number = int(st.session_state.get("recommended_page", 1))
+        preview_scope_signature = build_scope_signature(
             lookback_days,
-            tuple(sorted(selected_languages)),
-            tuple(sorted(selected_geographies)),
-            feed_sort_order,
+            selected_languages,
+            selected_geographies,
         )
-        if st.session_state.get("filter_signature") != filter_signature:
-            st.session_state["filter_signature"] = filter_signature
-            st.session_state["recommended_page"] = 1
+        preview_rows_signature = build_rows_signature(
+            preview_scope_signature,
+            feed_sort_order,
+            current_page_number,
+            RECOMMENDED_PAGE_SIZE,
+        )
+        previous_lookback_days = st.session_state.get("brief_last_lookback_days")
+        lookback_changed = (
+            previous_lookback_days is not None
+            and int(previous_lookback_days) != lookback_days
+        )
     else:
         selected_languages = []
         selected_geographies = []
         language_options = []
         geography_options = []
+        preview_scope_signature = None
+        preview_rows_signature = None
+
+    loading_message = _resolve_loading_message(
+        current_page=current_page,
+        brief_scope_signature=preview_scope_signature,
+        brief_rows_signature=preview_rows_signature,
+    )
+    if loading_message is not None:
+        loading_placeholder = st.empty()
+        render_loading_state(
+            loading_message,
+            container=loading_placeholder,
+            variant="page",
+        )
+
+    if current_page == PAGE_BRIEF:
+        try:
+            selected_languages, selected_geographies, language_options, geography_options = (
+                resolve_brief_filter_state(
+                    lookback_days=lookback_days,
+                    selected_languages=selected_languages,
+                    selected_geographies=selected_geographies,
+                    load_language_options=lambda scoped_lookback, scoped_geographies: (
+                        load_brief_language_options(
+                            project_id,
+                            BriefLanguageOptionsQueryConfig(
+                                table_fqn=table_fqn,
+                                lookback_days=scoped_lookback,
+                                selected_geographies=scoped_geographies,
+                            ),
+                        )
+                    ),
+                    load_geography_options=lambda scoped_lookback, scoped_languages: (
+                        load_brief_geography_options(
+                            project_id,
+                            BriefGeographyOptionsQueryConfig(
+                                table_fqn=table_fqn,
+                                lookback_days=scoped_lookback,
+                                selected_languages=scoped_languages,
+                            ),
+                        )
+                    ),
+                    preserve_selected_in_options=lookback_changed,
+                )
+            )
+            st.session_state["selected_languages"] = selected_languages
+            st.session_state["selected_geographies"] = selected_geographies
+            st.session_state["draft_selected_languages"] = list(selected_languages)
+            st.session_state["draft_selected_geographies"] = list(
+                selected_geographies
+            )
+            st.session_state["brief_last_lookback_days"] = lookback_days
+            st.session_state["lookback_days"] = lookback_days
+            st.session_state["feed_sort_order"] = feed_sort_order
+
+            scope_signature = build_scope_signature(
+                lookback_days,
+                selected_languages,
+                selected_geographies,
+            )
+            language_options_signature = build_language_options_signature(
+                lookback_days,
+                selected_geographies,
+            )
+            geography_options_signature = build_geography_options_signature(
+                lookback_days,
+                selected_languages,
+            )
+            st.session_state["brief_language_options_signature"] = (
+                language_options_signature
+            )
+            st.session_state["brief_geography_options_signature"] = (
+                geography_options_signature
+            )
+
+            current_page_number = reset_page_on_scope_change(
+                st.session_state.get("brief_scope_signature"),
+                scope_signature,
+                current_page_number,
+            )
+            st.session_state["brief_scope_signature"] = scope_signature
+
+            summary = load_brief_scope_summary(
+                project_id,
+                BriefScopeQueryConfig(
+                    table_fqn=table_fqn,
+                    lookback_days=scope_signature[0],
+                    selected_languages=scope_signature[1],
+                    selected_geographies=scope_signature[2],
+                ),
+            )
+            total_rows = int(summary["row_count"])
+            total_pages = compute_total_pages(total_rows, RECOMMENDED_PAGE_SIZE)
+            current_page_number = clamp_page_number(
+                current_page_number,
+                total_rows,
+                RECOMMENDED_PAGE_SIZE,
+            )
+            st.session_state["recommended_page"] = current_page_number
+
+            rows_signature = build_rows_signature(
+                scope_signature,
+                feed_sort_order,
+                current_page_number,
+                RECOMMENDED_PAGE_SIZE,
+            )
+            st.session_state["brief_rows_signature"] = rows_signature
+            rows, _ = load_brief_rows(
+                project_id,
+                BriefRowsQueryConfig(
+                    table_fqn=table_fqn,
+                    lookback_days=rows_signature[0][0],
+                    selected_languages=rows_signature[0][1],
+                    selected_geographies=rows_signature[0][2],
+                    sort_order=rows_signature[1],
+                    page_number=rows_signature[2],
+                    page_size=rows_signature[3],
+                ),
+            )
+        except Exception as exc:  # pragma: no cover - UI fallback
+            if loading_placeholder is not None:
+                loading_placeholder.empty()
+            st.error(f"Query failed: {exc}")
+            st.stop()
 
     pulse_dashboard = None
-    if current_page == PAGE_PULSE:
-        pulse_dashboard = load_pulse_dashboard(DEFAULT_PROJECT_ID, DEFAULT_TABLE_FQN)
-        pipeline_status = (
-            dict(pulse_dashboard.get("latest_snapshot") or {})
-            if pulse_dashboard is not None
-            else None
-        )
-    else:
-        pipeline_status = load_pipeline_status(DEFAULT_PROJECT_ID, DEFAULT_TABLE_FQN)
+    try:
+        if current_page == PAGE_PULSE:
+            pulse_dashboard = load_pulse_dashboard(project_id, table_fqn)
+            pipeline_status = (
+                dict(pulse_dashboard.get("latest_snapshot") or {})
+                if pulse_dashboard is not None
+                else None
+            )
+        else:
+            pipeline_status = load_pipeline_status(project_id, table_fqn)
+    except Exception as exc:  # pragma: no cover - UI fallback
+        if loading_placeholder is not None:
+            loading_placeholder.empty()
+        st.error(f"Query failed: {exc}")
+        st.stop()
+
+    if loading_placeholder is not None:
+        loading_placeholder.empty()
+
+    st.session_state["last_loaded_page"] = current_page
+    if current_page == PAGE_BRIEF:
+        st.session_state["last_loaded_brief_scope_signature"] = scope_signature
+        st.session_state["last_loaded_brief_rows_signature"] = rows_signature
     pipeline_status_markup = render_pipeline_status(pipeline_status)
 
     render_global_header(
@@ -147,29 +312,15 @@ def main() -> None:
         pipeline_status_markup=pipeline_status_markup,
     )
 
-    filtered_rows = rows
-    if selected_languages:
-        selected_language_set = {str(value) for value in selected_languages}
-        filtered_rows = [
-            row for row in filtered_rows if _row_language(row) in selected_language_set
-        ]
-    if selected_geographies:
-        selected_geo_set = {str(value) for value in selected_geographies}
-        filtered_rows = [
-            row for row in filtered_rows if _row_geography(row) in selected_geo_set
-        ]
-
-    visible_feed_state = build_visible_feed_state(
-        filtered_rows,
-        feed_sort_order=feed_sort_order,
-    )
-
     if current_page == PAGE_BRIEF:
         render_brief(
             language_options=language_options,
             geography_options=geography_options,
-            summary=visible_feed_state.summary,
-            recommended_rows=visible_feed_state.recommended_rows,
+            summary=summary,
+            recommended_rows=rows,
+            current_page=int(st.session_state.get("recommended_page", 1)),
+            total_pages=total_pages,
+            total_rows=total_rows,
         )
     elif current_page == PAGE_PULSE:
         render_pulse(

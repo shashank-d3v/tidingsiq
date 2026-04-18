@@ -12,8 +12,8 @@ from scripts.generate_scoring_eval_sample import (
 class GenerateScoringEvalSampleTest(unittest.TestCase):
     def test_build_sampling_sql_covers_expected_buckets(self) -> None:
         sql = build_sampling_sql(
-            "tidingsiq-dev.gold.positive_news_feed",
-            "tidingsiq-dev.silver.gdelt_news_refined",
+            "example-project.gold.positive_news_feed",
+            "example-project.silver.gdelt_news_refined",
             lookback_days=30,
             bucket_size=50,
         )
@@ -26,11 +26,11 @@ class GenerateScoringEvalSampleTest(unittest.TestCase):
 
     def test_qualify_table_adds_project_when_needed(self) -> None:
         self.assertEqual(
-            qualify_table("tidingsiq-dev", "gold.positive_news_feed"),
-            "tidingsiq-dev.gold.positive_news_feed",
+            qualify_table("example-project", "gold.positive_news_feed"),
+            "example-project.gold.positive_news_feed",
         )
         self.assertEqual(
-            qualify_table("tidingsiq-dev", "other.gold.positive_news_feed"),
+            qualify_table("example-project", "other.gold.positive_news_feed"),
             "other.gold.positive_news_feed",
         )
 

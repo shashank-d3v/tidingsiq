@@ -71,24 +71,24 @@ class FakeBigQueryModule:
 class ArchiveBronzeTest(unittest.TestCase):
     def test_build_archive_uri_uses_cutoff_date_partition(self) -> None:
         uri = build_archive_uri(
-            "gs://tidingsiq-bronze-archive/automated",
+            "gs://example-bronze-archive/automated",
             cutoff_timestamp=datetime(2026, 2, 26, 0, 0, tzinfo=timezone.utc),
         )
 
         self.assertEqual(
             uri,
-            "gs://tidingsiq-bronze-archive/automated/bronze_gdelt_news_raw/cutoff_date=2026-02-26/*.parquet",
+            "gs://example-bronze-archive/automated/bronze_gdelt_news_raw/cutoff_date=2026-02-26/*.parquet",
         )
 
     def test_build_count_sql_targets_ingested_at_cutoff(self) -> None:
-        sql = build_count_sql("tidingsiq-dev.bronze.gdelt_news_raw")
+        sql = build_count_sql("example-project.bronze.gdelt_news_raw")
 
-        self.assertIn("from `tidingsiq-dev.bronze.gdelt_news_raw`", sql.lower())
+        self.assertIn("from `example-project.bronze.gdelt_news_raw`", sql.lower())
         self.assertIn("where ingested_at < @cutoff_timestamp", sql.lower())
 
     def test_build_export_sql_uses_export_data_statement(self) -> None:
         sql = build_export_sql(
-            "tidingsiq-dev.bronze.gdelt_news_raw",
+            "example-project.bronze.gdelt_news_raw",
             "gs://bucket/automated/*.parquet",
             datetime(2026, 2, 1, tzinfo=timezone.utc),
         )
@@ -102,11 +102,11 @@ class ArchiveBronzeTest(unittest.TestCase):
 
     def test_build_delete_sql_targets_same_cutoff(self) -> None:
         sql = build_delete_sql(
-            "tidingsiq-dev.bronze.gdelt_news_raw",
+            "example-project.bronze.gdelt_news_raw",
             datetime(2026, 2, 1, tzinfo=timezone.utc),
         )
 
-        self.assertIn("delete from `tidingsiq-dev.bronze.gdelt_news_raw`", sql.lower())
+        self.assertIn("delete from `example-project.bronze.gdelt_news_raw`", sql.lower())
         self.assertIn(
             "where ingested_at < timestamp('2026-02-01 00:00:00+00:00')",
             sql.lower(),
@@ -161,7 +161,7 @@ class ArchiveBronzeTest(unittest.TestCase):
         client = FakeClient([FakeQueryJob([{"row_count": 4}])])
         summary = archive_bronze(
             BronzeArchiveConfig(
-                project_id="tidingsiq-dev",
+                project_id="example-project",
                 archive_uri_prefix="gs://bucket/automated",
                 dry_run=True,
                 run_started_at=datetime(2026, 4, 12, 12, 34, tzinfo=timezone.utc),
@@ -188,7 +188,7 @@ class ArchiveBronzeTest(unittest.TestCase):
 
         summary = archive_bronze(
             BronzeArchiveConfig(
-                project_id="tidingsiq-dev",
+                project_id="example-project",
                 archive_uri_prefix="gs://bucket/automated",
                 delete_after_export=True,
                 run_started_at=datetime(2026, 4, 12, 12, 34, tzinfo=timezone.utc),
@@ -223,7 +223,7 @@ class ArchiveBronzeTest(unittest.TestCase):
         with self.assertRaises(BronzeArchiveFailure) as caught:
             archive_bronze(
                 BronzeArchiveConfig(
-                    project_id="tidingsiq-dev",
+                    project_id="example-project",
                     archive_uri_prefix="gs://bucket/automated",
                     delete_after_export=True,
                     run_started_at=datetime(2026, 4, 12, 12, 34, tzinfo=timezone.utc),
@@ -249,7 +249,7 @@ class ArchiveBronzeTest(unittest.TestCase):
         with self.assertRaises(BronzeArchiveFailure) as caught:
             archive_bronze(
                 BronzeArchiveConfig(
-                    project_id="tidingsiq-dev",
+                    project_id="example-project",
                     archive_uri_prefix="gs://bucket/automated",
                     delete_after_export=True,
                     max_delete_rows=20_000,
@@ -277,7 +277,7 @@ class ArchiveBronzeTest(unittest.TestCase):
         with self.assertRaises(BronzeArchiveFailure) as caught:
             archive_bronze(
                 BronzeArchiveConfig(
-                    project_id="tidingsiq-dev",
+                    project_id="example-project",
                     archive_uri_prefix="gs://bucket/automated",
                     delete_after_export=True,
                     run_started_at=datetime(2026, 4, 12, 12, 34, tzinfo=timezone.utc),

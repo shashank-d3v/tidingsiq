@@ -19,9 +19,9 @@ Example dry run:
 
 ```bash
 python3 scripts/archive_bronze.py \
-  --project-id tidingsiq-dev \
-  --archive-uri-prefix gs://your-bronze-archive-bucket/manual \
-  --run-date 2026-04-12 \
+  --project-id <GCP_PROJECT_ID> \
+  --archive-uri-prefix <ARCHIVE_BUCKET_URI>/manual \
+  --run-date <YYYY-MM-DD> \
   --dry-run
 ```
 
@@ -29,8 +29,8 @@ Example export without deletion:
 
 ```bash
 python3 scripts/archive_bronze.py \
-  --project-id tidingsiq-dev \
-  --archive-uri-prefix gs://your-bronze-archive-bucket/manual \
+  --project-id <GCP_PROJECT_ID> \
+  --archive-uri-prefix <ARCHIVE_BUCKET_URI>/manual \
   --max-delete-rows 20000
 ```
 
@@ -38,8 +38,8 @@ Example export and cleanup:
 
 ```bash
 python3 scripts/archive_bronze.py \
-  --project-id tidingsiq-dev \
-  --archive-uri-prefix gs://your-bronze-archive-bucket/manual \
+  --project-id <GCP_PROJECT_ID> \
+  --archive-uri-prefix <ARCHIVE_BUCKET_URI>/manual \
   --max-delete-rows 20000 \
   --delete-after-export
 ```
@@ -102,5 +102,5 @@ It intentionally preserves:
 Example:
 
 ```bash
-scripts/reset_warehouse.sh tidingsiq-dev
+scripts/reset_warehouse.sh <GCP_PROJECT_ID>
 ```

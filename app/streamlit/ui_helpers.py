@@ -6,7 +6,10 @@ from datetime import datetime, timedelta, timezone
 
 import streamlit as st
 
-from constants import PAGE_BRIEF, PAGE_METHODOLOGY, PAGE_PULSE
+try:  # pragma: no cover - import path varies between app runtime and tests
+    from .constants import PAGE_BRIEF, PAGE_METHODOLOGY, PAGE_PULSE
+except ImportError:  # pragma: no cover - script entrypoint fallback
+    from constants import PAGE_BRIEF, PAGE_METHODOLOGY, PAGE_PULSE
 
 
 def render_logo(*, is_collapsed: bool = False) -> None:
@@ -186,11 +189,27 @@ def render_empty_state(message: str, *, tone: str = "default") -> None:
     )
 
 
-def render_loading_state(message: str, *, container: object | None = None) -> None:
+def render_loading_state(
+    message: str,
+    *,
+    container: object | None = None,
+    variant: str = "inline",
+) -> None:
     target = container if container is not None else st
+    state_class = "tiq-loading-state"
+    wrapper_open = ""
+    wrapper_close = ""
+    if variant == "page":
+        state_class = "tiq-loading-state tiq-loading-state-page"
+        wrapper_open = '<div class="tiq-loading-screen">'
+        wrapper_close = "</div>"
+    else:
+        state_class = "tiq-loading-state tiq-loading-state-inline"
+
     target.markdown(
         f"""
-        <div class="tiq-loading-state" role="status" aria-live="polite">
+        {wrapper_open}
+        <div class="{state_class}" role="status" aria-live="polite">
           <div class="tiq-loading-graphic" aria-hidden="true">
             <span class="tiq-loading-bar tiq-loading-bar-1"></span>
             <span class="tiq-loading-bar tiq-loading-bar-2"></span>
@@ -200,6 +219,7 @@ def render_loading_state(message: str, *, container: object | None = None) -> No
           </div>
           <div class="tiq-loading-copy">{html.escape(message)}</div>
         </div>
+        {wrapper_close}
         """,
         unsafe_allow_html=True,
     )
