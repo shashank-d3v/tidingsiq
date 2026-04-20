@@ -40,11 +40,9 @@ Operational notes:
 
 ## Next Steps
 
-1. Finalize evaluator-facing documentation, screenshots, and submission polish.
-2. Improve tests and release-review confidence around the public dashboard and Cloud Run paths.
-3. Decide whether to deepen scoring beyond title guardrails using validated GKG fields.
-4. Decide whether the daily summary job should later move from Monitoring-triggered emails to a richer mail-delivery path.
-5. Keep the deferred authoritative-fetching design note available for a later Streamlit serving refactor without changing the current Gold-only app contract.
+1. Decide whether to deepen scoring beyond title guardrails using validated GKG fields.
+2. Decide whether the daily summary job should later move from Monitoring-triggered emails to a richer mail-delivery path.
+3. Keep the deferred authoritative-fetching design note available for a later Streamlit serving refactor without changing the current Gold-only app contract.
 
 ## Phases Completed
 
