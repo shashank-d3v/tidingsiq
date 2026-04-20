@@ -6,6 +6,26 @@ TidingsIQ is designed as a small but credible ELT system for global news intelli
 
 The architecture is intentionally batch-oriented and minimal. The goal is a clear, reviewable design that can be implemented incrementally without introducing unnecessary services.
 
+## High-Level Diagram
+
+```mermaid
+flowchart LR
+    SRC["GDELT GKG 2.1"] --> BRUIN["Bruin Bronze Ingestion"]
+    BRUIN --> BQ_B["BigQuery Bronze"]
+    BQ_B --> BQ_S["BigQuery Silver"]
+    BQ_S --> BQ_G["BigQuery Gold<br/>positive_news_feed"]
+    BQ_G --> APP["Streamlit Dashboard"]
+    BQ_G --> METRICS["Gold Operational Metrics<br/>pipeline_run_metrics"]
+    METRICS --> APP
+
+    TF["Terraform"] --> GCP["GCP Resources<br/>BigQuery, IAM, Bucket, Cloud Run"]
+    GCP --> BRUIN
+    GCP --> APP
+
+    SCHED["Cloud Scheduler"] --> JOB["Cloud Run Job"]
+    JOB --> BRUIN
+```
+
 ## System Boundary
 
 In scope:
