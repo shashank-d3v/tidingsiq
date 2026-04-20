@@ -284,18 +284,53 @@ def materialize(**kwargs: Any) -> pd.DataFrame:
 def _resolve_requested_window() -> tuple[datetime, datetime]:
     start_raw = os.environ.get("BRUIN_START_DATE")
     end_raw = os.environ.get("BRUIN_END_DATE")
+    current_time = datetime.now(timezone.utc)
 
     if start_raw and end_raw:
         start_dt = _parse_bruin_datetime(start_raw)
         end_dt = _parse_bruin_datetime(end_raw)
     else:
-        end_dt = datetime.now(timezone.utc)
-        start_dt = end_dt - timedelta(minutes=DEFAULT_LOOKBACK_MINUTES)
+        return _default_requested_window(current_time)
 
     if start_dt > end_dt:
         raise ValueError("BRUIN_START_DATE must be less than or equal to BRUIN_END_DATE.")
 
+    if _should_fallback_to_runtime_lookback_window(
+        start_dt=start_dt,
+        end_dt=end_dt,
+        current_time=current_time,
+    ):
+        print(
+            "Bruin interval resolved to a stale zero-width deployed window "
+            f"({start_dt.isoformat()} to {end_dt.isoformat()}); "
+            "falling back to the rolling Bronze lookback window."
+        )
+        return _default_requested_window(current_time)
+
     return start_dt, end_dt
+
+
+def _default_requested_window(current_time: datetime) -> tuple[datetime, datetime]:
+    end_dt = current_time
+    start_dt = end_dt - timedelta(minutes=DEFAULT_LOOKBACK_MINUTES)
+    return start_dt, end_dt
+
+
+def _should_fallback_to_runtime_lookback_window(
+    *,
+    start_dt: datetime,
+    end_dt: datetime,
+    current_time: datetime,
+) -> bool:
+    if not _is_deployed_runtime():
+        return False
+
+    if start_dt != end_dt:
+        return False
+
+    return current_time - end_dt >= timedelta(
+        minutes=GDELT_FILE_GRANULARITY_MINUTES
+    )
 
 
 def _parse_bruin_datetime(value: str) -> datetime:

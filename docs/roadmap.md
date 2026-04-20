@@ -20,7 +20,7 @@ Completed:
 - pipeline containerization for Cloud Run Jobs
 - applied pipeline automation for Artifact Registry, Cloud Run Job, and active Cloud Scheduler
 - daily reporting Cloud Run Job plus Monitoring-based email notifications
-- Streamlit app containerization and Cloud Run hosting path
+- Streamlit app containerization, Cloud Run hosting path, and live public dashboard URL
 
 Operational notes:
 - `bronze_staging` is a supporting operational dataset for the Bronze merge load path
@@ -30,26 +30,26 @@ Operational notes:
 - a manual Cloud Run execution succeeded on `2026-04-06` after redeploying the updated pipeline image
 - a post-reset manual Cloud Run execution succeeded on `2026-04-07` before the scheduler was activated
 - a manual Cloud Run execution succeeded on `2026-04-16` after provisioning `gold_staging`, correcting the nullable integer load shape for `gold.url_validation_results`, and recreating `gold.positive_news_feed_v3_shadow` with the expected partitioning
-- hosted app deployment is currently disabled in the active environment
+- the live public dashboard is available at `https://tidingsiq-app-eglccrtc7q-el.a.run.app/`
 - the latest source finding is that `TranslationInfo` is empty in the sampled landed GKG rows, so Gold language metadata still depends heavily on deterministic inference and should remain informational rather than a serving gate
 - the current Gold default feed is `is_positive_feed_eligible = true` with `happy_factor >= 65`
+- the current score version is `v2_1_guardrailed_tone` and the current title-rule version is `v1_1_title_rules`
 - Monitoring email delivery may still require the recipient to confirm the verification email from GCP
 - the current `Pulse` page now reads warehouse-wide Gold aggregates and is no longer tied to the Brief's inline compact controls
 - the current Streamlit app now shows explicit loading screens during BigQuery-backed Brief refreshes and section switches to keep warehouse latency visible to the user
 
 ## Next Steps
 
-1. Improve tests, security, and reviewability for final portfolio presentation.
-2. Integrate the final Streamlit UI design, including the inline compact Brief filter and sort controls beside the `Recommended` section header.
-3. Finalize architecture and deployment documentation.
-4. Decide whether to deepen scoring beyond title guardrails using validated GKG fields.
-5. Decide whether the daily summary job should later move from Monitoring-triggered emails to a richer mail-delivery path.
-6. Keep the deferred authoritative-fetching design note available for a later Streamlit serving refactor without changing the current local-first app behavior.
+1. Finalize evaluator-facing documentation, screenshots, and submission polish.
+2. Improve tests and release-review confidence around the public dashboard and Cloud Run paths.
+3. Decide whether to deepen scoring beyond title guardrails using validated GKG fields.
+4. Decide whether the daily summary job should later move from Monitoring-triggered emails to a richer mail-delivery path.
+5. Keep the deferred authoritative-fetching design note available for a later Streamlit serving refactor without changing the current Gold-only app contract.
 
 ## Phases Completed
 
 1. Terraform foundation
-2. Bruin scaffold
+2. Bruin project foundation
 3. Bronze ingestion
 4. Silver normalization and deduplication
 5. Gold scoring model
@@ -61,7 +61,6 @@ Operational notes:
 
 ## Future Work
 
-- Cloud Run deployment for the Streamlit app
 - stronger data quality checks and alerting
 - broader positive-feed QA and rule tuning
 - final documentation polish, including an architecture diagram

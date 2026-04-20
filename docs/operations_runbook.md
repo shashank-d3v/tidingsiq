@@ -4,6 +4,7 @@ This runbook contains parameterized example commands for resetting, validating, 
 
 Replace the placeholders in each command before use:
 
+- `<REPOSITORY_ROOT>`
 - `<GCP_PROJECT_ID>`
 - `<REGION>`
 - `<PIPELINE_JOB_NAME>`
@@ -18,11 +19,7 @@ Replace the placeholders in each command before use:
 - `<ENVIRONMENT>`
 - `<RESTRICTED_EGRESS_METRIC_NAME>`
 - `<APP_SERVICE_NAME>`
-- `<APP_DOMAIN_NAME>`
-- `<APP_BACKEND_SERVICE_NAME>`
-- `<APP_HTTPS_FORWARDING_RULE_NAME>`
-- `<APP_HTTP_FORWARDING_RULE_NAME>`
-- `<APP_CLOUD_ARMOR_POLICY_NAME>`
+- `<APP_RUN_APP_URL>`
 
 Operational dataset assumptions:
 
@@ -40,7 +37,7 @@ Warehouse-only reset. This preserves:
 Run the helper:
 
 ```bash
-cd "/Volumes/SWE/repos/DE 2026/tidingsiq"
+cd <REPOSITORY_ROOT>
 scripts/reset_warehouse.sh <GCP_PROJECT_ID>
 ```
 
@@ -83,6 +80,16 @@ gcloud logging read \
   --project=<GCP_PROJECT_ID> \
   --limit=100 \
   --format='value(textPayload)'
+```
+
+Confirm the Bruin interval matches the intended cadence instead of collapsing to a stale day-wide or zero-width window:
+
+```bash
+gcloud logging read \
+  'resource.type="cloud_run_job" AND resource.labels.job_name="<PIPELINE_JOB_NAME>" AND textPayload:"Interval:"' \
+  --project=<GCP_PROJECT_ID> \
+  --limit=5 \
+  --format='value(timestamp,textPayload)'
 ```
 
 Verify row counts:
@@ -199,7 +206,7 @@ gcloud compute networks vpc-access connectors describe tidingsiq-restricted-egre
   --project=<GCP_PROJECT_ID>
 ```
 
-## Public App Edge Operations
+## Public App Operations
 
 Describe the hosted app service:
 
@@ -209,83 +216,51 @@ gcloud run services describe <APP_SERVICE_NAME> \
   --project=<GCP_PROJECT_ID>
 ```
 
-Confirm the app ingress is load-balancer-only:
+Fetch the direct public `run.app` URL:
 
 ```bash
 gcloud run services describe <APP_SERVICE_NAME> \
   --region=<REGION> \
   --project=<GCP_PROJECT_ID> \
-  --format='value(spec.template.metadata.annotations.run.googleapis.com/ingress,status.url)'
+  --format='value(status.url)'
 ```
 
-Describe the HTTPS forwarding rule:
+Confirm the app is publicly reachable on the direct Cloud Run URL:
 
 ```bash
-gcloud compute forwarding-rules describe <APP_HTTPS_FORWARDING_RULE_NAME> \
-  --global \
-  --project=<GCP_PROJECT_ID>
+curl -I <APP_RUN_APP_URL>
 ```
 
-Describe the HTTP redirect forwarding rule:
+Confirm the service is not restricted to a load-balancer-only ingress path:
 
 ```bash
-gcloud compute forwarding-rules describe <APP_HTTP_FORWARDING_RULE_NAME> \
-  --global \
-  --project=<GCP_PROJECT_ID>
-```
-
-Describe the Cloud Armor policy:
-
-```bash
-gcloud compute security-policies describe <APP_CLOUD_ARMOR_POLICY_NAME> \
-  --project=<GCP_PROJECT_ID>
-```
-
-Smoke test the public hostname:
-
-```bash
-curl -I https://<APP_DOMAIN_NAME>
-curl -I http://<APP_DOMAIN_NAME>
-```
-
-The HTTP response should redirect to HTTPS, and the HTTPS response should be served by the load balancer hostname rather than a direct public `run.app` path.
-
-Inspect preview-mode throttle events during the monitor-first rollout:
-
-```bash
-gcloud logging read \
-  'resource.type="http_load_balancer" AND resource.labels.backend_service_name="<APP_BACKEND_SERVICE_NAME>" AND jsonPayload.previewSecurityPolicy.configuredAction="THROTTLE" AND jsonPayload.previewSecurityPolicy.rateLimitAction.outcome="RATE_LIMIT_THRESHOLD_EXCEED"' \
+gcloud run services describe <APP_SERVICE_NAME> \
+  --region=<REGION> \
   --project=<GCP_PROJECT_ID> \
-  --limit=50 \
-  --format='value(timestamp,httpRequest.remoteIp,jsonPayload.previewSecurityPolicy.rateLimitAction.outcome)'
+  --format='json(metadata.annotations,status.url)'
 ```
 
-Inspect enforced throttle denials after preview mode is turned off:
+Smoke test the app root:
+
+```bash
+curl -L <APP_RUN_APP_URL> | head -n 20
+```
+
+Inspect recent Cloud Run request logs:
 
 ```bash
 gcloud logging read \
-  'resource.type="http_load_balancer" AND resource.labels.backend_service_name="<APP_BACKEND_SERVICE_NAME>" AND jsonPayload.enforcedSecurityPolicy.configuredAction="THROTTLE" AND jsonPayload.statusDetails="denied_by_security_policy"' \
-  --project=<GCP_PROJECT_ID> \
-  --limit=50 \
-  --format='value(timestamp,httpRequest.remoteIp,jsonPayload.statusDetails)'
-```
-
-Inspect app request-volume logs:
-
-```bash
-gcloud logging read \
-  'resource.type="http_load_balancer" AND resource.labels.backend_service_name="<APP_BACKEND_SERVICE_NAME>"' \
+  'resource.type="cloud_run_revision" AND resource.labels.service_name="<APP_SERVICE_NAME>"' \
   --project=<GCP_PROJECT_ID> \
   --limit=50 \
   --format='value(timestamp,httpRequest.requestMethod,httpRequest.requestUrl,httpRequest.status)'
 ```
 
-Rollout criteria:
+Current expected posture:
 
-- keep preview mode enabled for the first 7 days
-- review page refreshes, pagination, filter changes, and multiple-user NAT traffic before enforcement
-- disable preview mode before tightening thresholds
-- only consider reducing the threshold toward `90 requests / 60 seconds / IP` after a second observation window
+- Cloud Run serves the app directly on the reported `run.app` URL.
+- No load balancer, Cloud Armor policy, forwarding rules, or custom-domain DNS should be required for the active deployment.
+- If future traffic warrants stricter protection, the optional AppEdge Terraform slice can be re-enabled.
 
 ## Bronze Archive Operations
 
@@ -364,7 +339,7 @@ bq query --use_legacy_sql=false "create or replace external table \`<GCP_PROJECT
 Build and push the pipeline image:
 
 ```bash
-cd "/Volumes/SWE/repos/DE 2026/tidingsiq"
+cd <REPOSITORY_ROOT>
 docker buildx build \
   --platform linux/amd64 \
   -f pipeline/bruin/Dockerfile \

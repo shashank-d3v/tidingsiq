@@ -247,6 +247,19 @@ class RenderBriefTest(unittest.TestCase):
 
 
 class RenderPulseTest(unittest.TestCase):
+    def test_light_vega_spec_forces_light_background_defaults(self) -> None:
+        spec = ui_pages._light_vega_spec(
+            {
+                "mark": {"type": "bar"},
+                "config": {"view": {"stroke": None}},
+            }
+        )
+
+        self.assertEqual(spec["background"], "#ffffff")
+        self.assertEqual(spec["config"]["view"]["fill"], "#ffffff")
+        self.assertEqual(spec["config"]["axis"]["labelColor"], "#151515")
+        self.assertEqual(spec["config"]["legend"]["titleColor"], "#151515")
+
     def test_render_pulse_supporting_stats_accept_timestamps(self) -> None:
         pulse_dashboard = {
             "latest_snapshot": {

@@ -76,7 +76,11 @@ custom_checks:
       with bronze_ingestions as (
         select
           ingestion_id,
-          count(*) as accepted_row_count,
+          coalesce(
+            max(bronze_run_accepted_row_count),
+            max(safe_cast(json_value(raw_payload, '$.bronze_run_accepted_row_count') as int64)),
+            count(*)
+          ) as accepted_row_count,
           max(ingested_at) as latest_ingested_at
         from bronze.gdelt_news_raw
         group by ingestion_id
@@ -214,10 +218,12 @@ latest_bronze_ingestion as (
 latest_bronze_ingestion_metrics as (
   select
     coalesce(
+      max(bronze_run_accepted_row_count),
       max(safe_cast(json_value(raw_payload, '$.bronze_run_accepted_row_count') as int64)),
       count(*)
     ) as latest_bronze_ingestion_accepted_row_count,
     coalesce(
+      max(bronze_run_malformed_ratio),
       max(safe_cast(json_value(raw_payload, '$.bronze_run_malformed_ratio') as float64)),
       0.0
     ) as latest_bronze_ingestion_malformed_ratio

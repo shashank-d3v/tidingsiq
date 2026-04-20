@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+from collections.abc import Callable
 from datetime import date
 from datetime import datetime, timedelta, timezone
 
@@ -31,9 +32,33 @@ def render_logo(*, is_collapsed: bool = False) -> None:
     )
 
 
+def render_choice_button_group(
+    *,
+    anchor_class: str,
+    state_key: str,
+    options: list[object],
+    current_value: object,
+    format_func: Callable[[object], str] = str,
+    rerun_on_change: bool = True,
+) -> None:
+    st.markdown(f'<div class="{anchor_class}"></div>', unsafe_allow_html=True)
+    button_columns = st.columns(len(options), gap="small")
+    for index, (column, option) in enumerate(zip(button_columns, options, strict=False)):
+        with column:
+            is_active = option == current_value
+            if st.button(
+                str(format_func(option)),
+                key=f"{state_key}_choice_{index}",
+                type="primary" if is_active else "secondary",
+                use_container_width=True,
+            ) and not is_active:
+                st.session_state[state_key] = option
+                if rerun_on_change:
+                    st.rerun()
+
+
 def render_global_header(*, current_page: str, pipeline_status_markup: str) -> None:
     nav_items = [PAGE_BRIEF, PAGE_PULSE, PAGE_METHODOLOGY]
-    st.session_state.setdefault("header_segmented_nav", current_page)
     header_container = st.container()
     with header_container:
         st.markdown('<div class="tiq-global-header-anchor"></div>', unsafe_allow_html=True)
@@ -43,23 +68,17 @@ def render_global_header(*, current_page: str, pipeline_status_markup: str) -> N
             with brand_col:
                 render_logo()
             with nav_col:
-                st.markdown('<div class="tiq-global-nav-anchor"></div>', unsafe_allow_html=True)
-                selected_page = st.segmented_control(
-                    "Section",
+                render_choice_button_group(
+                    anchor_class="tiq-global-nav-anchor",
+                    state_key="current_page",
                     options=nav_items,
-                    default=current_page,
-                    key="header_segmented_nav",
+                    current_value=current_page,
                     format_func=lambda page: {
                         PAGE_BRIEF: "⊞ The Brief",
                         PAGE_PULSE: "∿ Pulse",
                         PAGE_METHODOLOGY: "ⓘ Methodology",
                     }[page],
-                    label_visibility="collapsed",
-                    width="content",
                 )
-                if selected_page and selected_page != current_page:
-                    st.session_state["current_page"] = selected_page
-                    st.rerun()
         with status_col:
             st.markdown('<div class="tiq-global-status-anchor"></div>', unsafe_allow_html=True)
             st.markdown(pipeline_status_markup, unsafe_allow_html=True)

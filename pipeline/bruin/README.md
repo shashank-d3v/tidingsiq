@@ -1,20 +1,20 @@
-# Bruin Scaffold
+# Bruin Pipeline
 
 This directory contains the Bruin pipeline for TidingsIQ, including the working Bronze, Silver, and Gold layers.
 
 ## Included
 
-- `pipeline.yml` with minimal pipeline metadata
+- `pipeline.yml` with pipeline metadata
 - one Python Bronze ingestion asset
 - one SQL Silver normalization and deduplication asset
-- one SQL Gold scoring asset
+- Gold SQL assets for scoring, guardrails, and operational metrics
 - `pyproject.toml` for Python asset dependencies
 
-## Not Included Yet
+## Local-Only Configuration Notes
 
 - committed `.bruin.yml` credentials configuration
 - CI execution wiring
-- fully automated archive scheduling
+- a repository-safe way to ship live connection details
 
 ## Local Bruin Configuration
 
@@ -22,7 +22,7 @@ Bruin expects a `.bruin.yml` file at the root of the git repository. That file s
 
 Bruin automatically adds `.bruin.yml` to `.gitignore` the first time it creates the file. This repository also ignores it proactively.
 
-Recommended local connection name used by this scaffold:
+Recommended local connection name:
 
 - `bigquery-default`
 
@@ -54,8 +54,10 @@ The Bronze asset reads GDELT GKG 2.1 15-minute export files directly and lands a
 Important runtime defaults:
 
 - it uses the Bruin interval to decide which GKG files are eligible
+- `pipeline/bruin/pipeline.yml` now declares the intended 6-hour cadence so Bruin's interval stays aligned with the Cloud Scheduler trigger
 - it fetches only the most recent `GDELT_MAX_FILES` files in that interval
 - default `GDELT_MAX_FILES` is `4` to keep Phase 3 bounded and inexpensive
+- in deployed runtimes, if Bruin resolves a stale zero-width interval, Bronze falls back to the rolling lookback window instead of reusing the same old source slice
 
 Optional environment variables:
 
@@ -158,8 +160,8 @@ Representative validation should confirm:
 
 The pipeline now includes the container path used by the deployed Cloud Run Job:
 
-- [Dockerfile](/Volumes/SWE/repos/DE%202026/tidingsiq/pipeline/bruin/Dockerfile)
-- [container-entrypoint.sh](/Volumes/SWE/repos/DE%202026/tidingsiq/pipeline/bruin/container-entrypoint.sh)
+- [Dockerfile](Dockerfile)
+- [container-entrypoint.sh](container-entrypoint.sh)
 
 Build from the repository root:
 

@@ -13,17 +13,50 @@ APP_CSS = """
   --tiq-offwhite: #f7f6f2;
   --tiq-border: #e6e4dd;
   --tiq-slate: #4d514a;
+  --tiq-control-shell: #f5f6fa;
+  --tiq-control-border: #e2e7ef;
+  --tiq-control-text: #6b7280;
+  --tiq-control-text-strong: #151515;
+  --tiq-control-hover: #eef2f7;
   --tiq-card-shadow: 0 10px 32px rgba(21, 21, 21, 0.06);
   --tiq-global-header-height: 4.2rem;
+  background: #f7f6f2;
+  color-scheme: light;
 }
 
-html, body, [class*="css"]  {
+html,
+body,
+#root,
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewContainer"] > .main,
+.stApp {
+  background: var(--tiq-offwhite) !important;
+}
+
+html,
+body,
+[class*="css"],
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewContainer"] *,
+[data-baseweb="layer"],
+[data-baseweb="portal"],
+[data-baseweb="menu"],
+[data-baseweb="popover"],
+[role="dialog"],
+[role="listbox"],
+[role="presentation"],
+button,
+input,
+select,
+textarea {
   color: var(--tiq-charcoal);
+  color-scheme: light !important;
 }
 
 .stApp {
   background: var(--tiq-offwhite);
   color: var(--tiq-charcoal);
+  color-scheme: light !important;
 }
 
 .stButton button {
@@ -32,6 +65,52 @@ html, body, [class*="css"]  {
 
 [data-testid="stHorizontalBlock"] {
   align-items: flex-start;
+}
+
+[data-baseweb="segmented-control"],
+[data-baseweb="select"],
+[data-baseweb="popover"],
+[data-testid="stPopover"],
+[data-testid="stSegmentedControl"] {
+  color-scheme: light !important;
+}
+
+[data-baseweb="popover"],
+[data-baseweb="popover"] > div,
+[data-baseweb="layer"],
+[data-baseweb="portal"],
+[data-baseweb="popover"] [role="dialog"],
+[data-baseweb="menu"],
+[role="presentation"],
+[data-testid="stPopoverBody"],
+[data-testid="stPopoverContent"] {
+  background: #ffffff !important;
+  border: 0 !important;
+  border-radius: 22px !important;
+  box-shadow: 0 18px 38px rgba(21, 21, 21, 0.10) !important;
+  color: var(--tiq-charcoal) !important;
+}
+
+[data-baseweb="popover"] *,
+[data-testid="stPopoverBody"] *,
+[data-testid="stPopoverContent"] * {
+  color: inherit;
+}
+
+[data-baseweb="popover"] .stButton button[kind="primary"],
+[data-testid="stPopoverBody"] .stButton button[kind="primary"],
+[data-testid="stPopoverContent"] .stButton button[kind="primary"] {
+  background: var(--tiq-mint) !important;
+  border: 1px solid #00b96b !important;
+  color: #ffffff !important;
+}
+
+[data-baseweb="popover"] .stButton button[kind="secondary"],
+[data-testid="stPopoverBody"] .stButton button[kind="secondary"],
+[data-testid="stPopoverContent"] .stButton button[kind="secondary"] {
+  background: #ffffff !important;
+  border: 1px solid #ddd8ca !important;
+  color: var(--tiq-charcoal) !important;
 }
 
 button[kind] {
@@ -255,45 +334,85 @@ div[data-testid="stVerticalBlock"]:has(.tiq-global-nav-anchor) [data-testid="stS
   margin: 0;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-global-nav-anchor) [data-baseweb="segmented-control"] {
-  background: #f5f6fa;
-  border: 1px solid #eaedf3;
-  border-radius: 999px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 2px rgba(21, 21, 21, 0.04);
-  display: flex;
-  gap: 0.46rem;
-  padding: 0.51rem;
+div[data-testid="stVerticalBlock"]:has(.tiq-global-nav-anchor) > div[data-testid="stHorizontalBlock"] {
+  gap: 0.45rem;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-global-nav-anchor) [data-baseweb="segmented-control"] button {
-  background: transparent !important;
-  border: 0 !important;
+div[data-testid="stVerticalBlock"]:has(.tiq-global-nav-anchor) .stButton,
+div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) .stButton,
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) .stButton {
+  margin: 0 !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-global-nav-anchor) > div[data-testid="stHorizontalBlock"] > div,
+div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) > div[data-testid="stHorizontalBlock"] > div,
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) > div[data-testid="stHorizontalBlock"] > div {
+  min-width: 0 !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-global-nav-anchor) .stButton button {
+  background: #ffffff !important;
+  border: 1px solid var(--tiq-control-border) !important;
   border-radius: 999px !important;
-  box-shadow: none !important;
-  color: #a0a8b8 !important;
+  box-shadow: 0 3px 12px rgba(21, 21, 21, 0.06) !important;
+  color: var(--tiq-control-text-strong) !important;
   font-family: "Inter", sans-serif !important;
-  font-size: 1.38rem !important;
+  font-size: 1rem !important;
   font-weight: 700 !important;
-  height: 4rem !important;
-  padding: 0 1.62rem !important;
+  height: 2.65rem !important;
+  padding: 0 1rem !important;
   transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-global-nav-anchor) [data-baseweb="segmented-control"] button[aria-pressed="true"] {
+[class*="st-key-current_page_choice_"] [data-testid^="stBaseButton"],
+[class*="st-key-lookback_days_choice_"] [data-testid^="stBaseButton"],
+[class*="st-key-feed_sort_order_choice_"] [data-testid^="stBaseButton"] {
+  box-sizing: border-box !important;
+  inline-size: 100% !important;
+  max-width: 100% !important;
+  min-inline-size: 0 !important;
+  min-width: 0 !important;
+}
+
+[class*="st-key-lookback_days_choice_"] [data-testid^="stBaseButton"],
+[class*="st-key-feed_sort_order_choice_"] [data-testid^="stBaseButton"] {
   background: #ffffff !important;
-  border: 1px solid #e8ebf2 !important;
-  box-shadow: 0 3px 12px rgba(21, 21, 21, 0.08) !important;
-  color: var(--tiq-charcoal) !important;
+  border: 1px solid var(--tiq-control-border) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 12px rgba(21, 21, 21, 0.05) !important;
+  color: var(--tiq-control-text-strong) !important;
+  font-family: "Inter", sans-serif !important;
+  font-size: 0.74rem !important;
+  font-weight: 800 !important;
+  height: 1.9rem !important;
+  overflow: hidden !important;
+  padding: 0 0.32rem !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-global-nav-anchor) [data-baseweb="segmented-control"] button[aria-pressed="false"] {
-  background: transparent !important;
-  color: #9ca5b5 !important;
+[class*="st-key-lookback_days_choice_"] [data-testid^="stBaseButton"][kind="primary"],
+[class*="st-key-feed_sort_order_choice_"] [data-testid^="stBaseButton"][kind="primary"] {
+  background: var(--tiq-mint-soft) !important;
+  border: 1px solid #b9e8cf !important;
+  box-shadow: 0 5px 14px rgba(0, 201, 117, 0.12) !important;
+  color: #0f5a39 !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-global-nav-anchor) [data-baseweb="segmented-control"] button[aria-pressed="false"]:hover {
-  background: rgba(255, 255, 255, 0.42) !important;
-  color: #7f899a !important;
+[class*="st-key-lookback_days_choice_"] [data-testid^="stBaseButton"][kind="secondary"]:hover,
+[class*="st-key-feed_sort_order_choice_"] [data-testid^="stBaseButton"][kind="secondary"]:hover {
+  background: var(--tiq-control-hover) !important;
+  color: var(--tiq-control-text-strong) !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-global-nav-anchor) .stButton button[kind="primary"] {
+  background: var(--tiq-mint-soft) !important;
+  border: 1px solid #b9e8cf !important;
+  box-shadow: 0 3px 12px rgba(0, 201, 117, 0.12) !important;
+  color: #0f5a39 !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-global-nav-anchor) .stButton button[kind="secondary"]:hover {
+  background: var(--tiq-control-hover) !important;
+  color: var(--tiq-control-text-strong) !important;
 }
 
 .tiq-global-status-anchor {
@@ -417,6 +536,11 @@ div[data-testid="stVerticalBlock"]:has(.tiq-brief-filter-bar-anchor) {
 
 div[data-testid="stVerticalBlock"]:has(.tiq-brief-filter-bar-anchor) > div[data-testid="stHorizontalBlock"] {
   align-items: center;
+  gap: 0.7rem;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-brief-filter-bar-anchor) > div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+  min-width: 0 !important;
 }
 
 div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor),
@@ -424,7 +548,9 @@ div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor),
 div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor),
 div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor),
 div[data-testid="stVerticalBlock"]:has(.tiq-inline-filter-action-anchor) {
+  min-width: 0 !important;
   position: relative;
+  width: 100% !important;
 }
 
 div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) [data-testid="stSegmentedControl"],
@@ -437,45 +563,54 @@ div[data-testid="stVerticalBlock"]:has(.tiq-inline-filter-action-anchor) .stButt
   margin-bottom: 0;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) [data-baseweb="segmented-control"] {
-  background: #f5f6fa;
-  border: 1px solid #eaedf3;
-  border-radius: 999px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 8px 24px rgba(21, 21, 21, 0.035);
-  display: flex;
-  gap: 0.14rem;
-  padding: 0.22rem;
+div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) > div[data-testid="stHorizontalBlock"],
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) > div[data-testid="stHorizontalBlock"] {
+  gap: 0.32rem;
+  width: 100% !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) [data-baseweb="segmented-control"] button {
-  background: transparent !important;
-  border: 0 !important;
+div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) > div[data-testid="stHorizontalBlock"] > div,
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) > div[data-testid="stHorizontalBlock"] > div {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  width: 0 !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) .stButton button,
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) .stButton button {
+  background: #ffffff !important;
+  border: 1px solid var(--tiq-control-border) !important;
   border-radius: 14px !important;
-  box-shadow: none !important;
-  color: #9aa2ae !important;
+  box-shadow: 0 4px 12px rgba(21, 21, 21, 0.05) !important;
+  color: var(--tiq-control-text-strong) !important;
   font-family: "Inter", sans-serif !important;
-  font-size: 0.8rem !important;
+  font-size: 0.78rem !important;
   font-weight: 800 !important;
-  height: 1.84rem !important;
-  min-width: 2.32rem !important;
-  padding: 0 0.48rem !important;
+  height: 1.8rem !important;
+  min-width: 0 !important;
+  padding: 0 0.4rem !important;
+  width: 100% !important;
   transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) [data-baseweb="segmented-control"] button[aria-pressed="true"] {
-  background: #ffffff !important;
-  box-shadow: 0 5px 14px rgba(21, 21, 21, 0.12) !important;
-  color: var(--tiq-charcoal) !important;
+div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) .stButton button[kind="primary"],
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) .stButton button[kind="primary"] {
+  background: var(--tiq-mint-soft) !important;
+  border: 1px solid #b9e8cf !important;
+  box-shadow: 0 5px 14px rgba(0, 201, 117, 0.12) !important;
+  color: #0f5a39 !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) [data-baseweb="segmented-control"] button[aria-pressed="false"]:hover {
-  color: var(--tiq-charcoal) !important;
+div[data-testid="stVerticalBlock"]:has(.tiq-lookback-control-anchor) .stButton button[kind="secondary"]:hover,
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) .stButton button[kind="secondary"]:hover {
+  background: var(--tiq-control-hover) !important;
+  color: var(--tiq-control-text-strong) !important;
 }
 
 div[data-testid="stVerticalBlock"]:has(.tiq-language-control-anchor) [data-baseweb="select"] > div,
 div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-baseweb="select"] > div {
-  background: #f5f6fa !important;
-  border: 1px solid #eaedf3 !important;
+  background: var(--tiq-control-shell) !important;
+  border: 1px solid var(--tiq-control-border) !important;
   border-radius: 18px !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 8px 24px rgba(21, 21, 21, 0.035) !important;
   min-height: 2.18rem !important;
@@ -508,7 +643,8 @@ div[data-testid="stVerticalBlock"]:has(.tiq-geography-control-anchor) [data-test
   gap: 0.5rem !important;
   justify-content: space-between !important;
   min-height: 2.08rem !important;
-  min-width: 13.5rem !important;
+  max-width: 100% !important;
+  min-width: 12rem !important;
   padding: 0.06rem 0.9rem !important;
   text-align: left !important;
   white-space: nowrap !important;
@@ -687,13 +823,13 @@ div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-footer-anchor) .stBut
   color: #ffffff !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-footer-anchor) .stButton button[kind="secondary"] {
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-footer-anchor) .stButton button:not([kind="primary"]) {
   background: #ffffff !important;
   border: 1px solid #ddd8ca !important;
   color: var(--tiq-charcoal) !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) [data-baseweb="segmented-control"] {
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) {
   width: 100% !important;
 }
 
@@ -738,41 +874,71 @@ div[data-testid="stVerticalBlock"]:has(.tiq-inline-filter-action-anchor) .stButt
   box-shadow: 0 8px 18px rgba(21, 21, 21, 0.07) !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) [data-baseweb="segmented-control"] {
-  background: var(--tiq-charcoal);
-  border: 1px solid rgba(21, 21, 21, 0.96);
-  border-radius: 999px;
-  box-shadow: 0 12px 28px rgba(21, 21, 21, 0.18);
-  display: flex;
-  gap: 0.18rem;
-  padding: 0.22rem;
-}
-
-div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) [data-baseweb="segmented-control"] button {
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 14px !important;
-  box-shadow: none !important;
-  color: #8d929c !important;
-  flex: 1 1 0;
-  font-family: "Inter", sans-serif !important;
-  font-size: 0.84rem !important;
-  font-weight: 800 !important;
-  height: 1.88rem !important;
-  min-width: 0 !important;
-  padding: 0 0.7rem !important;
-  transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease !important;
+div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) .stButton button {
   white-space: nowrap !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) [data-baseweb="segmented-control"] button[aria-pressed="true"] {
-  background: var(--tiq-mint) !important;
-  box-shadow: 0 5px 14px rgba(0, 201, 117, 0.24) !important;
-  color: #053d28 !important;
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-panel-anchor),
+div[data-testid="stElementContainer"]:has(.tiq-filter-popover-panel-anchor),
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-footer-anchor),
+div[data-testid="stElementContainer"]:has(.tiq-filter-popover-footer-anchor) {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.tiq-feed-sort-control-anchor) [data-baseweb="segmented-control"] button[aria-pressed="false"]:hover {
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-panel-anchor) [data-baseweb="select"] [role="combobox"],
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-panel-anchor) [data-baseweb="select"] [role="textbox"],
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-panel-anchor) [data-baseweb="select"] input,
+div[data-testid="stVerticalBlock"]:has(.tiq-filter-popover-panel-anchor) [data-baseweb="select"] div {
+  color: var(--tiq-charcoal) !important;
+}
+
+div[role="dialog"] [role="listbox"],
+div[role="dialog"] [data-baseweb="menu"],
+div[role="dialog"] [role="option"],
+body [data-baseweb="layer"],
+body [data-baseweb="portal"],
+body [role="listbox"],
+body [data-baseweb="menu"],
+body [role="presentation"],
+body [role="option"] {
+  background: #ffffff !important;
+  border: 0 !important;
+  box-shadow: 0 16px 32px rgba(21, 21, 21, 0.10) !important;
+  color: var(--tiq-charcoal) !important;
+  color-scheme: light !important;
+}
+
+div[role="dialog"] [role="option"],
+body [role="option"] {
+  border-radius: 12px !important;
+}
+
+div[role="dialog"] [role="option"]:hover,
+body [role="option"]:hover {
+  background: #f4f8f6 !important;
+  color: var(--tiq-charcoal) !important;
+}
+
+div[role="dialog"] [aria-selected="true"],
+body [aria-selected="true"] {
+  background: var(--tiq-mint-soft) !important;
+  color: #0f5a39 !important;
+}
+
+div[role="dialog"] .stButton button[kind="primary"],
+body [role="dialog"] .stButton button[kind="primary"] {
+  background: var(--tiq-mint) !important;
+  border: 1px solid #00b96b !important;
   color: #ffffff !important;
+}
+
+div[role="dialog"] .stButton button:not([kind="primary"]),
+body [role="dialog"] .stButton button:not([kind="primary"]) {
+  background: #ffffff !important;
+  border: 1px solid #ddd8ca !important;
+  color: var(--tiq-charcoal) !important;
 }
 
 .tiq-section-divider {

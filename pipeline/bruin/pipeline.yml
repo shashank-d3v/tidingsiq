@@ -1,4 +1,5 @@
 name: tidingsiq_positive_news
+schedule: "0 */6 * * *"
 
 default_connections:
   google_cloud_platform: "bigquery-default"

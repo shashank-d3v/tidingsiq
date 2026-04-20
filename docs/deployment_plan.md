@@ -22,14 +22,14 @@ Implemented in the repository:
 - Terraform automation for Artifact Registry, Cloud Run Job, and Cloud Scheduler
 - Terraform-managed restricted-egress path for the main pipeline and Bronze archive Cloud Run jobs
 - reporting Cloud Run Job path and Monitoring-based email notifications
-- Bronze archive Cloud Run Job, scheduler, and Monitoring scaffolding in repository, designed to reuse the pipeline image while running under a dedicated archive service account
-- Streamlit app container and Terraform hosting scaffold for Cloud Run service
-- app hosting path available as an optional deployment target
+- Bronze archive Cloud Run Job, scheduler, and Monitoring resources in repository, designed to reuse the pipeline image while running under a dedicated archive service account
+- Streamlit app container and Terraform hosting path for a Cloud Run service
+- public dashboard currently live on the direct Cloud Run URL: `https://tidingsiq-app-eglccrtc7q-el.a.run.app/`
 
 Not implemented as a public, always-on deployment contract:
 
-- active hosted cloud deployment for the Streamlit app behind the hardened public edge
 - container build and release flow in GCP
+- a hardened public edge in front of the already-live direct Cloud Run app
 
 ## Deployment Targets
 
@@ -116,11 +116,11 @@ Current implementation choice:
 
 Recommended target:
 
-- external HTTPS load balancer + Cloud Armor + Cloud Run service
+- direct public Cloud Run service
 
 Recommended flow:
 
-`Browser -> external HTTPS load balancer -> Cloud Armor -> Cloud Run service -> Streamlit app -> BigQuery gold.positive_news_feed`
+`Browser -> Cloud Run service -> Streamlit app -> BigQuery gold.positive_news_feed`
 
 Why this fits:
 
@@ -133,12 +133,8 @@ Expected components:
 
 - Artifact Registry repository for the app container image
 - Cloud Run service for Streamlit
-- serverless NEG for the Cloud Run backend
-- external HTTPS load balancer with HTTP-to-HTTPS redirect
-- Google-managed certificate for the app hostname
-- Cloud Armor security policy with per-IP throttle
 - dedicated app service account
-- load-balancer request logging, logs-based metrics, dashboarding, and an instance-pressure alert
+- direct `run.app` HTTPS endpoint
 
 App service account responsibilities:
 
@@ -151,7 +147,6 @@ The app should not need write access to Bronze or Silver.
 Current serving safety posture:
 
 - keep the app public and unauthenticated
-- force internet traffic through the external HTTPS load balancer by switching Cloud Run ingress to load-balancer-only mode
 - keep `app_max_instance_count` conservative so abusive traffic cannot scale far
 - preserve the current bounded query model:
   - fixed lookback options only
@@ -161,13 +156,10 @@ Current serving safety posture:
 
 Rollout guidance:
 
-- start the Cloud Armor throttle rule in preview mode for the first 7 days
-- inspect preview exceed logs before enforcing the rule
-- keep the initial threshold at `120 requests / 60 seconds / IP` while the preview window is active
-- if normal traffic from shared office or home NATs stays clean, turn preview off before tightening thresholds
-- only after a second observation window should the threshold be considered for tightening toward `90 requests / 60 seconds / IP`
-- re-test page refreshes, pagination, filter changes, and multiple users behind the same NAT before enforcing tighter settings
-- expect very frequent refreshes from a single IP to be the first legitimate behavior that may see throttling after enforcement
+- verify the direct `run.app` URL serves the app after deploy
+- re-test page refreshes, pagination, and filter changes on the direct Cloud Run URL
+- keep the instance cap conservative until real traffic justifies additional hardening
+- if public traffic later warrants stricter protection or custom-domain branding, the optional AppEdge slice can be enabled in front of the same Cloud Run service
 
 ## Recommended Separation
 
@@ -193,18 +185,18 @@ When cloud deployment work starts, Terraform should likely add:
 - Cloud Scheduler job for the pipeline cadence
 - controlled VPC egress for Cloud Run jobs that fetch external URLs
 - Cloud Run service for Streamlit
-- external HTTPS load balancer and Cloud Armor for the public app
+- optional external HTTPS load balancer and Cloud Armor for future app hardening
 - service-account IAM for both runtimes
 - Secret Manager bindings if secrets are introduced
 
-The app hosting and app-edge slices are implemented and can be enabled together once the target hostname is ready.
+The app hosting slice is sufficient for the active public deployment. The app-edge slice remains available as an optional future hardening layer.
 
 ## Suggested Delivery Order
 
 1. Retention and archive operations for Bronze, Silver, and Gold
 1. Verify the Monitoring email recipient has confirmed any verification email
-2. Provision the public app edge with load balancer, Cloud Armor preview mode, and monitoring
-3. CI or release workflow for image build and deployment
+2. Keep the public app healthy on direct Cloud Run
+3. Add CI or release workflow for image build and deployment
 
 ## Open Questions
 

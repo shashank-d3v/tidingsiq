@@ -18,8 +18,8 @@ Current `v3` defaults intentionally leave upstream GDELT-derived signal adjustme
 
 ## Operational Scripts
 
-- [generate_scoring_eval_sample.py](/Volumes/SWE/repos/DE%202026/tidingsiq/scripts/generate_scoring_eval_sample.py): generates a stratified CSV sample from current Gold for manual review.
-- [compare_gold_score_versions.py](/Volumes/SWE/repos/DE%202026/tidingsiq/scripts/compare_gold_score_versions.py): compares current Gold and shadow Gold overlap, changed rows, exclusion mix, domain mix, and labeled precision.
+- [generate_scoring_eval_sample.py](../scripts/generate_scoring_eval_sample.py): generates a stratified CSV sample from current Gold for manual review.
+- [compare_gold_score_versions.py](../scripts/compare_gold_score_versions.py): compares current Gold and shadow Gold overlap, changed rows, exclusion mix, domain mix, and labeled precision.
 
 ## Validation Notes
 

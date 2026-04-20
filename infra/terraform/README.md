@@ -12,7 +12,7 @@ This directory contains the first infrastructure slice for TidingsIQ. It provisi
 - optional restricted-egress network path for the pipeline and Bronze archive Cloud Run jobs
 - reporting resources for a daily Cloud Run summary job and Monitoring-based email notifications
 - optional app hosting resources for Artifact Registry and a Cloud Run service
-- optional app-edge resources for an external HTTPS load balancer, Cloud Armor, logging metrics, dashboards, and an instance-pressure alert
+- optional app-edge resources for future hardening via an external HTTPS load balancer, Cloud Armor, logging metrics, dashboards, and an instance-pressure alert
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ This directory contains the first infrastructure slice for TidingsIQ. It provisi
 - Google application default credentials or another supported Terraform authentication method
 - required APIs already enabled in the target project, at minimum BigQuery and IAM
 
-This scaffold does not enable project APIs automatically. That is intentional to keep the first version small and permission-conscious.
+This module does not enable project APIs automatically. That is intentional to keep the infrastructure explicit and permission-conscious.
 
 Cloud Storage must also be enabled in the target project because Bronze archival is now provisioned in Terraform.
 
@@ -107,13 +107,13 @@ Examples in this document use placeholders such as `<GCP_PROJECT_ID>`, `<REGION>
 | `bronze_archive_dry_run` | No | `true` | Runs the Bronze archive worker in dry-run mode |
 | `bronze_archive_delete_after_export` | No | `false` | Enables delete-after-export once reconciliation is trusted |
 | `bronze_archive_max_delete_rows` | No | `20000` | Delete guardrail for the Bronze archive worker |
-| `enable_app_hosting` | No | `false` | Enables Artifact Registry and a Cloud Run service for the Streamlit app |
+| `enable_app_hosting` | No | `false` | Enables Artifact Registry and a direct public Cloud Run service for the Streamlit app |
 | `app_artifact_repository_id` | No | `tidingsiq-app` | Artifact Registry repository ID for the app image |
 | `app_container_image` | No | derived | Full image URI for the Streamlit app container |
 | `app_service_name` | No | `tidingsiq-app` | Cloud Run service name for the Streamlit app |
 | `app_memory_limit` | No | `1Gi` | Memory limit for the Streamlit Cloud Run container |
 | `app_allow_unauthenticated` | No | `true` | Grants public invoke access to the Streamlit Cloud Run service |
-| `enable_app_edge` | No | `false` | Enables an external HTTPS load balancer, Cloud Armor, and app observability resources in front of the Streamlit app |
+| `enable_app_edge` | No | `false` | Enables an optional future hardening layer with an external HTTPS load balancer, Cloud Armor, and app observability resources in front of the Streamlit app |
 | `app_domain_name` | Conditionally | `""` | DNS hostname served by the external HTTPS load balancer; required when `enable_app_edge = true` |
 | `app_rate_limit_count` | No | `120` | Per-IP Cloud Armor throttle threshold for the app |
 | `app_rate_limit_interval_sec` | No | `60` | Cloud Armor throttle interval in seconds for the app |
@@ -191,6 +191,7 @@ If app hosting is enabled, Terraform also provisions:
 - an Artifact Registry Docker repository for the app image
 - a Cloud Run service for the Streamlit frontend
 - optional unauthenticated public invoke access on that Cloud Run service
+- direct public serving on the Cloud Run `run.app` URL by default
 
 If app edge is enabled, Terraform also provisions:
 
@@ -213,7 +214,7 @@ Implementation notes:
 - the Bronze archive job path is available in code and remains feature-gated behind `enable_bronze_archive_automation`
 - app hosting can be kept disabled while the UI and security posture are still being finalized, and when disabled the app service account plus its BigQuery IAM are not provisioned
 - when `enable_app_edge = true`, the Cloud Run service ingress is restricted to Google Cloud load balancers and internal traffic so internet requests must traverse the external HTTPS load balancer
-- the default app rollout posture is public and unauthenticated behind the load balancer, with the first Cloud Armor throttle rule in preview mode and `app_max_instance_count` kept conservative
+- the default portfolio-app posture can stay public and unauthenticated on the direct Cloud Run URL, with `app_max_instance_count` kept conservative
 
 ## Notes
 

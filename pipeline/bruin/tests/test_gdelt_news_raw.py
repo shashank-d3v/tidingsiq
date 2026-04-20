@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import io
+import os
 import pathlib
 import sys
 import types
@@ -390,6 +391,68 @@ class GdeltNewsRawTest(unittest.TestCase):
                 total_rows_seen=82,
                 malformed_rows=2,
             )
+
+    def test_resolve_requested_window_falls_back_from_same_day_midnight_bruin_interval(self) -> None:
+        class FakeDateTime(datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return cls(2026, 4, 20, 6, 30, tzinfo=tz or timezone.utc)
+
+        with mock.patch.object(gdelt_news_raw, "datetime", FakeDateTime):
+            with mock.patch.dict(
+                os.environ,
+                {
+                    "BRUIN_START_DATE": "2026-04-20T00:00:00Z",
+                    "BRUIN_END_DATE": "2026-04-20T00:00:00Z",
+                    "CLOUD_RUN_JOB": "tidingsiq-pipeline",
+                },
+                clear=False,
+            ):
+                start_dt, end_dt = gdelt_news_raw._resolve_requested_window()
+
+        self.assertEqual(start_dt, datetime(2026, 4, 20, 5, 30, tzinfo=timezone.utc))
+        self.assertEqual(end_dt, datetime(2026, 4, 20, 6, 30, tzinfo=timezone.utc))
+
+    def test_resolve_requested_window_keeps_historical_zero_width_interval_outside_deployed_runtime(self) -> None:
+        class FakeDateTime(datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return cls(2026, 4, 20, 6, 30, tzinfo=tz or timezone.utc)
+
+        with mock.patch.object(gdelt_news_raw, "datetime", FakeDateTime):
+            with mock.patch.dict(
+                os.environ,
+                {
+                    "BRUIN_START_DATE": "2026-04-19T00:00:00Z",
+                    "BRUIN_END_DATE": "2026-04-19T00:00:00Z",
+                },
+                clear=False,
+            ):
+                start_dt, end_dt = gdelt_news_raw._resolve_requested_window()
+
+        self.assertEqual(start_dt, datetime(2026, 4, 19, 0, 0, tzinfo=timezone.utc))
+        self.assertEqual(end_dt, datetime(2026, 4, 19, 0, 0, tzinfo=timezone.utc))
+
+    def test_resolve_requested_window_keeps_current_zero_width_interval_in_deployed_runtime(self) -> None:
+        class FakeDateTime(datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return cls(2026, 4, 20, 6, 30, tzinfo=tz or timezone.utc)
+
+        with mock.patch.object(gdelt_news_raw, "datetime", FakeDateTime):
+            with mock.patch.dict(
+                os.environ,
+                {
+                    "BRUIN_START_DATE": "2026-04-20T06:20:00Z",
+                    "BRUIN_END_DATE": "2026-04-20T06:20:00Z",
+                    "CLOUD_RUN_JOB": "tidingsiq-pipeline",
+                },
+                clear=False,
+            ):
+                start_dt, end_dt = gdelt_news_raw._resolve_requested_window()
+
+        self.assertEqual(start_dt, datetime(2026, 4, 20, 6, 20, tzinfo=timezone.utc))
+        self.assertEqual(end_dt, datetime(2026, 4, 20, 6, 20, tzinfo=timezone.utc))
 
 
 if __name__ == "__main__":

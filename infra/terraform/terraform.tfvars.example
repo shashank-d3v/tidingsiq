@@ -39,6 +39,8 @@ bigquery_location = "<BIGQUERY_LOCATION>"
 # app_service_name = "<APP_SERVICE_NAME>"
 # app_memory_limit = "1Gi"
 # app_allow_unauthenticated = true
+#
+# Optional future hardening only:
 # enable_app_edge = true
 # app_domain_name = "<APP_DOMAIN_NAME>"
 # app_rate_limit_count = 120

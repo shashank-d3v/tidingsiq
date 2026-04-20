@@ -1,81 +1,141 @@
 # TidingsIQ: Positive News Intelligence Pipeline
 
-TidingsIQ is a portfolio data engineering project that builds a low-cost, cloud-native ELT pipeline for global news intelligence. The system ingests news metadata from GDELT, lands and transforms it in BigQuery with Bruin, provisions supporting GCP resources with Terraform, and serves sentiment-filtered results through a Streamlit app.
+Live dashboard: [https://tidingsiq-app-eglccrtc7q-el.a.run.app/](https://tidingsiq-app-eglccrtc7q-el.a.run.app/)
 
-The core product is a queryable feed of recent articles ranked by a configurable `happy_factor` and gated by explicit title guardrails, intended to surface more positive news coverage without pretending to solve sentiment perfectly.
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)
+![Google Cloud](https://img.shields.io/badge/Google%20Cloud-Cloud%20Run%20%26%20BigQuery-4285F4?style=flat-square&logo=googlecloud&logoColor=white)
+![BigQuery](https://img.shields.io/badge/BigQuery-Warehouse-669DF6?style=flat-square&logo=googlebigquery&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-IaC-844FBA?style=flat-square&logo=terraform&logoColor=white)
+![Bruin](https://img.shields.io/badge/Bruin-Orchestration-111827?style=flat-square)
+![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Containers-2496ED?style=flat-square&logo=docker&logoColor=white)
 
-## Scope
+TidingsIQ is a data engineering project that ingests bounded GDELT news metadata, models it in BigQuery with Bruin, provisions cloud infrastructure with Terraform, and serves a reviewer-accessible positive-news dashboard through Streamlit.
 
-This repository now includes the applied infrastructure foundation, a working Bronze Bruin ingestion asset, the Silver normalization layer, the Gold scoring layer, the initial Streamlit app, and the core design docs.
+The project focuses on a practical problem: broad news feeds skew toward noise and negative headlines, while many consumers still want a credible way to discover more constructive coverage. TidingsIQ addresses that by building a warehouse-centric pipeline that scores recent articles with an explainable `happy_factor`, applies explicit title guardrails, and publishes the resulting feed through a simple cloud-hosted dashboard.
 
-Included in scope:
-- GCP infrastructure managed with Terraform
-- BigQuery as the warehouse and compute engine
-- Bruin for ingestion, SQL transformations, orchestration, and checks
-- Streamlit as a lightweight analytical frontend
-
-Not in scope for the current scaffold:
-- production-grade MLOps or custom NLP models
-- full editorial quality scoring
-- real-time streaming ingestion
-
-## Planned System
+## Architecture
 
 Data flow:
 
-`GDELT -> Bruin ingestion -> BigQuery bronze -> BigQuery silver -> BigQuery gold -> Streamlit`
+`GDELT GKG 2.1 -> Bruin Bronze ingestion -> BigQuery bronze -> BigQuery silver -> BigQuery gold -> Streamlit dashboard`
 
-Serving model:
+Serving contract:
 
-- `gold.positive_news_feed`
+- canonical serving table: `gold.positive_news_feed`
+- default dashboard feed: rows where `is_positive_feed_eligible = true`
+- current score version: `happy_factor_version = 'v2_1_guardrailed_tone'`
+- current title-rule version: `positive_guardrail_version = 'v1_1_title_rules'`
+- current eligibility floor: `happy_factor >= 65`
 
-Primary user controls:
+Warehouse layout:
 
-- Brief lookback plus inline language, region, and sort controls in the Streamlit UI
-- a warehouse-wide `Pulse` page backed by Gold operational aggregates
-- page-level loading states during BigQuery-backed Brief refreshes and section switches in the Streamlit UI
+- `bronze`: landed source records plus ingestion metadata
+- `silver`: normalized, deduplicated article rows
+- `gold`: scored serving rows and operational metrics
+- `bronze_staging` and `gold_staging`: operational merge/staging datasets used by the current load paths
 
-## Repository Layout
+## Stack
 
-```text
-.
-├── app/
-│   └── streamlit/
-├── docs/
-│   ├── architecture.md
-│   ├── data_contract.md
-│   ├── gdelt_findings.md
-│   ├── happy_factor.md
-│   └── roadmap.md
-├── infra/
-│   └── terraform/
-├── pipeline/
-│   └── bruin/
-│       ├── pipeline.yml
-│       └── assets/
-└── scripts/
+- Source: GDELT GKG 2.1
+- Cloud: Google Cloud
+- Warehouse and compute: BigQuery
+- Orchestration and checks: Bruin
+- Infrastructure as code: Terraform
+- Dashboard: Streamlit on Cloud Run
+- Containers: Docker
+- Language: Python and SQL
+
+## What Is Implemented
+
+- Terraform-managed datasets, IAM, archive bucket, pipeline automation, reporting resources, and app-hosting path
+- Bruin-managed Bronze ingestion, Silver normalization/deduplication, Gold scoring, and warehouse checks
+- Retention posture captured in code and docs:
+  - Bronze retained 45 days in BigQuery, then archived to GCS
+  - Silver retained 90 days in-model
+  - Gold retained 180 days in-model
+  - archived Bronze objects retained 365 days in GCS
+- Public Streamlit dashboard backed only by Gold-layer tables
+- Cloud Run deployment path for the pipeline, reporting jobs, and dashboard
+- Operational `Pulse` view backed by `gold.pipeline_run_metrics` and Gold summary queries
+
+## Dashboard
+
+Live dashboard: [https://tidingsiq-app-eglccrtc7q-el.a.run.app/](https://tidingsiq-app-eglccrtc7q-el.a.run.app/)
+
+The dashboard exposes three reviewer-relevant surfaces:
+
+- `The Brief`: the application-facing positive-news feed served from eligible Gold rows only
+- `Pulse`: warehouse-wide operational visibility for ingestion freshness, row counts, eligibility mix, and score distribution
+- `Methodology`: an explainer for the scoring and serving logic
+
+### Product Walkthrough
+
+**The Brief Overview**
+
+![TidingsIQ Brief Overview](docs/screenshots/dashboard-brief-overview-clean.png)
+
+**Interface Details**
+
+| Feed Detail | Methodology |
+|---|---|
+| ![TidingsIQ Brief Feed Detail](docs/screenshots/dashboard-brief-feed-detail.png) | ![TidingsIQ Methodology](docs/screenshots/dashboard-methodology.png) |
+
+**Pulse**
+
+<p align="center">
+  <img src="docs/screenshots/dashboard-pulse.png" alt="TidingsIQ Pulse" width="72%">
+</p>
+
+The dashboard remains intentionally bounded for a public portfolio deployment:
+
+- fixed lookback windows
+- fixed page size
+- no unbounded free-form search
+- Gold-only reads from the app layer
+
+## Reproducibility
+
+### 1. Provision or validate infrastructure
+
+```bash
+cd infra/terraform
+cp terraform.tfvars.example terraform.tfvars
+terraform init
+terraform validate
+terraform plan
 ```
 
-`infra/terraform/`, `pipeline/bruin/`, `app/streamlit/`, and `scripts/` now contain working implementation slices.
+### 2. Configure Bruin locally
 
-## Documentation Index
+Create a local `.bruin.yml` at the repository root and point the default connection at your BigQuery project and location.
 
-- [Architecture](docs/architecture.md): system boundaries, responsibilities, and runtime flow
-- [Data Contract](docs/data_contract.md): planned Bronze, Silver, and Gold schemas
-- [GDELT Findings](docs/gdelt_findings.md): verified upstream GKG column layout, current mappings, and source-quality findings
-- [Happy Factor](docs/happy_factor.md): initial scoring approach and validation rules
-- [Roadmap](docs/roadmap.md): public build status and next-step summary
-- [Authoritative Fetching With Controlled Query Cost](docs/authoritative_fetching_query_cost.md): deferred Streamlit serving design for authoritative warehouse-side filtering, counts, and pagination
-- [Deployment Plan](docs/deployment_plan.md): future GCP hosting path for the pipeline and app
-- [Terraform Foundation](infra/terraform/README.md): initial GCP and BigQuery infrastructure scaffold
-- [Bruin Pipeline](pipeline/bruin/README.md): local setup notes, asset behavior, and validation workflow
-- [Streamlit App](app/streamlit/README.md): local UI run instructions and Gold query contract
-- [Operations Scripts](scripts/README.md): manual archive and retention helpers
-- [Operations Runbook](docs/operations_runbook.md): reset, smoke test, scheduler, image, and warehouse debug commands
+Minimal example:
 
-## Local App Run
+```yaml
+default_environment: default
+environments:
+  default:
+    connections:
+      google_cloud_platform:
+        - name: "bigquery-default"
+          project_id: "<GCP_PROJECT_ID>"
+          location: "<BIGQUERY_LOCATION>"
+          use_application_default_credentials: true
+```
 
-The Streamlit app requires an explicit project id at startup:
+### 3. Run the pipeline locally
+
+```bash
+bruin validate pipeline/bruin/pipeline.yml
+bruin run pipeline/bruin/assets/bronze/gdelt_news_raw.py
+bruin run pipeline/bruin/assets/silver/gdelt_news_refined.sql
+bruin run pipeline/bruin/assets/gold/positive_feed_guardrail_terms.sql
+bruin run pipeline/bruin/assets/gold/positive_news_feed.sql
+bruin run pipeline/bruin/assets/gold/pipeline_run_metrics.sql
+```
+
+### 4. Run the dashboard locally
 
 ```bash
 python3 -m pip install -r app/streamlit/requirements.txt
@@ -83,36 +143,54 @@ export TIDINGSIQ_GCP_PROJECT=<GCP_PROJECT_ID>
 streamlit run app/streamlit/app.py
 ```
 
-The current Brief filter UI depends on controlled `st.popover` behavior, so the app now requires Streamlit `1.55.0` or newer.
-
-Optional override:
-
-```bash
-export TIDINGSIQ_GOLD_TABLE=<GOLD_TABLE_FQN>
-```
-
-If you prefer the repository `Makefile`, pass the project explicitly for that run:
+Or with the repository `Makefile`:
 
 ```bash
 TIDINGSIQ_GCP_PROJECT=<GCP_PROJECT_ID> make streamlit
 ```
 
-## Design Principles
+## Repository Structure
 
-- Keep the first release batch-oriented, deterministic, and inexpensive to run.
-- Make the Gold model the stable contract for the application.
-- Preserve enough raw detail for debugging, but avoid storing unnecessary payload.
-- Mark uncertain upstream mappings explicitly until validated against actual GDELT inputs.
-- Prefer explainable SQL-friendly logic over opaque heuristics.
+```text
+.
+├── app/streamlit/          # Streamlit dashboard
+├── docs/                   # Architecture, scoring, runbook, and roadmap docs
+├── infra/terraform/        # GCP infrastructure as code
+├── pipeline/bruin/         # Bruin pipeline assets and container path
+└── scripts/                # Operational helpers and reporting utilities
+```
 
-## Current Status
+## Documentation Index
 
-The repository includes the Terraform foundation, a working Bronze ingestion slice in Bruin, a deterministic Silver normalization layer, a versioned Gold scoring model, a Streamlit app that queries Gold only, and supporting retention/archive automation paths.
+- [Architecture](docs/architecture.md): system boundaries, responsibilities, and runtime flow
+- [Data Contract](docs/data_contract.md): Bronze, Silver, Gold, and operational schemas
+- [Happy Factor](docs/happy_factor.md): current scoring and feed-eligibility logic
+- [GDELT Findings](docs/gdelt_findings.md): upstream field-mapping evidence and source findings
+- [Bruin Pipeline](pipeline/bruin/README.md): local setup, asset behavior, validation, and container path
+- [Streamlit App](app/streamlit/README.md): dashboard behavior, local run instructions, and Gold query contract
+- [Terraform Foundation](infra/terraform/README.md): provisioned GCP resources and variables
+- [Operations Scripts](scripts/README.md): archive, reporting, and warehouse-reset helpers
+- [Operations Runbook](docs/operations_runbook.md): smoke tests, scheduler operations, and deployment debugging
+- [Roadmap](docs/roadmap.md): current state, deployment posture, and remaining work
+- [Deployment Plan](docs/deployment_plan.md): cloud runtime posture for pipeline and dashboard
 
-The Cloud Run job path, reporting path, and app-hosting path are implemented in the repo as reusable deployment options rather than hard-coded operator state. The infrastructure also includes the operational `bronze_staging` dataset used only by the Bronze merge load path. The current Gold serving contract separates score from eligibility: `happy_factor` ranks records, while `is_positive_feed_eligible` keeps obvious non-uplifting titles out of the default feed. The default serving threshold is `65`. In the Streamlit UI, article cards now render clickable outbound links only for exact `http` and `https` URLs; unsupported, blank, or malformed values are displayed as plain text. The current app also shows explicit loading screens during BigQuery-backed Brief refreshes and page switches so the warehouse-backed UI does not appear frozen during reruns.
+## Current Deployment Posture
 
-## Next Build Order
+- The public dashboard is live on Cloud Run at the URL linked above.
+- The pipeline Cloud Run Job path, reporting job path, and app-hosting path are implemented in the repository.
+- The current public app posture is direct public Cloud Run serving on the `run.app` URL rather than a load-balancer-hardened edge.
+- The optional AppEdge hardening path remains available in Terraform for future traffic or branding needs.
 
-1. Harden security, replay behavior, and public-release posture.
-2. Integrate the final Streamlit UI design on top of the stabilized Gold contract.
-3. Finalize architecture and deployment documentation.
+## Known Limitations
+
+- The scoring model is explainable and deterministic, but it is not a claim of full-article sentiment understanding or factual verification.
+- `TranslationInfo` remains sparse in sampled GDELT rows, so language metadata is still native-first with deterministic inference as fallback and remains informational rather than a serving gate.
+- The Bronze archive path is implemented, but repeated export-only operation should remain transitional until a persisted archival boundary is introduced.
+- The dashboard currently favors bounded, reviewer-friendly browsing over a richer search experience.
+
+## Submission Notes
+
+- This repository is documented to be reviewable from the root README first.
+- The canonical serving table is `gold.positive_news_feed`.
+- The public dashboard and the GitHub repository website field should point to the same live URL.
+- Supporting docs are kept aligned to current implementation state; future work is called out explicitly rather than mixed into current-state sections.

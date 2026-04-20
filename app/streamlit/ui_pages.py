@@ -17,6 +17,7 @@ try:  # pragma: no cover - import path varies between app runtime and tests
         format_relative_time,
         format_timestamp,
         render_empty_state,
+        render_choice_button_group,
         render_metric_card,
         render_pagination,
         score_badge_class,
@@ -31,6 +32,7 @@ except ImportError:  # pragma: no cover - script entrypoint fallback
         format_relative_time,
         format_timestamp,
         render_empty_state,
+        render_choice_button_group,
         render_metric_card,
         render_pagination,
         score_badge_class,
@@ -142,6 +144,42 @@ def _render_page_masthead(
             unsafe_allow_html=True,
         )
         # Date intentionally hidden for now pending the next masthead iteration.
+
+
+def _light_vega_spec(spec: dict[str, object]) -> dict[str, object]:
+    config_value = spec.get("config")
+    config = dict(config_value) if isinstance(config_value, dict) else {}
+    view_value = config.get("view")
+    view = dict(view_value) if isinstance(view_value, dict) else {}
+    axis_value = config.get("axis")
+    axis = dict(axis_value) if isinstance(axis_value, dict) else {}
+    legend_value = config.get("legend")
+    legend = dict(legend_value) if isinstance(legend_value, dict) else {}
+    title_value = config.get("title")
+    title = dict(title_value) if isinstance(title_value, dict) else {}
+
+    view.setdefault("fill", "#ffffff")
+    view.setdefault("stroke", None)
+    axis.setdefault("gridColor", "#e6e4dd")
+    axis.setdefault("domainColor", "#d9d4c9")
+    axis.setdefault("tickColor", "#d9d4c9")
+    axis.setdefault("labelColor", "#151515")
+    axis.setdefault("titleColor", "#151515")
+    legend.setdefault("labelColor", "#151515")
+    legend.setdefault("titleColor", "#151515")
+    title.setdefault("color", "#151515")
+
+    return {
+        **spec,
+        "background": "#ffffff",
+        "config": {
+            **config,
+            "view": view,
+            "axis": axis,
+            "legend": legend,
+            "title": title,
+        },
+    }
 
 
 def _format_lookback_option(days: int) -> str:
@@ -303,7 +341,7 @@ def _render_brief_filter_bar(
 
     st.markdown('<div class="tiq-brief-filter-bar-anchor"></div>', unsafe_allow_html=True)
     lookback_col, language_col, geography_col, sort_col = st.columns(
-        [1.15, 1.55, 1.55, 1.45],
+        [1.35, 1.45, 1.45, 1.45],
         gap="small",
     )
     with lookback_col:
@@ -346,17 +384,12 @@ def _render_brief_filter_bar(
             value_formatter=format_geography,
         )
     with sort_col:
-        st.markdown(
-            '<div class="tiq-feed-sort-control-anchor"></div>',
-            unsafe_allow_html=True,
-        )
-        st.segmented_control(
-            "Sort feed",
+        render_choice_button_group(
+            anchor_class="tiq-feed-sort-control-anchor",
+            state_key="feed_sort_order",
             options=sort_options,
-            key="feed_sort_order",
+            current_value=st.session_state.get("feed_sort_order", sort_options[0]),
             format_func=_format_sort_option,
-            label_visibility="collapsed",
-            width="stretch",
         )
 
 
@@ -545,7 +578,7 @@ def render_pulse(
     )
     st.vega_lite_chart(
         stage_snapshot,
-        {
+        _light_vega_spec({
             "height": 300,
             "transform": [
                 {"joinaggregate": [{"op": "max", "field": "row_count", "as": "max_row_count"}]},
@@ -626,7 +659,7 @@ def render_pulse(
                 },
             ],
             "config": {"view": {"stroke": None}},
-        },
+        }),
         width="stretch",
     )
     _render_supporting_stats(
@@ -647,7 +680,7 @@ def render_pulse(
         if exclusion_breakdown:
             st.vega_lite_chart(
                 exclusion_breakdown,
-                {
+                _light_vega_spec({
                     "mark": {"type": "arc", "innerRadius": 52, "outerRadius": 118},
                     "encoding": {
                         "theta": {"field": "row_count", "type": "quantitative"},
@@ -666,7 +699,7 @@ def render_pulse(
                         ],
                     },
                     "config": {"view": {"stroke": None}},
-                },
+                }),
                 width="stretch",
             )
             _render_supporting_stats(
@@ -687,7 +720,7 @@ def render_pulse(
         if pipeline_trend:
             st.vega_lite_chart(
                 pipeline_trend,
-                {
+                _light_vega_spec({
                     "mark": {"type": "line", "point": True, "strokeWidth": 3},
                     "encoding": {
                         "x": {
@@ -723,7 +756,7 @@ def render_pulse(
                         ],
                     },
                     "config": {"view": {"stroke": None}},
-                },
+                }),
                 width="stretch",
             )
             _render_supporting_stats(
@@ -746,7 +779,7 @@ def render_pulse(
         if silver_cleanup_trend:
             st.vega_lite_chart(
                 silver_cleanup_trend,
-                {
+                _light_vega_spec({
                     "mark": {"type": "bar", "cornerRadiusTopLeft": 4, "cornerRadiusTopRight": 4},
                     "encoding": {
                         "x": {
@@ -778,7 +811,7 @@ def render_pulse(
                         ],
                     },
                     "config": {"view": {"stroke": None}},
-                },
+                }),
                 width="stretch",
             )
             _render_supporting_stats(
@@ -799,7 +832,7 @@ def render_pulse(
         if score_distribution:
             st.vega_lite_chart(
                 score_distribution,
-                {
+                _light_vega_spec({
                     "mark": {
                         "type": "bar",
                         "cornerRadiusTopLeft": 4,
@@ -826,7 +859,7 @@ def render_pulse(
                         ],
                     },
                     "config": {"view": {"stroke": None}},
-                },
+                }),
                 width="stretch",
             )
             _render_supporting_stats(
