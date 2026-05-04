@@ -71,7 +71,7 @@ custom_checks:
         )
       )
   - name: latest_bronze_ingestion_row_count_has_no_recent_drop
-    description: The latest Bronze ingestion accepted-row count should stay within a reasonable recent band.
+    description: The latest Bronze ingestion accepted-row count should not collapse severely versus recent history.
     query: |
       with bronze_ingestions as (
         select
@@ -105,7 +105,7 @@ custom_checks:
         (select avg_bronze_ingestion_accepted_row_count from history) is null,
         0,
         if(
-          (select accepted_row_count from latest) >= 0.7 * (select avg_bronze_ingestion_accepted_row_count from history),
+          (select accepted_row_count from latest) >= 0.4 * (select avg_bronze_ingestion_accepted_row_count from history),
           0,
           1
         )

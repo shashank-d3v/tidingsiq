@@ -111,7 +111,36 @@ bq query --use_legacy_sql=false "select count(*) as source_quality_rows from \`<
 bq query --use_legacy_sql=false "select count(*) as positive_news_shadow_rows from \`<GCP_PROJECT_ID>.gold.positive_news_feed_v3_shadow\`"
 ```
 
-If restricted egress is enabled for the pipeline and archive jobs, also inspect blocked firewall logs after the manual run:
+Network posture check:
+
+- default dev posture is restricted egress disabled
+- pipeline and archive Cloud Run Jobs should not have a `vpcAccess` block
+- the restricted-egress connector should not exist unless `enable_restricted_egress = true`
+
+Verify default low-cost egress posture:
+
+```bash
+gcloud run jobs describe <PIPELINE_JOB_NAME> \
+  --region=<REGION> \
+  --project=<GCP_PROJECT_ID> \
+  --format='yaml(template.template.vpcAccess)'
+
+gcloud run jobs describe <ARCHIVE_JOB_NAME> \
+  --region=<REGION> \
+  --project=<GCP_PROJECT_ID> \
+  --format='yaml(template.template.vpcAccess)'
+
+gcloud compute networks vpc-access connectors describe tiq-eg-<ENVIRONMENT> \
+  --region=<REGION> \
+  --project=<GCP_PROJECT_ID>
+```
+
+Expected result for the active dev cost-control posture:
+
+- both Cloud Run job describes show `null` for `vpcAccess`
+- the connector describe returns `NOT_FOUND`
+
+If restricted egress is deliberately enabled for the pipeline and archive jobs, also inspect blocked firewall logs after the manual run:
 
 ```bash
 gcloud logging read \
@@ -121,7 +150,7 @@ gcloud logging read \
   --format='value(jsonPayload.connection.src_ip,jsonPayload.connection.dest_ip,jsonPayload.rule_details.reference)'
 ```
 
-Describe the blocked-egress metric:
+Describe the blocked-egress metric only when restricted egress is enabled:
 
 ```bash
 gcloud logging metrics describe <RESTRICTED_EGRESS_METRIC_NAME> \
@@ -201,7 +230,7 @@ gcloud scheduler jobs describe <ARCHIVE_SCHEDULER_NAME> \
 If restricted egress is enabled, verify the connector state before resuming schedulers:
 
 ```bash
-gcloud compute networks vpc-access connectors describe tidingsiq-restricted-egress-<ENVIRONMENT>-connector \
+gcloud compute networks vpc-access connectors describe tiq-eg-<ENVIRONMENT> \
   --region=<REGION> \
   --project=<GCP_PROJECT_ID>
 ```
@@ -418,7 +447,7 @@ gcloud logging read \
   --format='value(textPayload)'
 ```
 
-Inspect blocked-egress activity after the first scheduled run:
+Inspect blocked-egress activity after the first scheduled run only when restricted egress is enabled:
 
 ```bash
 gcloud logging read \

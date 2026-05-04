@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.7
+
 FROM python:3.11.13-slim-bookworm@sha256:cec9aa7aa96eea4fa036e9b82be1e6b325f2e3707f462d885868df51ec0a4b47 AS bruin-fetch
 
 ARG BRUIN_VERSION=0.11.527

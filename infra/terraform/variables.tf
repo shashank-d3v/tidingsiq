@@ -79,13 +79,13 @@ variable "artifact_registry_location" {
 }
 
 variable "enable_restricted_egress" {
-  description = "When true, provisions a dedicated VPC egress path for the pipeline and Bronze archive Cloud Run jobs."
+  description = "When true, provisions the optional dedicated VPC egress path for the pipeline and Bronze archive Cloud Run jobs. Keep false for the low-cost dev posture unless static outbound IP or VPC-only private access is required."
   type        = bool
   default     = false
 }
 
 variable "restricted_egress_subnet_cidr" {
-  description = "CIDR range for the dedicated subnet used by the restricted-egress VPC."
+  description = "CIDR range for the optional dedicated subnet used by the restricted-egress VPC when enable_restricted_egress is true."
   type        = string
   default     = "10.240.0.0/24"
 
@@ -96,7 +96,7 @@ variable "restricted_egress_subnet_cidr" {
 }
 
 variable "restricted_egress_connector_cidr" {
-  description = "CIDR range for the Serverless VPC Access connector used by the restricted-egress path. GCP requires a /28."
+  description = "CIDR range for the optional Serverless VPC Access connector used by the restricted-egress path. GCP requires a /28."
   type        = string
   default     = "10.240.1.0/28"
 
@@ -142,9 +142,9 @@ variable "pipeline_job_timeout" {
 }
 
 variable "pipeline_job_max_retries" {
-  description = "Maximum retries per Cloud Run Job task."
+  description = "Maximum retries per Cloud Run Job task. Dev keeps this at 0 so data-quality failures do not create duplicate paid runs."
   type        = number
-  default     = 1
+  default     = 0
 }
 
 variable "pipeline_job_task_count" {
@@ -180,7 +180,7 @@ variable "pipeline_scheduler_name" {
 variable "pipeline_schedule" {
   description = "Cron schedule for the pipeline automation."
   type        = string
-  default     = "0 */6 * * *"
+  default     = "0 6 * * *"
 }
 
 variable "pipeline_schedule_time_zone" {
@@ -281,7 +281,7 @@ variable "reporting_scheduler_name" {
 variable "reporting_schedule" {
   description = "Cron schedule for the reporting job."
   type        = string
-  default     = "20 */6 * * *"
+  default     = "20 6 * * *"
 }
 
 variable "reporting_schedule_time_zone" {

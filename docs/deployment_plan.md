@@ -20,7 +20,7 @@ Implemented in the repository:
 - Streamlit app running locally against `gold.positive_news_feed`
 - pipeline container path for Cloud Run Job execution
 - Terraform automation for Artifact Registry, Cloud Run Job, and Cloud Scheduler
-- Terraform-managed restricted-egress path for the main pipeline and Bronze archive Cloud Run jobs
+- restricted egress is available as an opt-in Terraform slice but is disabled in the active dev deployment for cost control
 - reporting Cloud Run Job path and Monitoring-based email notifications
 - Bronze archive Cloud Run Job, scheduler, and Monitoring resources in repository, designed to reuse the pipeline image while running under a dedicated archive service account
 - Streamlit app container and Terraform hosting path for a Cloud Run service
@@ -49,9 +49,9 @@ Recommended flow:
 
 Example cadence target:
 
-- every 6 hours
+- once daily
 - timezone: `<SCHEDULE_TIME_ZONE>`
-- target run times: `00:00`, `06:00`, `12:00`, `18:00` IST
+- target run time: `06:00` IST
 
 Why this fits:
 
@@ -65,9 +65,14 @@ Expected components:
 - Artifact Registry repository for the pipeline container image
 - Cloud Run Job for Bruin execution
 - Cloud Scheduler job for cadence
-- dedicated VPC, subnet, Serverless VPC Access connector, Cloud Router, and Cloud NAT path for restricted outbound traffic
 - dedicated pipeline service account
 - Secret Manager or environment-based runtime configuration
+
+Default networking:
+
+- use Cloud Run default internet egress
+- do not provision a Serverless VPC Access connector, Cloud NAT, or static outbound IP for the dev pipeline
+- only enable the restricted-egress slice if an external dependency requires IP allowlisting, a private VPC-only dependency is introduced, or audit requirements explicitly demand connector-backed outbound control
 
 Pipeline service account responsibilities:
 
@@ -82,14 +87,15 @@ Current prep work already in the repo:
 - a container entrypoint that writes `.bruin.yml` from environment variables
 - a default container command that runs `bruin run pipeline/bruin/pipeline.yml`
 - Terraform resources for the Artifact Registry repository, Cloud Run Job, and Cloud Scheduler trigger
-- Terraform resources for a dedicated egress VPC, connector, NAT path, deny rules, and blocked-egress monitoring
+- Terraform resources for optional dedicated egress VPC, connector, NAT path, deny rules, and blocked-egress monitoring when restricted egress is deliberately enabled
 - a reusable Cloud Run Job and Cloud Scheduler configuration path
 
 Rollout guidance:
 
 - manual Cloud Run execution should still stay the first smoke check after image changes
+- keep restricted egress disabled for the low-cost dev posture unless static outbound IP or private VPC access becomes a real requirement
 - when restricted egress is enabled, keep the pipeline and Bronze archive schedulers paused until public article validation still succeeds through the connector-backed path
-- review blocked firewall logs after the first manual run and first scheduled run; unusual publisher redirects may need rule tuning before steady-state activation
+- review blocked firewall logs after the first manual run and first scheduled run only when restricted egress is enabled; unusual publisher redirects may need rule tuning before steady-state activation
 - the reporting and Bronze archive schedulers are separate automation paths and should not be paused for a pipeline-only rollout unless their own runtime is being changed
 - the pipeline now defaults to the documented HTTP GDELT feed, so SSL-verify overrides should not be the normal runtime path
 - a warehouse reset should happen before regular scheduled execution is activated for the clean-start rollout
@@ -172,7 +178,7 @@ Keep these separate:
 - service accounts
 - environment variables
 - deployment cadence
-- egress posture for workloads that fetch external URLs versus workloads that only query first-party services
+- egress posture for workloads that fetch external URLs versus workloads that only query first-party services, while keeping the active dev default on normal Cloud Run internet egress
 
 This keeps the architecture easier to reason about and easier to explain in a portfolio review.
 
@@ -183,7 +189,7 @@ When cloud deployment work starts, Terraform should likely add:
 - Artifact Registry repositories
 - Cloud Run Job for Bruin
 - Cloud Scheduler job for the pipeline cadence
-- controlled VPC egress for Cloud Run jobs that fetch external URLs
+- optional controlled VPC egress only if static outbound IP, third-party IP allowlisting, or private VPC access becomes necessary
 - Cloud Run service for Streamlit
 - optional external HTTPS load balancer and Cloud Armor for future app hardening
 - service-account IAM for both runtimes

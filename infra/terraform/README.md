@@ -9,7 +9,7 @@ This directory contains the first infrastructure slice for TidingsIQ. It provisi
 - conditional app service account for Streamlit reads when app hosting is enabled
 - minimum BigQuery and bucket IAM bindings for pipeline, reporting, app, and archive runtimes
 - applied pipeline automation resources for Artifact Registry, Cloud Run Jobs, and Cloud Scheduler
-- optional restricted-egress network path for the pipeline and Bronze archive Cloud Run jobs
+- optional restricted-egress network path for future static outbound IP or private VPC-only dependencies
 - reporting resources for a daily Cloud Run summary job and Monitoring-based email notifications
 - optional app hosting resources for Artifact Registry and a Cloud Run service
 - optional app-edge resources for future hardening via an external HTTPS load balancer, Cloud Armor, logging metrics, dashboards, and an instance-pressure alert
@@ -28,10 +28,13 @@ Cloud Storage must also be enabled in the target project because Bronze archival
 If you enable the pipeline automation slice, the following APIs must also already be enabled:
 
 - Artifact Registry API
-- Compute Engine API
 - Cloud Run Admin API
 - Cloud Scheduler API
 - Cloud Monitoring API
+
+If `enable_restricted_egress = true` or `enable_app_edge = true`, the relevant networking APIs must also be enabled. Restricted egress requires:
+
+- Compute Engine API
 - Serverless VPC Access API
 
 ## Files
@@ -47,6 +50,20 @@ If you enable the pipeline automation slice, the following APIs must also alread
 - `reporting.tf`: daily reporting job and email notification resources
 - `app_hosting.tf`: optional Streamlit app hosting resources
 - `app_edge.tf`: optional external HTTPS load balancer, Cloud Armor, and app observability resources
+
+## Current Network Posture
+
+The active dev deployment uses the low-cost Cloud Run default internet egress posture:
+
+- `enable_restricted_egress = false`
+- no Serverless VPC Access connector
+- no dedicated restricted-egress VPC, subnet, router, or Cloud NAT
+- no static outbound IP
+- pipeline and Bronze archive Cloud Run Jobs have no `vpc_access` block
+
+This is intentional. The May 2026 billing review showed the restricted-egress path was the dominant cost driver, while Cloud Run execution was almost fully covered by savings. The restricted-egress resources were removed from the live `tidingsiq-dev` deployment on 2026-05-04 with Terraform. Re-enable this slice only when an external dependency requires IP allowlisting, a private VPC-only dependency is introduced, or an audit requirement explicitly needs connector-backed egress.
+
+With restricted egress disabled, GDELT/public URL fetches and Google APIs such as BigQuery continue over normal Cloud Run outbound networking. External sites will not see a stable source IP.
 
 ## Usage
 
@@ -82,14 +99,19 @@ Examples in this document use placeholders such as `<GCP_PROJECT_ID>`, `<REGION>
 | `enable_pipeline_automation` | No | `false` | Enables Artifact Registry, Cloud Run Job, and Cloud Scheduler resources |
 | `automation_region` | No | `null` | Region for Cloud Run Job and Cloud Scheduler |
 | `artifact_registry_location` | No | `null` | Artifact Registry location; falls back to `automation_region` |
-| `enable_restricted_egress` | No | `false` | Enables the dedicated VPC egress path and attaches it to the pipeline and Bronze archive jobs |
-| `restricted_egress_subnet_cidr` | No | `10.240.0.0/24` | CIDR range for the dedicated restricted-egress subnet |
-| `restricted_egress_connector_cidr` | No | `10.240.1.0/28` | CIDR range for the Serverless VPC Access connector |
+| `enable_restricted_egress` | No | `false` | Enables the optional dedicated VPC egress path and attaches it to the pipeline and Bronze archive jobs; keep `false` for the low-cost dev posture |
+| `restricted_egress_subnet_cidr` | No | `10.240.0.0/24` | CIDR range for the optional restricted-egress subnet |
+| `restricted_egress_connector_cidr` | No | `10.240.1.0/28` | CIDR range for the optional Serverless VPC Access connector |
 | `pipeline_artifact_repository_id` | No | `<PIPELINE_REPOSITORY_ID>` | Artifact Registry repository ID for the pipeline image |
 | `pipeline_container_image` | Conditionally | `""` | Full image URI or digest for the shared pipeline image; required when pipeline, reporting, or archive automation is enabled |
 | `pipeline_job_name` | No | `<PIPELINE_JOB_NAME>` | Cloud Run Job name |
+| `pipeline_job_timeout` | No | `3600s` | Per-task timeout for the pipeline Cloud Run Job |
+| `pipeline_job_max_retries` | No | `0` | Cloud Run Job retry count; dev keeps this at `0` to avoid duplicate paid runs after data-quality failures |
+| `pipeline_job_task_count` | No | `1` | Task count for the pipeline Cloud Run Job execution |
+| `pipeline_job_parallelism` | No | `1` | Parallelism for the pipeline Cloud Run Job execution |
 | `pipeline_job_memory_limit` | No | `4Gi` | Memory limit for the Cloud Run Job container |
-| `pipeline_schedule` | No | `0 */6 * * *` | Cloud Scheduler cron for the pipeline |
+| `pipeline_gdelt_max_files` | No | `4` | GDELT file cap injected into the Cloud Run Job environment |
+| `pipeline_schedule` | No | `0 6 * * *` | Cloud Scheduler cron for the pipeline |
 | `pipeline_schedule_time_zone` | No | `Asia/Kolkata` | Time zone for the pipeline schedule |
 | `pipeline_schedule_paused` | No | `true` | Creates the scheduler job paused by default; set to `false` to activate recurring runs |
 | `enable_pipeline_reporting` | No | `false` | Enables the reporting job, reporting scheduler, and Monitoring email notifications |
@@ -97,7 +119,7 @@ Examples in this document use placeholders such as `<GCP_PROJECT_ID>`, `<REGION>
 | `notification_email_recipient` | No | `""` | Recipient for failure alerts and per-run summary notifications |
 | `reporting_job_name` | No | `<REPORTING_JOB_NAME>` | Cloud Run Job name for the reporting task |
 | `reporting_scheduler_name` | No | `<REPORTING_SCHEDULER_NAME>` | Cloud Scheduler job name for the reporting task |
-| `reporting_schedule` | No | `20 */6 * * *` | Cron for the reporting task, aligned 20 minutes after each pipeline window |
+| `reporting_schedule` | No | `20 6 * * *` | Cron for the reporting task, aligned 20 minutes after the daily pipeline window |
 | `reporting_schedule_time_zone` | No | `Asia/Kolkata` | Time zone for the reporting scheduler |
 | `bronze_archive_job_name` | No | `<ARCHIVE_JOB_NAME>` | Cloud Run Job name for Bronze archive automation |
 | `bronze_archive_scheduler_name` | No | `<ARCHIVE_SCHEDULER_NAME>` | Cloud Scheduler job name for Bronze archive automation |
@@ -111,7 +133,10 @@ Examples in this document use placeholders such as `<GCP_PROJECT_ID>`, `<REGION>
 | `app_artifact_repository_id` | No | `tidingsiq-app` | Artifact Registry repository ID for the app image |
 | `app_container_image` | No | derived | Full image URI for the Streamlit app container |
 | `app_service_name` | No | `tidingsiq-app` | Cloud Run service name for the Streamlit app |
+| `app_gold_table` | No | derived | Fully qualified BigQuery table used by the hosted Streamlit app |
 | `app_memory_limit` | No | `1Gi` | Memory limit for the Streamlit Cloud Run container |
+| `app_min_instance_count` | No | `0` | Minimum Streamlit Cloud Run instances; keep `0` for scale-to-zero cost control |
+| `app_max_instance_count` | No | `2` | Maximum Streamlit Cloud Run instances |
 | `app_allow_unauthenticated` | No | `true` | Grants public invoke access to the Streamlit Cloud Run service |
 | `enable_app_edge` | No | `false` | Enables an optional future hardening layer with an external HTTPS load balancer, Cloud Armor, and app observability resources in front of the Streamlit app |
 | `app_domain_name` | Conditionally | `""` | DNS hostname served by the external HTTPS load balancer; required when `enable_app_edge = true` |
@@ -167,6 +192,8 @@ If restricted egress is enabled, Terraform also provisions:
 - a Monitoring alert policy for blocked egress attempts when `notification_email_recipient` is configured
 - Cloud Run VPC egress attachment for the main pipeline job and the Bronze archive job only
 
+This slice is not part of the active low-cost dev deployment. Enabling it adds always-on networking resources and should be treated as a deliberate static-outbound-IP or private-network decision, not the default pipeline posture.
+
 If pipeline reporting is enabled, Terraform also provisions:
 
 - a reporting service account with BigQuery read access on `gold`
@@ -209,6 +236,7 @@ If app edge is enabled, Terraform also provisions:
 Implementation notes:
 
 - the shared pipeline image must already exist and `pipeline_container_image` must be set explicitly before apply when pipeline automation, reporting, or archive automation is enabled
+- keep `enable_restricted_egress = false` unless static outbound IP, third-party IP allowlisting, or private VPC access is required
 - when `enable_restricted_egress = true`, keep the pipeline and Bronze archive schedulers paused until a manual Cloud Run smoke test confirms that public article validation still succeeds and blocked firewall logs match only private, internal, or metadata destinations
 - the email notification channel sends a verification email to the configured recipient
 - the Bronze archive job path is available in code and remains feature-gated behind `enable_bronze_archive_automation`
@@ -228,7 +256,7 @@ Implementation notes:
 - The Bronze archive bucket is part of Terraform, and the scheduled Bronze archive job reuses the pipeline image but runs under a dedicated archive service account.
 - During rollout, export-only archive mode should be treated as transitional rather than steady-state because repeated export-only executions can re-export the same old Bronze rows into newer cutoff-date prefixes until delete succeeds or the worker gains a persisted archival boundary.
 - Pipeline automation remains opt-in in code through `enable_pipeline_automation`.
-- Restricted egress remains opt-in in code through `enable_restricted_egress`.
+- Restricted egress remains opt-in in code through `enable_restricted_egress` and is intentionally disabled in the active dev deployment for cost control.
 - Keep the scheduler paused during future rollouts until a manual `gcloud run jobs execute ... --wait` succeeds against the deployed image after any reset or image change.
 - Pipeline reporting uses native Monitoring email notifications, so it does not require a third-party email API secret.
 - App hosting is also opt-in in code through `enable_app_hosting`.

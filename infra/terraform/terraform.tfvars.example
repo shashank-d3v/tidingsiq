@@ -8,6 +8,11 @@ bigquery_location = "<BIGQUERY_LOCATION>"
 # enable_pipeline_automation = true
 # automation_region = "<AUTOMATION_REGION>"
 # artifact_registry_location = "<ARTIFACT_REGISTRY_LOCATION>"
+# Cost-control default: leave restricted egress disabled unless a static outbound IP
+# or private VPC-only dependency is explicitly required.
+# enable_restricted_egress = false
+#
+# Optional static-outbound-IP/private-egress posture only:
 # enable_restricted_egress = true
 # restricted_egress_subnet_cidr = "10.240.0.0/24"
 # restricted_egress_connector_cidr = "10.240.1.0/28"
@@ -15,7 +20,8 @@ bigquery_location = "<BIGQUERY_LOCATION>"
 # pipeline_container_image = "<PIPELINE_IMAGE_URI_OR_DIGEST>"
 # pipeline_job_name = "<PIPELINE_JOB_NAME>"
 # pipeline_job_memory_limit = "4Gi"
-# pipeline_schedule = "0 */6 * * *"
+# pipeline_job_max_retries = 0
+# pipeline_schedule = "0 6 * * *"
 # pipeline_schedule_time_zone = "Asia/Kolkata"
 # pipeline_schedule_paused = false
 # enable_pipeline_reporting = true
@@ -23,7 +29,7 @@ bigquery_location = "<BIGQUERY_LOCATION>"
 # notification_email_recipient = "<NOTIFICATION_EMAIL>"
 # reporting_job_name = "<REPORTING_JOB_NAME>"
 # reporting_scheduler_name = "<REPORTING_SCHEDULER_NAME>"
-# reporting_schedule = "20 */6 * * *"
+# reporting_schedule = "20 6 * * *"
 # reporting_schedule_time_zone = "Asia/Kolkata"
 # bronze_archive_job_name = "<ARCHIVE_JOB_NAME>"
 # bronze_archive_scheduler_name = "<ARCHIVE_SCHEDULER_NAME>"

@@ -25,8 +25,9 @@ Completed:
 Operational notes:
 - `bronze_staging` is a supporting operational dataset for the Bronze merge load path
 - `gold_staging` is a supporting operational dataset for Gold merge loads driven by `dlt`
-- the pipeline Cloud Run Job currently uses `2Gi` memory
-- the pipeline scheduler now runs every 6 hours in `Asia/Kolkata`
+- the pipeline Cloud Run Job currently uses `4Gi` memory
+- the pipeline scheduler now runs once daily at `06:00` in `Asia/Kolkata`
+- restricted egress was removed from the active dev deployment on `2026-05-04` after billing review; the pipeline and archive jobs now use default Cloud Run internet egress with no static outbound IP
 - a manual Cloud Run execution succeeded on `2026-04-06` after redeploying the updated pipeline image
 - a post-reset manual Cloud Run execution succeeded on `2026-04-07` before the scheduler was activated
 - a manual Cloud Run execution succeeded on `2026-04-16` after provisioning `gold_staging`, correcting the nullable integer load shape for `gold.url_validation_results`, and recreating `gold.positive_news_feed_v3_shadow` with the expected partitioning
@@ -42,7 +43,8 @@ Operational notes:
 
 1. Decide whether to deepen scoring beyond title guardrails using validated GKG fields.
 2. Decide whether the daily summary job should later move from Monitoring-triggered emails to a richer mail-delivery path.
-3. Keep the deferred authoritative-fetching design note available for a later Streamlit serving refactor without changing the current Gold-only app contract.
+3. Enable Cloud Billing export or a budget alert if longer-term cost auditability becomes important.
+4. Keep the deferred authoritative-fetching design note available for a later Streamlit serving refactor without changing the current Gold-only app contract.
 
 ## Phases Completed
 
@@ -62,6 +64,7 @@ Operational notes:
 - stronger data quality checks and alerting
 - broader positive-feed QA and rule tuning
 - final documentation polish, including an architecture diagram
+- optional static-outbound-IP networking only if a future dependency requires IP allowlisting or private VPC access
 - precomputed Gold snapshot table for Pulse aggregates to reduce live BigQuery reads on dashboard load
 - progressive Pulse rendering so the page shell appears immediately while slower charts populate incrementally
 - deferred app-serving refactor: move truth-defining Brief filters, counts, pagination, and filter-option generation into authoritative BigQuery queries with bounded caching and query cost; see [Authoritative Fetching With Controlled Query Cost](authoritative_fetching_query_cost.md)
