@@ -92,6 +92,7 @@ import json
 import math
 import os
 import re
+import sys
 import urllib.error
 import urllib.request
 import uuid
@@ -120,8 +121,10 @@ GDELT_FILE_GRANULARITY_MINUTES = 15
 DEFAULT_LOOKBACK_MINUTES = 60
 DEFAULT_MAX_FILES = 4
 DEFAULT_TIMEOUT_SECONDS = 60
+DEFAULT_CSV_FIELD_SIZE_LIMIT = 16 * 1024 * 1024
 DEFAULT_MAX_MALFORMED_RATIO = 0.05
 DEFAULT_MIN_ACCEPTED_ROW_RATIO = 0.50
+DEFAULT_LOW_ACCEPTED_ROW_ACTION = "warn"
 DEFAULT_BASELINE_RUNS = 5
 DEFAULT_BRONZE_TABLE = "bronze.gdelt_news_raw"
 TITLE_PATTERN = re.compile(r"<PAGE_TITLE>(.*?)</PAGE_TITLE>", re.DOTALL)
@@ -478,6 +481,7 @@ def _read_batch_archive(
     source_url: str,
 ) -> BatchFetchResult:
     result = BatchFetchResult()
+    _configure_csv_field_size_limit()
 
     with zipfile.ZipFile(io.BytesIO(response_bytes)) as archive:
         member_names = archive.namelist()
@@ -496,33 +500,47 @@ def _read_batch_archive(
             text_stream = io.TextIOWrapper(zipped_file, encoding="utf-8", errors="replace")
             reader = csv.reader(text_stream, delimiter="\t")
 
-            for row in reader:
-                result.total_rows_seen += 1
+            try:
+                for row in reader:
+                    result.total_rows_seen += 1
 
-                if len(row) != EXPECTED_GKG_ROW_WIDTH:
-                    _mark_malformed(result, MALFORMED_REASON_WIDTH_MISMATCH)
-                    continue
+                    if len(row) != EXPECTED_GKG_ROW_WIDTH:
+                        _mark_malformed(result, MALFORMED_REASON_WIDTH_MISMATCH)
+                        continue
 
-                parsed_row, malformed_reason = _parse_gkg_row(
-                    row=row,
-                    ingestion_id=ingestion_id,
-                    ingested_at=ingested_at,
-                    source_window_start=source_window_start,
-                    source_window_end=source_window_end,
-                    source_url=source_url,
-                )
-                if malformed_reason is not None:
-                    _mark_malformed(result, malformed_reason)
-                    continue
+                    parsed_row, malformed_reason = _parse_gkg_row(
+                        row=row,
+                        ingestion_id=ingestion_id,
+                        ingested_at=ingested_at,
+                        source_window_start=source_window_start,
+                        source_window_end=source_window_end,
+                        source_url=source_url,
+                    )
+                    if malformed_reason is not None:
+                        _mark_malformed(result, malformed_reason)
+                        continue
 
-                if parsed_row is None:
-                    _mark_malformed(result, MALFORMED_REASON_MISSING_SOURCE_RECORD_ID)
-                    continue
+                    if parsed_row is None:
+                        _mark_malformed(result, MALFORMED_REASON_MISSING_SOURCE_RECORD_ID)
+                        continue
 
-                result.records.append(parsed_row)
-                result.accepted_rows += 1
+                    result.records.append(parsed_row)
+                    result.accepted_rows += 1
+            except csv.Error as exc:
+                raise RuntimeError(
+                    f"GDELT CSV parse failed for {source_url}: {exc}. "
+                    "Increase GDELT_CSV_FIELD_SIZE_LIMIT if upstream fields legitimately exceed "
+                    f"{csv.field_size_limit()} bytes."
+                ) from exc
 
     return result
+
+
+def _configure_csv_field_size_limit() -> None:
+    configured_limit = int(
+        os.environ.get("GDELT_CSV_FIELD_SIZE_LIMIT", str(DEFAULT_CSV_FIELD_SIZE_LIMIT))
+    )
+    csv.field_size_limit(min(configured_limit, sys.maxsize))
 
 
 def _mark_malformed(result: BatchFetchResult, reason: str) -> None:
@@ -645,10 +663,17 @@ def _enforce_run_guardrails(
     minimum_allowed_rows = average_recent_count * min_accepted_ratio
 
     if accepted_rows < minimum_allowed_rows:
-        raise RuntimeError(
-            f"GDELT validation failed: accepted row count {accepted_rows} fell below "
+        message = (
+            f"GDELT validation warning: accepted row count {accepted_rows} fell below "
             f"{min_accepted_ratio:.0%} of recent average {average_recent_count:.1f}."
         )
+        action = os.environ.get(
+            "GDELT_LOW_ACCEPTED_ROW_ACTION",
+            DEFAULT_LOW_ACCEPTED_ROW_ACTION,
+        ).strip().lower()
+        if action == "fail":
+            raise RuntimeError(message.replace("warning", "failed"))
+        print(message)
 
 
 def _calculate_ratio(numerator: int, denominator: int) -> float:

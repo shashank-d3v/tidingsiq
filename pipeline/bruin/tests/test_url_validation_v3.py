@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from http.client import RemoteDisconnected
 import socket
 import unittest
 from unittest import mock
@@ -173,6 +174,16 @@ class UrlValidationV3Test(unittest.TestCase):
             outcome = validate_url("https://example.com/slow", opener=opener)
 
         self.assertEqual(outcome.status, STATUS_TIMEOUT)
+
+    def test_validate_url_maps_remote_disconnect_to_unavailable(self) -> None:
+        opener = _SequenceOpener([RemoteDisconnected("closed")])
+
+        with self._patch_dns():
+            outcome = validate_url("https://example.com/disconnect", opener=opener)
+
+        self.assertEqual(outcome.status, STATUS_UNAVAILABLE)
+        self.assertIsNone(outcome.http_status_code)
+        self.assertEqual(outcome.redirect_count, 0)
 
     def test_validate_url_blocks_direct_ssrf_targets_before_request(self) -> None:
         cases = [

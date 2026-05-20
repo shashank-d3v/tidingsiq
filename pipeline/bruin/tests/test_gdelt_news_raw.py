@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import importlib.util
 import io
 import os
@@ -21,10 +22,14 @@ MODULE_PATH = (
 )
 SPEC = importlib.util.spec_from_file_location("gdelt_news_raw", MODULE_PATH)
 assert SPEC and SPEC.loader
-sys.modules.setdefault("pandas", types.SimpleNamespace(DataFrame=object, Series=object))
+_PANDAS_STUB_INSERTED = "pandas" not in sys.modules
+if _PANDAS_STUB_INSERTED:
+    sys.modules["pandas"] = types.SimpleNamespace(DataFrame=object, Series=object)
 gdelt_news_raw = importlib.util.module_from_spec(SPEC)
 sys.modules["gdelt_news_raw"] = gdelt_news_raw
 SPEC.loader.exec_module(gdelt_news_raw)
+if _PANDAS_STUB_INSERTED:
+    sys.modules.pop("pandas", None)
 
 
 class GdeltNewsRawTest(unittest.TestCase):
@@ -357,6 +362,54 @@ class GdeltNewsRawTest(unittest.TestCase):
             1,
         )
 
+    def test_read_batch_archive_accepts_large_gdelt_fields(self) -> None:
+        row = self._valid_row()
+        row[gdelt_news_raw.GKG_EXTRAS] = f"<PAGE_TITLE>{'A' * 150_000}</PAGE_TITLE>"
+        previous_limit = csv.field_size_limit()
+        try:
+            with mock.patch.dict(
+                "os.environ",
+                {"GDELT_CSV_FIELD_SIZE_LIMIT": "200000"},
+                clear=False,
+            ):
+                result = gdelt_news_raw._read_batch_archive(
+                    response_bytes=self._zip_bytes([row]),
+                    batch_time=self._valid_batch_time(),
+                    ingestion_id="ingestion",
+                    ingested_at=datetime(2026, 4, 2, 17, 0, tzinfo=timezone.utc),
+                    source_window_start=datetime(2026, 4, 2, 16, 0, tzinfo=timezone.utc),
+                    source_window_end=datetime(2026, 4, 2, 16, 45, tzinfo=timezone.utc),
+                    source_url="http://data.gdeltproject.org/gdeltv2/20260402164500.gkg.csv.zip",
+                )
+        finally:
+            csv.field_size_limit(previous_limit)
+
+        self.assertEqual(result.accepted_rows, 1)
+        self.assertEqual(result.malformed_rows, 0)
+
+    def test_read_batch_archive_wraps_unrecoverable_csv_errors(self) -> None:
+        row = self._valid_row()
+        row[gdelt_news_raw.GKG_EXTRAS] = f"<PAGE_TITLE>{'A' * 128}</PAGE_TITLE>"
+        previous_limit = csv.field_size_limit()
+        try:
+            with mock.patch.dict(
+                "os.environ",
+                {"GDELT_CSV_FIELD_SIZE_LIMIT": "64"},
+                clear=False,
+            ):
+                with self.assertRaisesRegex(RuntimeError, "GDELT CSV parse failed"):
+                    gdelt_news_raw._read_batch_archive(
+                        response_bytes=self._zip_bytes([row]),
+                        batch_time=self._valid_batch_time(),
+                        ingestion_id="ingestion",
+                        ingested_at=datetime(2026, 4, 2, 17, 0, tzinfo=timezone.utc),
+                        source_window_start=datetime(2026, 4, 2, 16, 0, tzinfo=timezone.utc),
+                        source_window_end=datetime(2026, 4, 2, 16, 45, tzinfo=timezone.utc),
+                        source_url="http://data.gdeltproject.org/gdeltv2/20260402164500.gkg.csv.zip",
+                    )
+        finally:
+            csv.field_size_limit(previous_limit)
+
     def test_enforce_run_guardrails_fails_on_high_malformed_ratio(self) -> None:
         with mock.patch.object(gdelt_news_raw, "_fetch_recent_accepted_row_counts", return_value=[]):
             with mock.patch.dict("os.environ", {"GDELT_MAX_MALFORMED_RATIO": "0.10"}, clear=False):
@@ -367,18 +420,38 @@ class GdeltNewsRawTest(unittest.TestCase):
                         malformed_rows=2,
                     )
 
-    def test_enforce_run_guardrails_fails_on_recent_row_count_collapse(self) -> None:
+    def test_enforce_run_guardrails_warns_on_recent_row_count_collapse_by_default(self) -> None:
         with mock.patch.object(
             gdelt_news_raw,
             "_fetch_recent_accepted_row_counts",
             return_value=[100, 120, 110],
         ):
-            with self.assertRaisesRegex(RuntimeError, "accepted row count 40"):
+            with mock.patch("builtins.print") as print_mock:
                 gdelt_news_raw._enforce_run_guardrails(
                     accepted_rows=40,
                     total_rows_seen=40,
                     malformed_rows=0,
                 )
+        print_mock.assert_called_once()
+        self.assertIn("accepted row count 40", print_mock.call_args.args[0])
+
+    def test_enforce_run_guardrails_can_fail_on_recent_row_count_collapse(self) -> None:
+        with mock.patch.object(
+            gdelt_news_raw,
+            "_fetch_recent_accepted_row_counts",
+            return_value=[100, 120, 110],
+        ):
+            with mock.patch.dict(
+                "os.environ",
+                {"GDELT_LOW_ACCEPTED_ROW_ACTION": "fail"},
+                clear=False,
+            ):
+                with self.assertRaisesRegex(RuntimeError, "accepted row count 40"):
+                    gdelt_news_raw._enforce_run_guardrails(
+                        accepted_rows=40,
+                        total_rows_seen=40,
+                        malformed_rows=0,
+                    )
 
     def test_enforce_run_guardrails_accepts_healthy_payload(self) -> None:
         with mock.patch.object(

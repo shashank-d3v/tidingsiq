@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+from http.client import IncompleteRead, RemoteDisconnected
 import ipaddress
 import logging
 import socket
@@ -307,6 +308,13 @@ def validate_url(
             http_status_code=None,
             redirect_count=0,
             status=STATUS_TIMEOUT,
+        )
+    except (ConnectionResetError, IncompleteRead, RemoteDisconnected):
+        return UrlValidationOutcome(
+            final_url=url,
+            http_status_code=None,
+            redirect_count=0,
+            status=STATUS_UNAVAILABLE,
         )
     except URLError as error:
         reason: Any = getattr(error, "reason", None)

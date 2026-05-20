@@ -128,6 +128,7 @@ Current implementation notes:
 - URL validation only attempts `http` and `https` targets whose hostname resolves exclusively to global public IP space.
 - URL validation blocks metadata hosts such as `metadata.google.internal`, blocks all IP-literal hosts by default, and fails closed to `status = "unavailable"` without issuing the request.
 - Blocked URL targets are logged with a clear reason so Cloud Run logs can distinguish SSRF hardening from remote-site failures.
+- Remote publisher disconnects during URL validation are recorded as `status = "unavailable"` and do not fail the run. URL retry behavior is intentionally deferred.
 - Silver retains unresolved positive and negative signal placeholders internally, but Gold does not expose them until the mappings are validated.
 - Bronze and Silver now treat `language` as native-first and inferred-second, with explicit resolution status
 - Bronze and Silver use `mentioned_country` for article geography from `V2Locations`; they do not model publisher country
@@ -137,6 +138,8 @@ Current implementation notes:
 - Silver partitions on `ingested_at` and clusters by `dedup_key`, `source_domain`, and `language`.
 - Gold partitions on `serving_date = DATE(COALESCE(published_at, ingested_at))` and clusters by `source_name`.
 - Bronze repeats run-level containment stats on landed rows so downstream operational metrics can expose the latest accepted-row count and malformed-row ratio.
+- Bronze raises the CSV parser field-size limit to `16MiB` by default through `GDELT_CSV_FIELD_SIZE_LIMIT`; unrecoverable CSV parser errors are wrapped with the source file URL and effective limit.
+- Bronze still hard-fails empty downloads, zero accepted rows, and high malformed-row ratios. A single low accepted-row window now logs a warning by default because GDELT volume varies materially across windows. Set `GDELT_LOW_ACCEPTED_ROW_ACTION=fail` to restore the earlier hard-fail behavior for row-count drops.
 - `gold.pipeline_run_metrics` is an append-history operational table for warehouse row counts, duplicate-rate visibility, score distribution monitoring, and Bronze containment visibility.
 - If `gold.pipeline_run_metrics` is ever dropped during a schema reset, recreate the empty partitioned table before rerunning the asset; the append materialization does not bootstrap a missing destination table.
 
@@ -148,9 +151,10 @@ Representative validation should confirm:
 - the Bronze downloader keeps the documented HTTP default path rather than treating this as an HTTPS migration
 - deployed runtimes reject arbitrary `GDELT_BASE_URL` hosts before download
 - URL validation rejects non-public targets before request dispatch, including metadata hosts, loopback/private/link-local/reserved resolutions, and blocked redirect targets
-- URL validation logs blocked targets with an explicit reason and preserves strict timeout and redirect caps
-- corrupt ZIPs, unreadable ZIP members, bad row widths, and malformed timestamps fail closed
-- sudden accepted-row collapse and elevated malformed-row ratios fail the Bronze run and surface through the existing pipeline failure alert path
+- URL validation logs blocked targets with an explicit reason, preserves strict timeout and redirect caps, and treats remote disconnects as unavailable results without retries
+- corrupt ZIPs and unreadable ZIP members fail closed; bad row widths and malformed timestamps are counted as malformed rows and remain governed by the malformed-ratio threshold
+- elevated malformed-row ratios fail the Bronze run and surface through the existing pipeline failure alert path
+- sudden accepted-row drops emit warnings by default, while `GDELT_LOW_ACCEPTED_ROW_ACTION=fail` can make them fail the Bronze run
 - Silver produces deterministic canonical rows
 - Gold exposes `is_positive_feed_eligible = true` as the default app-facing feed
 - the `dlt`-backed Gold Python load path can materialize into `gold_staging` and merge into `gold`

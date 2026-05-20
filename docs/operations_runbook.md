@@ -437,6 +437,12 @@ If `gold.pipeline_run_metrics` fails with an inserted-column-count mismatch afte
 - add the missing columns and backfill historical rows before rerunning, if the history must be preserved
 - or drop and recreate `gold.pipeline_run_metrics` with the current schema and partitioning, then rerun the pipeline or rerun `pipeline/bruin/assets/gold/pipeline_run_metrics.sql`, if losing the operational history is acceptable
 
+Common runtime failures and expected handling:
+
+- `bronze.gdelt_news_raw` with `_csv.Error: field larger than field limit`: the Bronze parser raises Python's CSV field limit to `16MiB` by default. If GDELT legitimately emits larger fields, increase `GDELT_CSV_FIELD_SIZE_LIMIT` on the Cloud Run Job and rerun after rebuilding/deploying the image that contains this handling.
+- `gold.url_validation_results` with `RemoteDisconnected`, `ConnectionResetError`, or incomplete reads from a publisher: the validator records the URL as `unavailable` and continues. Retries are intentionally not enabled yet.
+- `bronze.gdelt_news_raw` with accepted rows below the recent average: this is now a warning by default because GDELT volume can swing substantially by window. Empty downloads, zero accepted rows, and high malformed-row ratios remain hard failures. Use `GDELT_LOW_ACCEPTED_ROW_ACTION=fail` only when row-count drops should page/fail immediately.
+
 Inspect summary-delivery logs:
 
 ```bash
