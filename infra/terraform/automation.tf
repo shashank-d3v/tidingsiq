@@ -91,6 +91,26 @@ resource "google_cloud_run_v2_job" "pipeline" {
           value = tostring(var.pipeline_gdelt_max_files)
         }
 
+        env {
+          name  = "GDELT_PUBLICATION_LAG_MINUTES"
+          value = tostring(var.pipeline_gdelt_publication_lag_minutes)
+        }
+
+        env {
+          name  = "GDELT_DOWNLOAD_MAX_ATTEMPTS"
+          value = tostring(var.pipeline_gdelt_download_max_attempts)
+        }
+
+        env {
+          name  = "GDELT_DOWNLOAD_BACKOFF_SECONDS"
+          value = var.pipeline_gdelt_download_backoff_seconds
+        }
+
+        env {
+          name  = "GDELT_RECENT_FILE_HOURS"
+          value = tostring(var.pipeline_gdelt_recent_file_hours)
+        }
+
         resources {
           limits = {
             cpu    = "1"

@@ -111,6 +111,10 @@ Examples in this document use placeholders such as `<GCP_PROJECT_ID>`, `<REGION>
 | `pipeline_job_parallelism` | No | `1` | Parallelism for the pipeline Cloud Run Job execution |
 | `pipeline_job_memory_limit` | No | `4Gi` | Memory limit for the Cloud Run Job container |
 | `pipeline_gdelt_max_files` | No | `4` | GDELT file cap injected into the Cloud Run Job environment |
+| `pipeline_gdelt_publication_lag_minutes` | No | `60` | Rolling-window lag used only when the GDELT manifest cannot be validated |
+| `pipeline_gdelt_download_max_attempts` | No | `4` | Per-request attempt limit for manifest and archive downloads |
+| `pipeline_gdelt_download_backoff_seconds` | No | `5,15,30` | Retry delays before jitter and any capped `Retry-After` override |
+| `pipeline_gdelt_recent_file_hours` | No | `24` | Age window in which archive HTTP 400/404 responses are treated as transient |
 | `pipeline_schedule` | No | `0 6 * * *` | Cloud Scheduler cron for the pipeline |
 | `pipeline_schedule_time_zone` | No | `Asia/Kolkata` | Time zone for the pipeline schedule |
 | `pipeline_schedule_paused` | No | `true` | Creates the scheduler job paused by default; set to `false` to activate recurring runs |
@@ -121,13 +125,16 @@ Examples in this document use placeholders such as `<GCP_PROJECT_ID>`, `<REGION>
 | `reporting_scheduler_name` | No | `<REPORTING_SCHEDULER_NAME>` | Cloud Scheduler job name for the reporting task |
 | `reporting_schedule` | No | `20 6 * * *` | Cron for the reporting task, aligned 20 minutes after the daily pipeline window |
 | `reporting_schedule_time_zone` | No | `Asia/Kolkata` | Time zone for the reporting scheduler |
+| `reporting_schedule_paused` | No | `false` | Keeps the reporting scheduler paused during controlled deployments |
 | `bronze_archive_job_name` | No | `<ARCHIVE_JOB_NAME>` | Cloud Run Job name for Bronze archive automation |
+| `bronze_archive_container_image` | No | `""` | Optional pinned archive-worker image; defaults to the pipeline image when empty |
 | `bronze_archive_scheduler_name` | No | `<ARCHIVE_SCHEDULER_NAME>` | Cloud Scheduler job name for Bronze archive automation |
 | `bronze_archive_schedule` | No | `15 3 * * *` | Daily cron for the Bronze archive job |
 | `bronze_archive_schedule_time_zone` | No | `Asia/Kolkata` | Time zone for the Bronze archive scheduler |
 | `bronze_archive_schedule_paused` | No | `true` | Creates the Bronze archive scheduler paused by default |
 | `bronze_archive_dry_run` | No | `true` | Runs the Bronze archive worker in dry-run mode |
-| `bronze_archive_delete_after_export` | No | `false` | Enables delete-after-export once reconciliation is trusted |
+| `bronze_archive_delete_after_export` | No | `false` | Enables capped pruning outside the 90-day serving horizon after verified archival |
+| `bronze_archive_memory_limit` | No | `512Mi` | Memory for server-side archive orchestration |
 | `bronze_archive_max_delete_rows` | No | `20000` | Delete guardrail for the Bronze archive worker |
 | `enable_app_hosting` | No | `false` | Enables Artifact Registry and a direct public Cloud Run service for the Streamlit app |
 | `app_artifact_repository_id` | No | `tidingsiq-app` | Artifact Registry repository ID for the app image |
@@ -202,6 +209,12 @@ If pipeline reporting is enabled, Terraform also provisions:
 - an email notification channel for Monitoring
 - a Monitoring alert policy for pipeline failures
 - a Monitoring alert policy for daily summary delivery
+- a `gdelt_incomplete_source_windows` log-based metric for partial or empty live windows
+- an enabled `TidingsIQ GDELT Incomplete Source Window` policy that alerts on the first event, rate-limits notifications to once per hour, and auto-closes after 24 hours
+
+The incomplete-window filter explicitly requires `mode=live`, so operator-driven
+backfills do not create asynchronous alerts. Terraform outputs expose both the metric
+and alert-policy names for deployment verification.
 
 If Bronze archive automation is enabled, Terraform also provisions:
 
@@ -254,7 +267,7 @@ Implementation notes:
 - If you revisit a multi-environment setup later, see `future_multi_environment.md`.
 - Current retention targets are Bronze 45 days with GCS archive, Silver 90 days, and Gold 180 days.
 - The Bronze archive bucket is part of Terraform, and the scheduled Bronze archive job reuses the pipeline image but runs under a dedicated archive service account.
-- During rollout, export-only archive mode should be treated as transitional rather than steady-state because repeated export-only executions can re-export the same old Bronze rows into newer cutoff-date prefixes until delete succeeds or the worker gains a persisted archival boundary.
+- The active archive worker persists a GCS checkpoint and immutable manifests. Repeated completed windows are no-ops. Optional pruning retains 90 days and enforces the deletion cap; see `docs/incident_20260928.md`.
 - Pipeline automation remains opt-in in code through `enable_pipeline_automation`.
 - Restricted egress remains opt-in in code through `enable_restricted_egress` and is intentionally disabled in the active dev deployment for cost control.
 - Keep the scheduler paused during future rollouts until a manual `gcloud run jobs execute ... --wait` succeeds against the deployed image after any reset or image change.

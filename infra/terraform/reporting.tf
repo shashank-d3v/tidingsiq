@@ -118,7 +118,7 @@ resource "google_cloud_scheduler_job" "reporting" {
   description      = "Post-run summary execution for the TidingsIQ warehouse."
   schedule         = var.reporting_schedule
   time_zone        = var.reporting_schedule_time_zone
-  paused           = false
+  paused           = var.reporting_schedule_paused
   attempt_deadline = "600s"
 
   retry_config {
@@ -198,6 +198,76 @@ EOT
   documentation {
     mime_type = "text/markdown"
     content   = "Matched a Cloud Run Job pipeline failure log for `${var.pipeline_job_name}` in `${local.automation_region}`."
+  }
+}
+
+resource "google_logging_metric" "gdelt_incomplete_source_windows" {
+  count = var.enable_pipeline_automation ? 1 : 0
+
+  project     = var.project_id
+  name        = "gdelt_incomplete_source_windows"
+  description = "Count of partial or empty live GDELT ingestion windows accepted by the pipeline."
+  filter      = <<-EOT
+resource.type="cloud_run_job"
+resource.labels.job_name="${var.pipeline_job_name}"
+textPayload:"GDELT_INGESTION_SUMMARY"
+textPayload:"mode=live"
+(
+  textPayload:"completeness=partial"
+  OR textPayload:"completeness=empty"
+)
+EOT
+}
+
+resource "google_monitoring_alert_policy" "gdelt_incomplete_source_window" {
+  count = var.enable_pipeline_automation && var.enable_pipeline_reporting && local.enable_notification_email ? 1 : 0
+
+  project               = var.project_id
+  display_name          = "TidingsIQ GDELT Incomplete Source Window"
+  combiner              = "OR"
+  enabled               = true
+  notification_channels = [google_monitoring_notification_channel.pipeline_email[0].name]
+
+  conditions {
+    display_name = "At least one incomplete live GDELT window"
+
+    condition_matched_log {
+      filter = <<-EOT
+resource.type="cloud_run_job"
+resource.labels.job_name="${var.pipeline_job_name}"
+textPayload:"GDELT_INGESTION_SUMMARY"
+textPayload:"mode=live"
+(
+  textPayload:"completeness=partial"
+  OR textPayload:"completeness=empty"
+)
+EOT
+
+      label_extractors = {
+        execution_name = "EXTRACT(labels.\"run.googleapis.com/execution_name\")"
+      }
+    }
+  }
+
+  alert_strategy {
+    auto_close = "86400s"
+
+    notification_rate_limit {
+      period = "3600s"
+    }
+  }
+
+  documentation {
+    mime_type = "text/markdown"
+    content   = <<-EOT
+The `${var.pipeline_job_name}` Cloud Run Job accepted a partial or empty live GDELT source window.
+
+Execution: `$${log.extracted_label.execution_name}`.
+
+Investigation query: `resource.type="cloud_run_job" resource.labels.job_name="${var.pipeline_job_name}" labels."run.googleapis.com/execution_name"="$${log.extracted_label.execution_name}"`.
+
+Inspect `GDELT_INGESTION_SUMMARY` and `GDELT_DOWNLOAD_ATTEMPT`, confirm the missing archive timestamps against GDELT, then run an explicit-interval Bronze-only backfill after the archives become available. Require a complete `4/4` summary before rebuilding downstream tables.
+EOT
   }
 }
 

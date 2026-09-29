@@ -83,6 +83,25 @@ Requirements:
 - Google Application Default Credentials or equivalent auth
 - `google-cloud-bigquery` available in the active Python environment
 
+## GDELT reliability schema migration
+
+`migrate_gdelt_reliability_schema.sh` applies the idempotent additive migration in
+`migrations/20260826_gdelt_reliability.sql`. It expands Bronze ingestion metadata and
+Gold operational metrics without recreating tables, changing partitioning, or
+backfilling historical values. It also creates the partitioned
+`bronze.gdelt_ingestion_attempts` ledger needed by the updated metrics query.
+
+Run it only after capturing the incident snapshot and pausing the pipeline and
+reporting schedulers:
+
+```bash
+scripts/migrate_gdelt_reliability_schema.sh <GCP_PROJECT_ID>
+```
+
+The operator needs BigQuery schema-update permission for the `bronze` and `gold`
+datasets. Re-running the helper is safe because every statement uses
+`ADD COLUMN IF NOT EXISTS` or `CREATE TABLE IF NOT EXISTS`.
+
 ## `reset_warehouse.sh`
 
 Performs the documented warehouse-only reset for:
@@ -104,3 +123,21 @@ Example:
 ```bash
 scripts/reset_warehouse.sh <GCP_PROJECT_ID>
 ```
+
+
+## Checkpointed archival and bounded source repairs
+
+`archive_bronze_incremental.py` is the scheduled archive worker. It exports after
+45 days, verifies full Parquet row equivalence, and advances a persisted GCS
+checkpoint under a generation lock. `--prune-after-days 90 --max-delete-rows 20000`
+retains the complete serving horizon and limits daily pruning. Read `bootstrap.json`
+plus the checkpoint's manifest chain when restoring; do not union orphaned batches.
+The legacy `archive_bronze.py` is only for explicitly scoped recovery exports.
+
+`repair_gdelt_windows.py --project-id <PROJECT> --start-date YYYY-MM-DD --end-date YYYY-MM-DD`
+repairs 1–31 daily sample windows ending at 00:30 UTC. It requires all four ZIPs
+for every window, stages JSON load jobs, and executes a single capped merge only
+after all windows pass. It preserves newer versions, retains staging for two days,
+and must be followed by one full pipeline run. It is not a continuous-day backfill.
+
+See `docs/incident_20260928.md` for migration prerequisites and verified recovery.

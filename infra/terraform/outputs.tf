@@ -45,6 +45,16 @@ output "pipeline_scheduler_service_account_email" {
   value       = var.enable_pipeline_automation ? google_service_account.scheduler[0].email : null
 }
 
+output "gdelt_incomplete_source_windows_metric_name" {
+  description = "Log-based metric for incomplete live GDELT ingestion windows."
+  value       = var.enable_pipeline_automation ? google_logging_metric.gdelt_incomplete_source_windows[0].name : null
+}
+
+output "gdelt_incomplete_source_window_alert_policy_name" {
+  description = "Monitoring alert policy for incomplete live GDELT source windows when reporting email is enabled."
+  value       = var.enable_pipeline_automation && var.enable_pipeline_reporting && local.enable_notification_email ? google_monitoring_alert_policy.gdelt_incomplete_source_window[0].name : null
+}
+
 output "restricted_egress_network_name" {
   description = "Dedicated VPC name for restricted outbound traffic when the restricted-egress slice is enabled."
   value       = local.enable_restricted_egress_resources ? google_compute_network.restricted_egress[0].name : null

@@ -34,6 +34,12 @@ resource "google_cloud_run_v2_service" "app" {
   ingress             = local.app_edge_enabled ? "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER" : "INGRESS_TRAFFIC_ALL"
   labels              = local.common_labels
 
+  lifecycle {
+    # Cloud Run may persist a service-level manual scaling value set by gcloud.
+    # Capacity for this service is managed through template.scaling below.
+    ignore_changes = [scaling]
+  }
+
   template {
     service_account = google_service_account.app[0].email
 
@@ -60,6 +66,7 @@ resource "google_cloud_run_v2_service" "app" {
       }
 
       resources {
+        cpu_idle = true
         limits = {
           cpu    = "1"
           memory = var.app_memory_limit

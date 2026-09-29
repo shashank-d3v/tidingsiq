@@ -2,7 +2,7 @@
 
 ## Containment
 
-- Confirm the documented GDELT default remains `http://data.gdeltproject.org/gdeltv2`.
+- Confirm the GDELT default is `https://data.gdeltproject.org/gdeltv2` and redirects remain host/path validated.
 - Confirm deployed runtimes reject `GDELT_BASE_URL` overrides that do not resolve to `data.gdeltproject.org`.
 - Confirm Bronze fails closed on corrupt ZIPs, unreadable ZIP members, wrong row widths, malformed timestamps, elevated malformed-row ratios, and sudden accepted-row collapse.
 - Confirm the existing Cloud Monitoring pipeline failure alert path is active for containment failures.
@@ -26,7 +26,7 @@
 
 ## Accepted Residual Risk
 
-- Accepted upstream residual risk: TidingsIQ intentionally uses the documented HTTP GDELT feed as the validated default path.
+- Accepted upstream residual risk: GDELT publication and CDN propagation can lag; TidingsIQ uses bounded retries, partial-load metadata, and immediate incomplete-window alerting.
 - This is a containment decision, not an HTTPS migration.
 - Residual risk is limited by host restriction, payload validation, anomaly detection, and fail-closed execution, but not eliminated while the upstream default remains HTTP.
 - Accepted public-app residual risk: the app no longer has Cloud Armor rate limiting or load-balancer buffering in front of Cloud Run, so abusive traffic is mitigated mainly by the app's bounded query model and conservative Cloud Run scaling.

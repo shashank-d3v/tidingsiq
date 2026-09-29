@@ -4,9 +4,9 @@
 
 TidingsIQ currently ingests raw GDELT GKG 2.1 15-minute export files from the `gdeltv2` feed.
 
-The validated default transport path remains the documented HTTP endpoint:
+The historical investigation validated GDELT's documented HTTP endpoint; the reliability rollout now uses its HTTPS equivalent:
 
-- `http://data.gdeltproject.org/gdeltv2`
+- `https://data.gdeltproject.org/gdeltv2`
 
 The verified row layout is:
 
@@ -108,7 +108,7 @@ Historical contrast from the old English-only Gold contract:
 - `source_domain` is not a blocker; it is already fully derivable in Silver from the canonical URL.
 - article geography is available from `V2Locations` for a substantial subset of landed rows and is the right source-backed path for country enrichment
 - publisher country is still not a direct source field in the current Bronze path and should not be inferred from domains in this contract
-- The GDELT transport path should default to the documented HTTP feed rather than forcing HTTPS with an SSL override.
+- The GDELT transport path should use HTTPS with normal certificate verification and strict redirect validation.
 - The current containment posture is to keep HTTP as the validated default while failing closed on suspicious payloads instead of accepting arbitrary endpoints or malformed source files.
 - The deployed Cloud Run pipeline path is now proven end to end; the remaining weakness is source-field completeness, not orchestration.
 - the Bronze and Silver contracts can now avoid blank language and country fields by using explicit sentinel values plus resolution-status columns
@@ -127,7 +127,7 @@ The Bronze downloader now treats the GDELT transport path as a containment bound
 
 Accepted upstream residual risk for public release:
 
-- TidingsIQ intentionally keeps the documented HTTP GDELT feed as the validated default path
+- TidingsIQ uses the GDELT HTTPS feed as the validated default path
 - this remains an upstream transport trust risk that is contained, not eliminated
 - the repo now relies on host restriction, payload validation, anomaly detection, and fail-closed execution to limit the blast radius of malformed or unexpected upstream responses
 

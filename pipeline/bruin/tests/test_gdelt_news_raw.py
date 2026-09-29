@@ -64,14 +64,14 @@ class GdeltNewsRawTest(unittest.TestCase):
                 archive.writestr(member_name, payload)
         return buffer.getvalue()
 
-    def test_build_gkg_batch_url_defaults_to_documented_http_feed(self) -> None:
+    def test_build_gkg_batch_url_defaults_to_secure_feed(self) -> None:
         batch_time = self._valid_batch_time()
 
         url = gdelt_news_raw._build_gkg_batch_url(batch_time)
 
         self.assertEqual(
             url,
-            "http://data.gdeltproject.org/gdeltv2/20260402164500.gkg.csv.zip",
+            "https://data.gdeltproject.org/gdeltv2/20260402164500.gkg.csv.zip",
         )
 
     def test_build_gkg_batch_url_honors_override(self) -> None:
@@ -304,6 +304,23 @@ class GdeltNewsRawTest(unittest.TestCase):
                     source_window_end=datetime(2026, 4, 2, 16, 45, tzinfo=timezone.utc),
                 )
 
+    def test_fetch_batch_rows_fails_when_downloaded_archive_has_zero_accepted_rows(self) -> None:
+        expected_url = "https://data.gdeltproject.org/gdeltv2/20260402164500.gkg.csv.zip"
+        malformed_row = self._valid_row()[:-1]
+        with mock.patch.object(
+            gdelt_news_raw,
+            "_download_bytes",
+            return_value=(self._zip_bytes([malformed_row]), expected_url),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "zero accepted rows"):
+                gdelt_news_raw._fetch_batch_rows(
+                    batch_time=self._valid_batch_time(),
+                    ingestion_id="ingestion",
+                    ingested_at=datetime(2026, 4, 2, 17, 0, tzinfo=timezone.utc),
+                    source_window_start=datetime(2026, 4, 2, 16, 0, tzinfo=timezone.utc),
+                    source_window_end=datetime(2026, 4, 2, 16, 45, tzinfo=timezone.utc),
+                )
+
     def test_fetch_batch_rows_fails_when_first_member_is_unreadable(self) -> None:
         expected_url = "http://data.gdeltproject.org/gdeltv2/20260402164500.gkg.csv.zip"
         with mock.patch.object(
@@ -424,7 +441,7 @@ class GdeltNewsRawTest(unittest.TestCase):
         with mock.patch.object(
             gdelt_news_raw,
             "_fetch_recent_accepted_row_counts",
-            return_value=[100, 120, 110],
+            return_value=[100, 120, 110, 90, 100],
         ):
             with mock.patch("builtins.print") as print_mock:
                 gdelt_news_raw._enforce_run_guardrails(
@@ -439,7 +456,7 @@ class GdeltNewsRawTest(unittest.TestCase):
         with mock.patch.object(
             gdelt_news_raw,
             "_fetch_recent_accepted_row_counts",
-            return_value=[100, 120, 110],
+            return_value=[100, 120, 110, 90, 100],
         ):
             with mock.patch.dict(
                 "os.environ",
@@ -457,7 +474,7 @@ class GdeltNewsRawTest(unittest.TestCase):
         with mock.patch.object(
             gdelt_news_raw,
             "_fetch_recent_accepted_row_counts",
-            return_value=[100, 120, 110],
+            return_value=[100, 120, 110, 90, 100],
         ):
             gdelt_news_raw._enforce_run_guardrails(
                 accepted_rows=80,
@@ -471,7 +488,11 @@ class GdeltNewsRawTest(unittest.TestCase):
             def now(cls, tz=None):
                 return cls(2026, 4, 20, 6, 30, tzinfo=tz or timezone.utc)
 
-        with mock.patch.object(gdelt_news_raw, "datetime", FakeDateTime):
+        with mock.patch.object(gdelt_news_raw, "datetime", FakeDateTime), mock.patch.object(
+            gdelt_news_raw,
+            "_fetch_latest_manifest_batch_time",
+            return_value=datetime(2026, 4, 20, 6, 30, tzinfo=timezone.utc),
+        ):
             with mock.patch.dict(
                 os.environ,
                 {
@@ -483,8 +504,8 @@ class GdeltNewsRawTest(unittest.TestCase):
             ):
                 start_dt, end_dt = gdelt_news_raw._resolve_requested_window()
 
-        self.assertEqual(start_dt, datetime(2026, 4, 20, 5, 30, tzinfo=timezone.utc))
-        self.assertEqual(end_dt, datetime(2026, 4, 20, 6, 30, tzinfo=timezone.utc))
+        self.assertEqual(start_dt, datetime(2026, 4, 20, 4, 45, tzinfo=timezone.utc))
+        self.assertEqual(end_dt, datetime(2026, 4, 20, 5, 30, tzinfo=timezone.utc))
 
     def test_resolve_requested_window_keeps_historical_zero_width_interval_outside_deployed_runtime(self) -> None:
         class FakeDateTime(datetime):
@@ -519,13 +540,400 @@ class GdeltNewsRawTest(unittest.TestCase):
                     "BRUIN_START_DATE": "2026-04-20T06:20:00Z",
                     "BRUIN_END_DATE": "2026-04-20T06:20:00Z",
                     "CLOUD_RUN_JOB": "tidingsiq-pipeline",
+                    "GDELT_EXPLICIT_INTERVAL_REQUESTED": "true",
                 },
                 clear=False,
             ):
                 start_dt, end_dt = gdelt_news_raw._resolve_requested_window()
 
-        self.assertEqual(start_dt, datetime(2026, 4, 20, 6, 20, tzinfo=timezone.utc))
-        self.assertEqual(end_dt, datetime(2026, 4, 20, 6, 20, tzinfo=timezone.utc))
+        self.assertEqual(start_dt, datetime(2026, 4, 20, 6, 15, tzinfo=timezone.utc))
+        self.assertEqual(end_dt, datetime(2026, 4, 20, 6, 15, tzinfo=timezone.utc))
+
+    def test_parse_manifest_selects_gkg_entry(self) -> None:
+        manifest = "\n".join(
+            [
+                "1 hash http://data.gdeltproject.org/gdeltv2/20260420060000.export.CSV.zip",
+                "2 hash http://data.gdeltproject.org/gdeltv2/20260420060000.mentions.CSV.zip",
+                "3 hash http://data.gdeltproject.org/gdeltv2/20260420060000.gkg.csv.zip",
+            ]
+        )
+
+        result = gdelt_news_raw._parse_manifest_gkg_batch_time(
+            manifest,
+            current_time=datetime(2026, 4, 20, 6, 5, tzinfo=timezone.utc),
+        )
+
+        self.assertEqual(result, datetime(2026, 4, 20, 6, 0, tzinfo=timezone.utc))
+
+    def test_manifest_validation_rejects_invalid_gkg_entries(self) -> None:
+        current_time = datetime(2026, 4, 20, 6, 5, tzinfo=timezone.utc)
+        invalid_manifests = {
+            "host": "3 hash https://example.com/gdeltv2/20260420060000.gkg.csv.zip",
+            "filename": "3 hash https://data.gdeltproject.org/gdeltv2/latest.gkg.csv.zip",
+            "boundary": "3 hash https://data.gdeltproject.org/gdeltv2/20260420060700.gkg.csv.zip",
+            "future": "3 hash https://data.gdeltproject.org/gdeltv2/20260420063000.gkg.csv.zip",
+            "next_boundary": "3 hash https://data.gdeltproject.org/gdeltv2/20260420061500.gkg.csv.zip",
+            "missing": "3 hash https://data.gdeltproject.org/gdeltv2/20260420060000.export.CSV.zip",
+        }
+
+        for case_name, manifest in invalid_manifests.items():
+            with self.subTest(case_name=case_name):
+                with self.assertRaises(ValueError):
+                    gdelt_news_raw._parse_manifest_gkg_batch_time(
+                        manifest,
+                        current_time=current_time,
+                    )
+
+    def test_manifest_window_contains_exactly_four_batches(self) -> None:
+        with mock.patch.object(
+            gdelt_news_raw,
+            "_fetch_latest_manifest_batch_time",
+            return_value=datetime(2026, 4, 20, 6, 0, tzinfo=timezone.utc),
+        ), mock.patch.dict(os.environ, {}, clear=True):
+            result = gdelt_news_raw._resolve_rolling_window(
+                datetime(2026, 4, 20, 6, 5, tzinfo=timezone.utc)
+            )
+
+        self.assertEqual(result.anchor, "manifest")
+        self.assertEqual(
+            result.batch_times,
+            (
+                datetime(2026, 4, 20, 4, 15, tzinfo=timezone.utc),
+                datetime(2026, 4, 20, 4, 30, tzinfo=timezone.utc),
+                datetime(2026, 4, 20, 4, 45, tzinfo=timezone.utc),
+                datetime(2026, 4, 20, 5, 0, tzinfo=timezone.utc),
+            ),
+        )
+
+    def test_manifest_failure_uses_publication_lag(self) -> None:
+        with mock.patch.object(
+            gdelt_news_raw,
+            "_fetch_latest_manifest_batch_time",
+            side_effect=ValueError("bad manifest"),
+        ), mock.patch.dict(
+            os.environ,
+            {"GDELT_PUBLICATION_LAG_MINUTES": "60"},
+            clear=True,
+        ):
+            result = gdelt_news_raw._resolve_rolling_window(
+                datetime(2026, 4, 20, 6, 7, tzinfo=timezone.utc)
+            )
+
+        self.assertEqual(result.anchor, "lag")
+        self.assertEqual(result.end_dt, datetime(2026, 4, 20, 5, 0, tzinfo=timezone.utc))
+
+    def test_explicit_historical_window_bypasses_manifest(self) -> None:
+        with mock.patch.object(
+            gdelt_news_raw,
+            "_fetch_latest_manifest_batch_time",
+        ) as manifest_mock, mock.patch.dict(
+            os.environ,
+            {
+                "BRUIN_START_DATE": "2026-04-19T23:45:00Z",
+                "BRUIN_END_DATE": "2026-04-20T00:30:00Z",
+            },
+            clear=True,
+        ):
+            result = gdelt_news_raw._resolve_window_selection()
+
+        manifest_mock.assert_not_called()
+        self.assertEqual(result.anchor, "explicit")
+        self.assertTrue(result.is_backfill)
+        self.assertEqual(len(result.batch_times), 4)
+
+    def test_bruin_datetime_variables_preserve_intraday_backfill_boundaries(self) -> None:
+        with mock.patch.dict(
+            os.environ,
+            {
+                "BRUIN_START_DATE": "2026-08-20",
+                "BRUIN_END_DATE": "2026-08-21",
+                "BRUIN_START_DATETIME": "2026-08-20T23:45:00",
+                "BRUIN_END_DATETIME": "2026-08-21T00:30:00",
+            },
+            clear=True,
+        ):
+            result = gdelt_news_raw._resolve_window_selection()
+
+        self.assertEqual(result.start_dt, datetime(2026, 8, 20, 23, 45, tzinfo=timezone.utc))
+        self.assertEqual(result.end_dt, datetime(2026, 8, 21, 0, 30, tzinfo=timezone.utc))
+        self.assertEqual(
+            [batch.strftime("%Y%m%d%H%M%S") for batch in result.batch_times],
+            ["20260820234500", "20260821000000", "20260821001500", "20260821003000"],
+        )
+
+    def test_deployed_scheduled_bruin_interval_still_uses_live_manifest(self) -> None:
+        with mock.patch.object(
+            gdelt_news_raw,
+            "_fetch_latest_manifest_batch_time",
+            return_value=datetime(2026, 8, 26, 13, 45, tzinfo=timezone.utc),
+        ) as manifest_mock, mock.patch.dict(
+            os.environ,
+            {
+                "CLOUD_RUN_JOB": "tidingsiq-pipeline",
+                "GDELT_EXPLICIT_INTERVAL_REQUESTED": "false",
+                "BRUIN_START_DATETIME": "2026-08-25T00:00:00",
+                "BRUIN_END_DATETIME": "2026-08-25T23:59:59",
+            },
+            clear=True,
+        ):
+            result = gdelt_news_raw._resolve_window_selection()
+
+        manifest_mock.assert_called_once()
+        self.assertEqual(result.anchor, "manifest")
+        self.assertFalse(result.is_backfill)
+        self.assertEqual(result.end_dt, datetime(2026, 8, 26, 13, 45, tzinfo=timezone.utc))
+
+    def test_deployed_cli_interval_marker_keeps_explicit_backfill(self) -> None:
+        with mock.patch.object(
+            gdelt_news_raw,
+            "_fetch_latest_manifest_batch_time",
+        ) as manifest_mock, mock.patch.dict(
+            os.environ,
+            {
+                "CLOUD_RUN_JOB": "tidingsiq-pipeline",
+                "GDELT_EXPLICIT_INTERVAL_REQUESTED": "true",
+                "BRUIN_START_DATETIME": "2026-08-20T23:45:00",
+                "BRUIN_END_DATETIME": "2026-08-21T00:30:00",
+            },
+            clear=True,
+        ):
+            result = gdelt_news_raw._resolve_window_selection()
+
+        manifest_mock.assert_not_called()
+        self.assertEqual(result.anchor, "explicit")
+        self.assertTrue(result.is_backfill)
+        self.assertEqual(
+            [batch.strftime("%Y%m%d%H%M%S") for batch in result.batch_times],
+            ["20260820234500", "20260821000000", "20260821001500", "20260821003000"],
+        )
+
+    def test_download_retries_transient_http_error_then_succeeds(self) -> None:
+        url = "https://data.gdeltproject.org/gdeltv2/lastupdate.txt"
+        http_error = urllib.error.HTTPError(url, 503, "Unavailable", {}, None)
+        with mock.patch.object(
+            gdelt_news_raw,
+            "_download_bytes",
+            side_effect=[http_error, (b"ok", url)],
+        ) as download_mock, mock.patch.object(
+            gdelt_news_raw.time,
+            "sleep",
+        ) as sleep_mock, mock.patch.object(
+            gdelt_news_raw.random,
+            "uniform",
+            return_value=0.0,
+        ), mock.patch.dict(
+            os.environ,
+            {
+                "GDELT_DOWNLOAD_MAX_ATTEMPTS": "4",
+                "GDELT_DOWNLOAD_BACKOFF_SECONDS": "5,15,30",
+            },
+            clear=True,
+        ):
+            result = gdelt_news_raw._download_bytes_with_retry(
+                url,
+                resource_label="manifest",
+            )
+
+        self.assertEqual(result, (b"ok", url))
+        self.assertEqual(download_mock.call_count, 2)
+        sleep_mock.assert_called_once_with(5.0)
+
+    def test_download_does_not_retry_permanent_http_error(self) -> None:
+        url = "https://data.gdeltproject.org/gdeltv2/lastupdate.txt"
+        with mock.patch.object(
+            gdelt_news_raw,
+            "_download_bytes",
+            side_effect=urllib.error.HTTPError(url, 403, "Forbidden", {}, None),
+        ) as download_mock, mock.patch.object(gdelt_news_raw.time, "sleep"):
+            with self.assertRaises(urllib.error.HTTPError):
+                gdelt_news_raw._download_bytes_with_retry(
+                    url,
+                    resource_label="manifest",
+                )
+
+        download_mock.assert_called_once()
+
+    def test_recent_404_retries_then_succeeds(self) -> None:
+        batch_time = datetime.now(timezone.utc)
+        url = f"https://data.gdeltproject.org/gdeltv2/{batch_time:%Y%m%d%H%M%S}.gkg.csv.zip"
+        http_error = urllib.error.HTTPError(url, 404, "Not Found", {}, None)
+        with mock.patch.object(
+            gdelt_news_raw,
+            "_download_bytes",
+            side_effect=[http_error, (b"ok", url)],
+        ) as download_mock, mock.patch.object(
+            gdelt_news_raw.time,
+            "sleep",
+        ) as sleep_mock, mock.patch.object(
+            gdelt_news_raw.random,
+            "uniform",
+            return_value=0.0,
+        ):
+            result = gdelt_news_raw._download_bytes_with_retry(
+                url,
+                batch_time=batch_time,
+                resource_label=f"{batch_time:%Y%m%d%H%M%S}",
+            )
+
+        self.assertEqual(result, (b"ok", url))
+        self.assertEqual(download_mock.call_count, 2)
+        sleep_mock.assert_called_once_with(5.0)
+
+    def test_retry_after_is_capped_at_sixty_seconds(self) -> None:
+        url = "https://data.gdeltproject.org/gdeltv2/lastupdate.txt"
+        http_error = urllib.error.HTTPError(
+            url,
+            503,
+            "Unavailable",
+            {"Retry-After": "120"},
+            None,
+        )
+        with mock.patch.object(
+            gdelt_news_raw,
+            "_download_bytes",
+            side_effect=[http_error, (b"ok", url)],
+        ), mock.patch.object(gdelt_news_raw.time, "sleep") as sleep_mock:
+            gdelt_news_raw._download_bytes_with_retry(url, resource_label="manifest")
+
+        sleep_mock.assert_called_once_with(60.0)
+
+    def test_redirect_validation_rejects_host_and_path_changes(self) -> None:
+        original = "https://data.gdeltproject.org/gdeltv2/lastupdate.txt"
+        with self.assertRaisesRegex(ValueError, "invalid host"):
+            gdelt_news_raw._validate_gdelt_redirect(
+                original,
+                "https://example.com/gdeltv2/lastupdate.txt",
+            )
+        with self.assertRaisesRegex(ValueError, "resource path"):
+            gdelt_news_raw._validate_gdelt_redirect(
+                original,
+                "https://data.gdeltproject.org/gdeltv2/other.txt",
+            )
+
+    def test_retryable_http_status_contract(self) -> None:
+        recent_batch = datetime.now(timezone.utc)
+        old_batch = datetime(2020, 1, 1, tzinfo=timezone.utc)
+        url = "https://data.gdeltproject.org/gdeltv2/example.gkg.csv.zip"
+
+        for status in (408, 429, 500, 502, 503, 504):
+            with self.subTest(status=status):
+                error = urllib.error.HTTPError(url, status, "temporary", {}, None)
+                self.assertTrue(
+                    gdelt_news_raw._is_retryable_http_error(
+                        error,
+                        batch_time=old_batch,
+                    )
+                )
+        for status in (400, 404):
+            with self.subTest(status=status):
+                error = urllib.error.HTTPError(url, status, "recent only", {}, None)
+                self.assertTrue(
+                    gdelt_news_raw._is_retryable_http_error(
+                        error,
+                        batch_time=recent_batch,
+                    )
+                )
+                self.assertFalse(
+                    gdelt_news_raw._is_retryable_http_error(
+                        error,
+                        batch_time=old_batch,
+                    )
+                )
+
+    def test_materialize_empty_window_emits_summary_and_preserves_empty_contract(self) -> None:
+        batch_times = tuple(
+            datetime(2026, 4, 20, 5, 15, tzinfo=timezone.utc)
+            + gdelt_news_raw.timedelta(minutes=15 * offset)
+            for offset in range(4)
+        )
+        window = gdelt_news_raw.RequestedWindow(
+            start_dt=batch_times[0],
+            end_dt=batch_times[-1],
+            batch_times=batch_times,
+            selection_mode="manifest",
+            is_backfill=False,
+        )
+        empty_sentinel = object()
+
+        with mock.patch.object(
+            gdelt_news_raw,
+            "_resolve_window_selection",
+            return_value=window,
+        ), mock.patch.object(
+            gdelt_news_raw,
+            "_fetch_batch_rows",
+            return_value=gdelt_news_raw.BatchFetchResult(
+                availability_status="unavailable",
+                was_missing=True,
+                missing_reason="HTTP 404",
+            ),
+        ), mock.patch.object(
+            gdelt_news_raw,
+            "_empty_dataframe",
+            return_value=empty_sentinel,
+        ), mock.patch.object(gdelt_news_raw, "_persist_source_attempt") as persist_mock, mock.patch("builtins.print") as print_mock:
+            result = gdelt_news_raw.materialize()
+
+        self.assertIs(result, empty_sentinel)
+        attempt = persist_mock.call_args.args[0]
+        self.assertEqual(attempt["accepted_row_count"], 0)
+        self.assertEqual(attempt["downloaded_file_count"], 0)
+        self.assertEqual(attempt["expected_file_count"], 4)
+        self.assertEqual(attempt["missing_file_count"], 4)
+        self.assertFalse(attempt["is_complete"])
+        self.assertFalse(attempt["is_backfill"])
+        summary = print_mock.call_args.args[0]
+        self.assertIn("mode=live", summary)
+        self.assertIn("expected_files=4", summary)
+        self.assertIn("downloaded_files=0", summary)
+        self.assertIn("completeness=empty", summary)
+        self.assertIn("low_volume=unknown", summary)
+
+    def test_source_attempt_load_waits_for_visibility_and_propagates_failure(self):
+        bigquery = mock.MagicMock()
+        client = bigquery.Client.return_value
+        attempt = {"ingestion_id": "test_attempt", "downloaded_file_count": 0}
+        with mock.patch.object(gdelt_news_raw, "_import_bigquery", return_value=bigquery), mock.patch.object(
+            gdelt_news_raw, "_resolve_project_id", return_value="example-project"
+        ):
+            gdelt_news_raw._persist_source_attempt(attempt)
+            args, kwargs = client.load_table_from_json.call_args
+            self.assertEqual(args, ([attempt], "example-project.bronze.gdelt_ingestion_attempts"))
+            self.assertEqual(kwargs["job_id"], "gdelt_attempt_test_attempt")
+            client.load_table_from_json.return_value.result.assert_called_once()
+            client.load_table_from_json.return_value.result.side_effect = RuntimeError("write failed")
+            with self.assertRaisesRegex(RuntimeError, "write failed"):
+                gdelt_news_raw._persist_source_attempt(attempt)
+
+    def test_low_volume_waits_for_full_five_run_baseline(self) -> None:
+        with mock.patch.object(
+            gdelt_news_raw,
+            "_fetch_recent_accepted_row_counts",
+            return_value=[100, 100, 100, 100],
+        ):
+            result = gdelt_news_raw._enforce_run_guardrails(
+                accepted_rows=1,
+                total_rows_seen=1,
+                malformed_rows=0,
+            )
+
+        self.assertFalse(result.low_volume)
+        self.assertIsNone(result.baseline_average_accepted_row_count)
+
+    def test_low_volume_is_not_evaluated_for_partial_window(self) -> None:
+        with mock.patch.object(
+            gdelt_news_raw,
+            "_fetch_recent_accepted_row_counts",
+        ) as history_mock:
+            result = gdelt_news_raw._enforce_run_guardrails(
+                accepted_rows=40,
+                total_rows_seen=40,
+                malformed_rows=0,
+                evaluate_low_volume=False,
+            )
+
+        history_mock.assert_not_called()
+        self.assertIsNone(result.low_volume)
 
 
 if __name__ == "__main__":

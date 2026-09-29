@@ -1,0 +1,5 @@
+# Reuses the deployed, pinned dependency/runtime layer for a bounded incident rollout.
+FROM asia-south1-docker.pkg.dev/tidingsiq-dev/tidingsiq-pipeline/tidingsiq-bruin@sha256:005f6017eadb6f990e61f7e5ae585de1885265b1e8138a44208fad0ca4680b5d
+COPY --chown=tidingsiq:tidingsiq pipeline /workspace/pipeline
+COPY --chown=tidingsiq:tidingsiq scripts /workspace/scripts
+COPY --chown=tidingsiq:tidingsiq --chmod=0755 pipeline/bruin/container-entrypoint.sh /usr/local/bin/container-entrypoint.sh

@@ -97,7 +97,7 @@ Rollout guidance:
 - when restricted egress is enabled, keep the pipeline and Bronze archive schedulers paused until public article validation still succeeds through the connector-backed path
 - review blocked firewall logs after the first manual run and first scheduled run only when restricted egress is enabled; unusual publisher redirects may need rule tuning before steady-state activation
 - the reporting and Bronze archive schedulers are separate automation paths and should not be paused for a pipeline-only rollout unless their own runtime is being changed
-- the pipeline now defaults to the documented HTTP GDELT feed, so SSL-verify overrides should not be the normal runtime path
+- the pipeline defaults to the GDELT HTTPS feed; SSL-verification overrides are not part of the deployed runtime path
 - a warehouse reset should happen before regular scheduled execution is activated for the clean-start rollout
 
 ### 1A. Reporting Runtime

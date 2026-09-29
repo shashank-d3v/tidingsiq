@@ -47,7 +47,7 @@ One ingested source record per row.
 - replay-safe landed loads keyed by the source record identifier
 - batch traceability
 - enough raw fidelity for replay and parsing diagnostics
-- 45-day query retention in BigQuery before archive and cleanup
+- At least 90-day query retention in BigQuery, with archival beginning after 45 days
 
 ### Fields
 
@@ -78,20 +78,40 @@ One ingested source record per row.
 | bronze_run_accepted_row_count | INT64 | No | Internal | Repeated run-level count of Bronze rows accepted after containment checks |
 | bronze_run_malformed_row_count | INT64 | No | Internal | Repeated run-level count of malformed source rows rejected during containment checks |
 | bronze_run_malformed_ratio | FLOAT64 | No | Internal | Repeated run-level malformed-row ratio for the latest Bronze ingestion |
+| bronze_run_expected_file_count | INT64 | No | Internal | Number of GDELT archives expected for the source window |
+| bronze_run_downloaded_file_count | INT64 | No | Internal | Number of expected archives downloaded successfully |
+| bronze_run_missing_file_count | INT64 | No | Internal | Number of unavailable expected archives after bounded retries |
+| bronze_run_is_complete | BOOL | No | Internal | Whether every expected archive downloaded |
+| bronze_run_is_backfill | BOOL | No | Internal | Whether the ingestion used an explicit historical interval |
+| bronze_run_low_volume | BOOL | No | Internal | Complete live-window volume result; null for partial/backfill windows |
+| bronze_run_baseline_average_accepted_row_count | FLOAT64 | No | Internal | Average accepted rows across the prior five complete live ingestions |
+| bronze_run_low_volume_threshold | FLOAT64 | No | Internal | Accepted-row threshold used to set the low-volume flag |
 | raw_payload | STRING | No | Internal | JSON-encoded payload retained for audit and debugging |
 
 ### Bronze quality expectations
 
 - `ingestion_id` and `ingested_at` must always be populated
 - the same replay window should be safe to rerun without losing traceability
-- the default transport remains the documented HTTP GDELT endpoint, while deployed runtime overrides are restricted to the expected GDELT host
+- the default transport uses GDELT's HTTPS endpoint, while deployed runtime overrides and every redirect remain restricted to the expected GDELT host and validated archive path
 - source files should fail closed when the resolved host, filename pattern, ZIP structure, row width, or timestamp parsing is suspicious
 - `language`, `language_resolution_status`, `mentioned_country_code`, `mentioned_country_name`, and `mentioned_country_resolution_status` should never be blank after Bronze resolution
 - `bronze_run_total_row_count`, `bronze_run_accepted_row_count`, `bronze_run_malformed_row_count`, and `bronze_run_malformed_ratio` should preserve run-level containment visibility on successful ingestions
 - `raw_payload` currently stores selected raw GKG fields rather than the entire original row to keep Bronze practical and debuggable without retaining unnecessary volume
 - Bronze rows older than 45 days should be exportable to GCS without losing row-level traceability
 - archived Bronze objects should be retained for 365 days before deletion
-- current implementation uses the canonical `scripts/archive_bronze.py` worker plus a Terraform-managed archive bucket and optional scheduled Cloud Run execution
+- current implementation uses `scripts/archive_bronze_incremental.py`, a persisted checkpoint, immutable verified Parquet batches, and a Terraform-managed twice-daily Cloud Run schedule
+
+### Source-attempt ledger
+
+`bronze.gdelt_ingestion_attempts` contains one record per completed source-fetch
+attempt, including empty windows with no article rows. It is partitioned by
+`DATE(latest_ingested_at)`, the attempt start time, and keyed logically by
+`ingestion_id`. It records source-window boundaries, accepted count, malformed
+ratio, expected/downloaded/missing file counts, completeness, backfill status,
+and the nullable low-volume result. A deterministic BigQuery load-job ID protects
+the append against retries of the same job. This is a source-availability ledger,
+not proof that Bruin subsequently committed the article rows. Hard parsing/load
+failures remain covered by the existing pipeline failure path.
 
 ## Silver Contract
 
@@ -264,8 +284,16 @@ One appended operational run snapshot row.
 | silver_row_count | INT64 | Yes | Derived | Current total row count in Silver |
 | silver_canonical_row_count | INT64 | Yes | Derived | Current canonical Silver row count |
 | silver_duplicate_row_count | INT64 | Yes | Derived | Current duplicate Silver row count |
-| latest_bronze_ingestion_accepted_row_count | INT64 | Yes | Derived | Accepted-row count for the latest successful Bronze ingestion |
-| latest_bronze_ingestion_malformed_ratio | FLOAT64 | Yes | Derived | Malformed-row ratio recorded for the latest successful Bronze ingestion |
+| latest_bronze_ingestion_accepted_row_count | INT64 | No | Derived | Accepted-row count for the latest live source attempt; zero for an empty attempt, null without live history |
+| latest_bronze_ingestion_malformed_ratio | FLOAT64 | No | Derived | Malformed-row ratio for the latest live source attempt; null without live history |
+| latest_bronze_source_window_start | TIMESTAMP | No | Derived | Start of the latest non-backfill Bronze source window |
+| latest_bronze_source_window_end | TIMESTAMP | No | Derived | End of the latest non-backfill Bronze source window |
+| latest_bronze_ingestion_expected_file_count | INT64 | No | Derived | Expected archives in the latest non-backfill Bronze ingestion |
+| latest_bronze_ingestion_downloaded_file_count | INT64 | No | Derived | Successfully downloaded archives in the latest non-backfill Bronze ingestion |
+| latest_bronze_ingestion_missing_file_count | INT64 | No | Derived | Missing archives in the latest non-backfill Bronze ingestion |
+| latest_bronze_ingestion_is_complete | BOOL | No | Derived | Completeness of the latest non-backfill Bronze ingestion |
+| latest_bronze_ingestion_low_volume | BOOL | No | Derived | Low-volume flag for the latest qualifying ingestion |
+| consecutive_complete_low_volume_run_count | INT64 | No | Derived | Adaptive complete-live-window low-volume streak, capped at three |
 | gold_row_count | INT64 | Yes | Derived | Current serving-table row count |
 | gold_min_happy_factor | FLOAT64 | No | Derived | Current minimum `happy_factor` |
 | gold_avg_happy_factor | FLOAT64 | No | Derived | Current average `happy_factor` |
@@ -300,14 +328,14 @@ Current chosen partition strategy:
 
 Current retention targets:
 
-- Bronze: retain 45 days in BigQuery, then archive older partitions to GCS for 365 days before deletion
+- Bronze: export after 45 days; retain at least 90 days in BigQuery to preserve Silver, then prune only checkpoint-covered rows outside both ingestion and publication horizons. GCS objects expire after 365 days
 - Silver: retain 90 days in BigQuery
 - Gold: retain 180 days in BigQuery
 
 Current implementation status:
 
 - Bronze archive bucket and object lifecycle are provisioned in Terraform
-- Bronze export and delete are executed manually through an operations script
+- Bronze export and capped pruning run through the checkpointed archive worker; verified catch-up deletions require a rollback snapshot
 - Silver and Gold retention are enforced in-model today
 
 Archive expectations for Bronze:

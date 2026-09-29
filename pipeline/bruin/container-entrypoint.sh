@@ -23,6 +23,16 @@ if ! git config --global --get-all safe.directory | grep -Fx "${WORKSPACE_ROOT}"
   git config --global --add safe.directory "${WORKSPACE_ROOT}"
 fi
 
+GDELT_EXPLICIT_INTERVAL_REQUESTED=false
+for argument in "$@"; do
+  case "${argument}" in
+    --start-date|--start-date=*|--end-date|--end-date=*)
+      GDELT_EXPLICIT_INTERVAL_REQUESTED=true
+      ;;
+  esac
+done
+export GDELT_EXPLICIT_INTERVAL_REQUESTED
+
 cat > "${BRUIN_CONFIG_PATH}" <<EOF
 default_environment: ${BRUIN_ENVIRONMENT}
 environments:

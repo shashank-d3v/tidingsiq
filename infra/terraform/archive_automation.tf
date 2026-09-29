@@ -1,3 +1,7 @@
+locals {
+  bronze_archive_container_image = trimspace(var.bronze_archive_container_image) != "" ? trimspace(var.bronze_archive_container_image) : local.pipeline_container_image
+}
+
 resource "google_service_account" "bronze_archive" {
   count = var.enable_bronze_archive_automation ? 1 : 0
 
@@ -46,7 +50,7 @@ resource "google_cloud_run_v2_job" "bronze_archive" {
 
     template {
       service_account = google_service_account.bronze_archive[0].email
-      max_retries     = 1
+      max_retries     = 0
       timeout         = var.pipeline_job_timeout
 
       dynamic "vpc_access" {
@@ -59,20 +63,18 @@ resource "google_cloud_run_v2_job" "bronze_archive" {
       }
 
       containers {
-        image   = local.pipeline_container_image
+        image   = local.bronze_archive_container_image
         command = ["python3"]
         args = concat(
           [
-            "scripts/archive_bronze.py",
+            "scripts/archive_bronze_incremental.py",
             "--project-id",
             var.project_id,
             "--archive-uri-prefix",
             "gs://${google_storage_bucket.bronze_archive.name}/automated",
-            "--max-delete-rows",
-            tostring(var.bronze_archive_max_delete_rows),
           ],
           var.bronze_archive_dry_run ? ["--dry-run"] : [],
-          var.bronze_archive_delete_after_export ? ["--delete-after-export"] : [],
+          var.bronze_archive_delete_after_export ? ["--prune-after-days", "90", "--max-delete-rows", tostring(var.bronze_archive_max_delete_rows)] : [],
         )
 
         env {
@@ -88,7 +90,7 @@ resource "google_cloud_run_v2_job" "bronze_archive" {
         resources {
           limits = {
             cpu    = "1"
-            memory = var.pipeline_job_memory_limit
+            memory = var.bronze_archive_memory_limit
           }
         }
       }
@@ -197,12 +199,12 @@ resource "google_monitoring_alert_policy" "bronze_archive_repeated_failures" {
   notification_channels = [google_monitoring_notification_channel.pipeline_email[0].name]
 
   conditions {
-    display_name = "Bronze archive failed twice within 24 hours"
+    display_name = "Bronze archive failed within 24 hours"
 
     condition_threshold {
       filter          = "resource.type=\"cloud_run_job\" AND metric.type=\"logging.googleapis.com/user/${google_logging_metric.bronze_archive_failures[0].name}\""
       comparison      = "COMPARISON_GT"
-      threshold_value = 1.5
+      threshold_value = 0.5
       duration        = "0s"
 
       aggregations {
@@ -224,7 +226,7 @@ resource "google_monitoring_alert_policy" "bronze_archive_repeated_failures" {
 
   documentation {
     mime_type = "text/markdown"
-    content   = "The Bronze archive worker emitted at least two failed `BRONZE_ARCHIVE_SUMMARY` runs in the last 24 hours."
+    content   = "The Bronze archive worker emitted a failed `BRONZE_ARCHIVE_SUMMARY` run in the last 24 hours."
   }
 }
 
@@ -243,7 +245,7 @@ resource "google_monitoring_alert_policy" "bronze_archive_backlog" {
     condition_threshold {
       filter          = "resource.type=\"cloud_run_job\" AND metric.type=\"logging.googleapis.com/user/${google_logging_metric.bronze_archive_backlog_runs[0].name}\""
       comparison      = "COMPARISON_GT"
-      threshold_value = 1.5
+      threshold_value = 0.5
       duration        = "0s"
 
       aggregations {
@@ -265,6 +267,46 @@ resource "google_monitoring_alert_policy" "bronze_archive_backlog" {
 
   documentation {
     mime_type = "text/markdown"
-    content   = "The Bronze archive worker reported remaining eligible rows on at least two delete-enabled runs in the last 24 hours."
+    content   = "The Bronze archive worker reported remaining eligible rows on a delete-enabled run in the last 24 hours."
+  }
+}
+
+resource "google_logging_metric" "bronze_archive_completed_runs" {
+  count       = var.enable_bronze_archive_automation ? 1 : 0
+  project     = var.project_id
+  name        = "bronze_archive_completed_runs"
+  description = "Successful checkpointed Bronze archive runs, including no-op runs."
+  filter      = <<-EOT
+resource.type="cloud_run_job"
+resource.labels.job_name="${var.bronze_archive_job_name}"
+textPayload:"BRONZE_ARCHIVE_SUMMARY"
+(textPayload:"status=exported" OR textPayload:"status=noop")
+EOT
+}
+
+resource "google_monitoring_alert_policy" "bronze_archive_missing_runs" {
+  count                 = var.enable_bronze_archive_automation && local.enable_notification_email ? 1 : 0
+  project               = var.project_id
+  display_name          = "TidingsIQ Bronze Archive Missing Runs"
+  combiner              = "OR"
+  enabled               = true
+  notification_channels = [google_monitoring_notification_channel.pipeline_email[0].name]
+  conditions {
+    display_name = "No successful archive heartbeat for 23.5 hours"
+    condition_absent {
+      filter   = "resource.type=\"cloud_run_job\" AND metric.type=\"logging.googleapis.com/user/${google_logging_metric.bronze_archive_completed_runs[0].name}\""
+      duration = "84600s"
+      aggregations {
+        alignment_period   = "3600s"
+        per_series_aligner = "ALIGN_SUM"
+      }
+      trigger {
+        count = 1
+      }
+    }
+  }
+  documentation {
+    mime_type = "text/markdown"
+    content   = "The twice-daily Bronze archive has not emitted a successful export/no-op heartbeat for 23.5 hours. Inspect Scheduler state, job executions, and the checkpoint lock. Never remove a lock until its owning execution has stopped."
   }
 }

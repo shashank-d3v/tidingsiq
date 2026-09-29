@@ -171,6 +171,84 @@ Interpretation notes:
 - If suspicious URLs are present, the Cloud Run logs should show `Blocked URL target` entries with explicit reasons such as `blocked_ip_literal`, `blocked_private_ip`, or `blocked_metadata_host`.
 - Blocked targets currently surface as `status = 'unavailable'` in `gold.url_validation_results`; that is intentional to avoid downstream schema and scoring changes.
 
+## GDELT Source-Window Reliability
+
+Normal runs resolve four consecutive 15-minute GKG archives from GDELT's validated
+`lastupdate.txt` manifest. If the manifest remains unavailable or invalid after the
+configured retries, the pipeline emits `GDELT_MANIFEST_FALLBACK` and anchors the
+window at `floor(now - GDELT_PUBLICATION_LAG_MINUTES)`. Explicit Bruin intervals
+remain authoritative for backfills and do not contact the manifest. Invoke Bruin
+with `--start-date` and `--end-date`; the asset prefers Bruin's exact intraday
+`BRUIN_START_DATETIME`/`BRUIN_END_DATETIME` values and falls back to the date-only
+variables only for compatible direct execution.
+
+Bruin also exports a computed interval for ordinary scheduled runs. The container
+entrypoint records whether `--start-date`/`--end-date` were actually supplied, and
+the ingestion ignores Bruin's generated interval for deployed live executions so
+they continue to use the manifest or lag fallback.
+
+The archive downloader retries transient transport failures and configured HTTP
+statuses within each asset. Cloud Run job retries remain disabled (`maxRetries=0`),
+so a successful asset is never rerun merely because another archive was late.
+Interpret `GDELT_DOWNLOAD_ATTEMPT` records together with the terminal
+`GDELT_INGESTION_SUMMARY`; response bodies are intentionally absent from logs.
+
+Window outcomes are:
+
+- `complete`: all four archives downloaded; normal volume evaluation applies
+- `partial`: one to three archives downloaded; valid rows land and volume evaluation is skipped
+- `empty`: no archives downloaded; Bronze data is left unchanged and volume evaluation is skipped
+
+Terminal source-fetch outcomes (`complete`, `partial`, and `empty`) are also
+persisted to `bronze.gdelt_ingestion_attempts` before the asset returns. Recording
+failures stop the asset rather than silently dropping monitoring state. This
+ledger describes source downloads, not the later Bruin/dlt commit; parser and
+warehouse-load failures still use the pipeline failure alert. Historical rows
+without ledger entries remain available through the metrics query's fallback.
+The daily report labels a fresh 0/4 attempt `gdelt_window_empty`, and absent live
+history `gdelt_window_unknown`; a backfill-only warehouse still emits a metrics
+snapshot with nullable live-ingestion fields.
+
+Every incomplete live window triggers the `TidingsIQ GDELT Incomplete Source Window`
+policy immediately. Backfills are excluded from that policy and must be checked
+synchronously by their operator. Corrupt ZIPs, parser failures, excessive malformed
+rows, and zero accepted rows from a downloaded archive remain hard failures.
+
+The adaptive volume check considers only complete, non-backfill ingestions with a
+five-run baseline. One or two low-volume observations warn; the third consecutive
+qualifying low-volume ingestion lands before the downstream Gold custom check fails.
+Partial and backfill ingestions neither advance nor reset the streak. The emergency
+`GDELT_LOW_ACCEPTED_ROW_ACTION=fail` override restores immediate Bronze failure and
+should remain disabled during normal operation.
+
+Before deploying a schema-changing image:
+
+1. Record the current image digest, scheduler states, BigQuery schemas, row counts,
+   latest ingestion timestamps, and recent metrics rows in an incident snapshot.
+2. Pause the pipeline and reporting schedulers; leave the unrelated archive scheduler unchanged.
+3. Run `scripts/migrate_gdelt_reliability_schema.sh <GCP_PROJECT_ID>`; this also creates
+   the partitioned source-attempt ledger required by the metrics query. Run it
+   before a metrics-only deployment, even if the additive columns already exist.
+4. Verify the additive columns and confirm the pipeline service account can append to both expanded tables.
+5. Apply the reviewed Terraform plan and immutable image digest, preserving one task,
+   one worker, `4Gi`, `3600s`, and `maxRetries=0`.
+6. Run a manual canary. Do not resume either scheduler until a complete `4/4` canary
+   has loaded Bronze, Silver, Gold, metrics, and URL validation successfully.
+
+For a targeted historical repair, execute only
+`pipeline/bruin/assets/bronze/gdelt_news_raw.py` and pass the exact interval through
+Bruin's `--start-date` and `--end-date` flags. Require `mode=backfill`,
+`downloaded_files=4`, a positive accepted-row count, the exact expected source-window
+bounds, and the four expected archive filenames; stop on the first mismatch or
+incomplete window. Record the ingestion ID and filenames. After all Bronze repairs,
+run the full pipeline once and verify four distinct GKG archives per repaired window,
+no duplicate inflation, and exclusion of backfills from the live low-volume streak.
+
+Rollback restores the recorded previous image digest and environment while both
+schedulers remain paused. Additive schema columns and monitoring resources may stay.
+Do not delete backfilled data automatically; any corrupt ingestion requires a
+separately reviewed repair scoped by its recorded ingestion ID and archive list.
+
 ## Scheduler Operations
 
 Rollout note:
@@ -293,12 +371,24 @@ Current expected posture:
 
 ## Bronze Archive Operations
 
-Rollout caveat:
+The active worker is `scripts/archive_bronze_incremental.py`. It uses a GCS
+checkpoint, generation-conditional lock, immutable export paths, and full-row
+Parquet reconciliation. The legacy `scripts/archive_bronze.py` remains available
+for explicit recovery exports; do not schedule that legacy export-only path.
+See [September recovery](incident_20260928.md) for the verified cutover and rollback.
 
-- Export-only Bronze archive runs are not yet idempotent across repeated daily executions. If `bronze_archive_dry_run = false` and `bronze_archive_delete_after_export = false`, or if a delete-enabled run exports successfully but fails before delete completes, the next run can export the same old Bronze rows again into a new `cutoff_date=...` path.
-- Keep export-only mode short-lived during rollout, review the emitted `BRONZE_ARCHIVE_SUMMARY` logs closely, and do not treat repeated export-only schedules as a steady-state retention strategy until the archive path gains a persisted high-water mark, non-overlapping export windows, or equivalent reconciliation.
+Normal archival exports data after 45 days. Optional `--prune-after-days 90`
+removes only checkpoint-covered rows outside both the ingestion and publication
+90-day horizons. The default prune cap is 20,000 rows; a backlog above that cap
+fails before deletion and needs a verified catch-up operation.
 
-Run the deployed Bronze archive job manually in dry-run mode:
+A repeated completed window is a no-op. A crashed worker may leave
+`automated/archive.lock`; confirm its execution has terminated before removing
+that exact object generation. Read committed manifests from `checkpoint.json`
+and its predecessor links plus `bootstrap.json`, not by globbing every batch (failed batches may be
+orphaned). Keep the bootstrap recovery export referenced by the initial checkpoint.
+
+Run the deployed Bronze archive job with its configured export/retention policy:
 
 ```bash
 gcloud run jobs execute <ARCHIVE_JOB_NAME> \
@@ -472,4 +562,4 @@ If restricted egress is enabled:
 - capture a `gold.url_validation_results` status mix before and after rollout so unexpected increases in `unavailable`, `timeout`, or `redirect_loop` are visible
 - treat denied firewall logs as rollout signals; private, internal, and metadata destinations are expected, while legitimate public publisher redirects may indicate the rules need tuning or the source URL needs review
 
-Do not leave the archive scheduler running indefinitely in export-only mode as the long-term default, because repeated export-only executions can duplicate already archived Bronze rows under newer cutoff-date prefixes.
+The checkpointed worker supports export-only scheduling without repeated completed-window exports. Enable 90-day hot retention only after archive verification and a rollback snapshot; retain the configured daily deletion cap.

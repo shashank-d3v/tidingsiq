@@ -14,6 +14,9 @@ def determine_action_needed(
     latest_gold_ingested_at: datetime | None,
     gold_row_count: int,
     eligible_row_count: int,
+    bronze_window_is_complete: bool | None = None,
+    bronze_downloaded_file_count: int | None = None,
+    consecutive_complete_low_volume_run_count: int = 0,
     now_utc: datetime | None = None,
 ) -> str:
     now_utc = now_utc or datetime.now(timezone.utc)
@@ -28,6 +31,14 @@ def determine_action_needed(
         latest_gold_ingested_at = latest_gold_ingested_at.replace(tzinfo=timezone.utc)
     if latest_gold_ingested_at < now_utc - timedelta(hours=18):
         return "gold_stale"
+    if consecutive_complete_low_volume_run_count >= 3:
+        return "gdelt_low_volume_failure"
+    if bronze_window_is_complete is False:
+        return "gdelt_window_empty" if bronze_downloaded_file_count == 0 else "gdelt_window_partial"
+    if bronze_window_is_complete is None:
+        return "gdelt_window_unknown"
+    if consecutive_complete_low_volume_run_count > 0:
+        return "gdelt_low_volume_warning"
 
     return "healthy"
 
@@ -48,7 +59,33 @@ def build_report_payload(
         latest_gold_ingested_at=latest_metrics.get("latest_gold_ingested_at"),
         gold_row_count=int(latest_metrics.get("gold_row_count", 0)),
         eligible_row_count=eligible_row_count,
+        bronze_window_is_complete=latest_metrics.get(
+            "latest_bronze_ingestion_is_complete"
+        ),
+        bronze_downloaded_file_count=latest_metrics.get(
+            "latest_bronze_ingestion_downloaded_file_count"
+        ),
+        consecutive_complete_low_volume_run_count=int(
+            latest_metrics.get("consecutive_complete_low_volume_run_count", 0) or 0
+        ),
         now_utc=generated_at,
+    )
+
+    expected_files = int(
+        latest_metrics.get("latest_bronze_ingestion_expected_file_count", 0) or 0
+    )
+    downloaded_files = int(
+        latest_metrics.get("latest_bronze_ingestion_downloaded_file_count", 0) or 0
+    )
+    is_complete = latest_metrics.get("latest_bronze_ingestion_is_complete")
+    bronze_window_status = (
+        "unknown"
+        if is_complete is None
+        else "complete"
+        if bool(is_complete)
+        else "empty"
+        if downloaded_files == 0
+        else "partial"
     )
 
     top_exclusions = sorted(
@@ -66,6 +103,21 @@ def build_report_payload(
         "latest_run_at": _isoformat_or_none(latest_metrics.get("audit_run_at")),
         "latest_gold_ingested_at": _isoformat_or_none(
             latest_metrics.get("latest_gold_ingested_at")
+        ),
+        "bronze_source_window_start": _isoformat_or_none(
+            latest_metrics.get("latest_bronze_source_window_start")
+        ),
+        "bronze_source_window_end": _isoformat_or_none(
+            latest_metrics.get("latest_bronze_source_window_end")
+        ),
+        "bronze_files_downloaded": downloaded_files,
+        "bronze_files_expected": expected_files,
+        "bronze_window_status": bronze_window_status,
+        "bronze_low_volume": latest_metrics.get(
+            "latest_bronze_ingestion_low_volume"
+        ),
+        "bronze_low_volume_streak": int(
+            latest_metrics.get("consecutive_complete_low_volume_run_count", 0) or 0
         ),
         "bronze_row_count": int(latest_metrics.get("bronze_row_count", 0)),
         "silver_row_count": int(latest_metrics.get("silver_row_count", 0)),
@@ -95,6 +147,10 @@ def build_summary_line(report: dict[str, object]) -> str:
         f"{SUMMARY_MARKER} "
         f"generated_at={report['generated_at']} "
         f"latest_run_at={report['latest_run_at'] or 'none'} "
+        f"bronze_window={report['bronze_window_status']} "
+        f"bronze_files={report['bronze_files_downloaded']}/{report['bronze_files_expected']} "
+        f"bronze_low_volume={report['bronze_low_volume']} "
+        f"bronze_low_volume_streak={report['bronze_low_volume_streak']} "
         f"bronze={report['bronze_row_count']} "
         f"silver={report['silver_row_count']} "
         f"canonical={report['silver_canonical_row_count']} "
@@ -135,7 +191,14 @@ select
   gold_avg_happy_factor,
   gold_max_happy_factor,
   latest_gold_ingested_at,
-  latest_gold_published_at
+  latest_gold_published_at,
+  latest_bronze_source_window_start,
+  latest_bronze_source_window_end,
+  latest_bronze_ingestion_expected_file_count,
+  latest_bronze_ingestion_downloaded_file_count,
+  latest_bronze_ingestion_is_complete,
+  latest_bronze_ingestion_low_volume,
+  consecutive_complete_low_volume_run_count
 from `{metrics_table_fqn}`
 order by audit_run_at desc
 limit 1

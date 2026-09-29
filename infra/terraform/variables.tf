@@ -171,6 +171,30 @@ variable "pipeline_gdelt_max_files" {
   default     = 4
 }
 
+variable "pipeline_gdelt_publication_lag_minutes" {
+  description = "Fallback publication lag used when the GDELT lastupdate manifest is unavailable or invalid."
+  type        = number
+  default     = 60
+}
+
+variable "pipeline_gdelt_download_max_attempts" {
+  description = "Maximum per-resource GDELT download attempts, including the initial request."
+  type        = number
+  default     = 4
+}
+
+variable "pipeline_gdelt_download_backoff_seconds" {
+  description = "Comma-separated retry delays used between bounded GDELT download attempts."
+  type        = string
+  default     = "5,15,30"
+}
+
+variable "pipeline_gdelt_recent_file_hours" {
+  description = "Age boundary for cautiously retrying recent GDELT HTTP 400 and 404 responses."
+  type        = number
+  default     = 24
+}
+
 variable "pipeline_scheduler_name" {
   description = "Cloud Scheduler job name for pipeline execution."
   type        = string
@@ -213,6 +237,12 @@ variable "bronze_archive_job_name" {
   default     = "tidingsiq-bronze-archive"
 }
 
+variable "bronze_archive_container_image" {
+  description = "Optional immutable image for Bronze archive automation; defaults to pipeline_container_image when empty."
+  type        = string
+  default     = ""
+}
+
 variable "bronze_archive_scheduler_name" {
   description = "Cloud Scheduler job name for Bronze archive automation."
   type        = string
@@ -244,7 +274,7 @@ variable "bronze_archive_dry_run" {
 }
 
 variable "bronze_archive_delete_after_export" {
-  description = "When true, deletes eligible Bronze rows after export reconciliation passes."
+  description = "When true, prunes checkpoint-covered Bronze rows outside the 90-day ingestion and publication horizons; export still begins after 45 days."
   type        = bool
   default     = false
 }
@@ -288,6 +318,12 @@ variable "reporting_schedule_time_zone" {
   description = "Time zone for the reporting Cloud Scheduler cron expression."
   type        = string
   default     = "Asia/Kolkata"
+}
+
+variable "reporting_schedule_paused" {
+  description = "When true, keeps the reporting scheduler paused during controlled deployments."
+  type        = bool
+  default     = false
 }
 
 variable "enable_app_hosting" {
@@ -406,4 +442,11 @@ variable "app_backend_log_sample_rate" {
     condition     = var.app_backend_log_sample_rate >= 0 && var.app_backend_log_sample_rate <= 1
     error_message = "app_backend_log_sample_rate must be between 0.0 and 1.0."
   }
+}
+
+
+variable "bronze_archive_memory_limit" {
+  description = "Memory for the BigQuery/GCS archive orchestrator; independent of the ingestion parser."
+  type        = string
+  default     = "512Mi"
 }
