@@ -8,6 +8,9 @@ The [architecture](architecture.md) describes responsibilities; the
 
 ## Current State
 
+The [October 3 safeguards release](release_safeguards_20261003.md) records the
+latest verified frontend/publisher images, success gate and retention update.
+
 Verified **2 October 2026**: project `tidingsiq-dev`, region `asia-south1`, one active
 environment. The public URL is <https://tidingsiq-app-eglccrtc7q-el.a.run.app/>.
 
@@ -105,7 +108,7 @@ before enabling a newly created schedule:
 ```bash
 gcloud run jobs update <STATIC_PUBLISHER_JOB_NAME> --project=<GCP_PROJECT_ID> \
   --region=<REGION> --image=<PUBLISHER_IMAGE_DIGEST> \
-  --args="--project,<GCP_PROJECT_ID>,--bucket,<STATIC_FEED_BUCKET>,--location,<BIGQUERY_LOCATION>,--pipeline-region,<REGION>,--pipeline-job,<PIPELINE_JOB_NAME>"
+  --args="--project=<GCP_PROJECT_ID>,--bucket=<STATIC_FEED_BUCKET>,--location=<BIGQUERY_LOCATION>,--pipeline-region=<REGION>,--pipeline-job=<PIPELINE_JOB_NAME>"
 gcloud run jobs execute <STATIC_PUBLISHER_JOB_NAME> --project=<GCP_PROJECT_ID> \
   --region=<REGION> --wait
 ```

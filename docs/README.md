@@ -32,6 +32,8 @@ an old plan is not mistaken for the current operating procedure.
 
 ## Status and Reference
 
+- [October 3 safeguards release](release_safeguards_20261003.md): deployed pipeline-success gate, feed retention and stale-tab warning.
+
 - [Roadmap](roadmap.md): completed work and justified next steps.
 - [V3 scoring shadow](gold_scoring_v3_shadow.md): experimental model, not promoted.
 - [Legacy Streamlit](../app/streamlit/README.md): retained development app, not public production.

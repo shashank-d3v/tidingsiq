@@ -72,8 +72,9 @@ live feeds to preserve the retained edition; private audits still expire after
 45 days. Files are uploaded and read back before a generation-guarded manifest
 replacement. The revised publisher also verifies the latest pipeline execution
 succeeded and contains the metrics audit timestamp, then rechecks it before
-manifest replacement. These subsequent safeguards require a publisher release
-and Terraform apply; this dated rollout is not evidence of their deployment.
+manifest replacement. These subsequent safeguards were deployed in the
+[October 3 release](release_safeguards_20261003.md); this October 2 record
+describes the earlier rollout.
 
 Success logs include input articles, story count, suppression ratio, exact,
 fuzzy and syndication matches, largest cluster, and version. A suppression-rate

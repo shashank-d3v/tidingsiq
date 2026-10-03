@@ -105,7 +105,7 @@ resource "google_cloud_run_v2_job" "static_publisher" {
       timeout         = "600s"
       containers {
         image = var.static_publisher_image
-        args  = ["--project", var.project_id, "--bucket", google_storage_bucket.static_feed[0].name, "--location", var.bigquery_location, "--pipeline-region", local.automation_region, "--pipeline-job", var.pipeline_job_name]
+        args  = ["--project=${var.project_id}", "--bucket=${google_storage_bucket.static_feed[0].name}", "--location=${var.bigquery_location}", "--pipeline-region=${local.automation_region}", "--pipeline-job=${var.pipeline_job_name}"]
         resources {
           limits = { cpu = "1", memory = "512Mi" }
         }
