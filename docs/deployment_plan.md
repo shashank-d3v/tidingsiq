@@ -1,211 +1,145 @@
-# TidingsIQ Deployment Plan
+# TidingsIQ Deployment Guide
 
 ## Purpose
 
-This document captures the intended cloud deployment shape for TidingsIQ after the local-first pipeline and app slices are stable.
-
-It covers two separate concerns:
-
-- scheduled pipeline execution
-- hosted application serving
-
-They should remain separate in both infrastructure and IAM.
+This is the current deployment procedure, replacing the earlier future-only plan.
+The [architecture](architecture.md) describes responsibilities; the
+[operations runbook](operations_runbook.md) covers recovery and diagnostics.
 
 ## Current State
 
-Implemented in the repository:
+Verified **2 October 2026**: project `tidingsiq-dev`, region `asia-south1`, one active
+environment. The public URL is <https://tidingsiq-app-eglccrtc7q-el.a.run.app/>.
 
-- Terraform-managed GCP foundation
-- Bruin pipeline running locally against BigQuery
-- Streamlit app running locally against `gold.positive_news_feed`
-- pipeline container path for Cloud Run Job execution
-- Terraform automation for Artifact Registry, Cloud Run Job, and Cloud Scheduler
-- restricted egress is available as an opt-in Terraform slice but is disabled in the active dev deployment for cost control
-- reporting Cloud Run Job path and Monitoring-based email notifications
-- Bronze archive Cloud Run Job, scheduler, and Monitoring resources in repository, designed to reuse the pipeline image while running under a dedicated archive service account
-- Streamlit app container and Terraform hosting path for a Cloud Run service
-- public dashboard currently live on the direct Cloud Run URL: `https://tidingsiq-app-eglccrtc7q-el.a.run.app/`
+| Runtime | Trigger, Asia/Kolkata | Identity boundary |
+|---|---|---|
+| Bruin pipeline job | Daily 06:00 | Pipeline warehouse editor |
+| Report job | Daily 06:20 | Gold read-only plus BigQuery job submission |
+| Static publisher job | Daily 06:30 | Gold reader, job submission, feed-bucket objectUser |
+| Bronze archive job | 03:15 and 15:15 daily | Bronze editor and archive-bucket objectAdmin |
+| nginx frontend service | HTTP requests | Feed-bucket objectViewer, read-only mount |
 
-Not implemented as a public, always-on deployment contract:
+All four schedules were enabled. October 1 and 2 publisher executions succeeded.
+The October 2 story-deduplication canary also passed; see
+[matching, validation, and rollback](durable_story_deduplication.md).
+The dated [engagement rollout](engagement_rollout_20261002.md) records the latest
+frontend revision observed in this documentation set, following the story release.
+Observed settings were request-based billing, automatic scaling, zero minimum
+and two maximum instances, 1 vCPU/512 MiB. Verify live settings before a release.
+Streamlit remains in the repository, not in the public traffic path.
 
-- container build and release flow in GCP
-- a hardened public edge in front of the already-live direct Cloud Run app
+No CDN, load balancer, Cloud Armor, VPC connector, or NAT is active. Those optional
+Terraform modules should be enabled only for a demonstrated requirement.
 
-## Deployment Targets
+## Inputs and Infrastructure
 
-### 1. Pipeline Runtime
+Use the [Terraform input reference](../infra/terraform/README.md). Static serving
+requires `enable_app_hosting`, `enable_pipeline_reporting`, and
+`enable_static_dashboard`, plus pinned frontend/publisher image digests.
+`static_publish_schedule_paused` defaults to `true` for a guarded first rollout.
+The active environment has it set to `false` after successful verification.
 
-Recommended target:
+Keep local variables and credentials ignored. Inspect every plan for unrelated
+pipeline/archive changes. Service-level scaling is intentionally ignored by
+Terraform so a console emergency shutdown is not silently undone. Template
+min/max settings alone do not re-enable a manually stopped service.
 
-- Cloud Run Jobs
+## Frontend Release
 
-Recommended trigger:
+Build from a new allowlisted context, not the repository root:
 
-- Cloud Scheduler
+```bash
+python3 app/static/build_production.py --output <NEW_FRONTEND_CONTEXT>
+docker buildx build --platform linux/amd64 \
+  -t <FRONTEND_IMAGE_TAG> --push <NEW_FRONTEND_CONTEXT>
+```
 
-Recommended flow:
+Resolve the pushed digest and record it as `app_container_image`. The artifact
+contains only six public assets and nginx configuration. No local data, scripts,
+tests, README, credentials, or preview labels are shipped. Production data comes
+from the private GCS mount, not a build-time export.
 
-`Cloud Scheduler -> Cloud Run Job -> bruin run pipeline/bruin/pipeline.yml -> BigQuery`
+For an existing correctly configured service, stage the image without traffic:
 
-Example cadence target:
+```bash
+gcloud run services update <APP_SERVICE_NAME> --project=<GCP_PROJECT_ID> \
+  --region=<REGION> --image=<FRONTEND_IMAGE_DIGEST> \
+  --no-traffic --revision-suffix=<UNIQUE_RELEASE_SUFFIX>
+```
 
-- once daily
-- timezone: `<SCHEDULE_TIME_ZONE>`
-- target run time: `06:00` IST
+Inspect revision configuration/readiness and the [release checklist](public_release_checklist.md).
+Promote only the verified static revision:
 
-Why this fits:
+```bash
+gcloud run services update-traffic <APP_SERVICE_NAME> --project=<GCP_PROJECT_ID> \
+  --region=<REGION> --to-revisions=<STATIC_REVISION_NAME>=100
+```
 
-- low operational overhead
-- inexpensive for batch execution
-- no always-on compute
-- clean fit for the current Bruin plus BigQuery architecture
+If the service was deliberately disabled, select the static revision while it is
+still stopped; explicitly re-enable automatic scaling only when ready. Follow the
+runbook's emergency-stop procedure if public checks fail. Do not automatically
+restore the costly Streamlit revision.
 
-Expected components:
+## Publisher Release
 
-- Artifact Registry repository for the pipeline container image
-- Cloud Run Job for Bruin execution
-- Cloud Scheduler job for cadence
-- dedicated pipeline service account
-- Secret Manager or environment-based runtime configuration
+Use a separate minimal context. `Dockerfile.publisher` expects **flat filenames**:
 
-Default networking:
+```bash
+mkdir <NEW_PUBLISHER_CONTEXT>
+cp app/static/Dockerfile.publisher <NEW_PUBLISHER_CONTEXT>/Dockerfile
+cp scripts/publish_static_feed.py app/static/build_snapshot.py \
+  app/static/story_matcher.py <NEW_PUBLISHER_CONTEXT>/
+docker buildx build --platform linux/amd64 \
+  -t <PUBLISHER_IMAGE_TAG> --push <NEW_PUBLISHER_CONTEXT>
+```
 
-- use Cloud Run default internet egress
-- do not provision a Serverless VPC Access connector, Cloud NAT, or static outbound IP for the dev pipeline
-- only enable the restricted-egress slice if an external dependency requires IP allowlisting, a private VPC-only dependency is introduced, or audit requirements explicitly demand connector-backed outbound control
+Record the resolved digest in `static_publisher_image`. Before releasing the
+revised publisher, apply a reviewed Terraform plan that grants its identity
+`roles/run.viewer` on the pipeline job and removes live-feed age expiry. Confirm
+those settings before the canary; an image-only update cannot provision them.
+This repository change alone does not update the deployed job or bucket.
 
-Pipeline service account responsibilities:
+Set the required pipeline job/region arguments, update the job, and run a canary
+before enabling a newly created schedule:
 
-- run BigQuery jobs
-- read and write the `bronze`, `silver`, and `gold` datasets plus the supporting `bronze_staging` and `gold_staging` datasets used by merge load paths
-- read any required runtime secrets
-- write logs to Cloud Logging
+```bash
+gcloud run jobs update <STATIC_PUBLISHER_JOB_NAME> --project=<GCP_PROJECT_ID> \
+  --region=<REGION> --image=<PUBLISHER_IMAGE_DIGEST> \
+  --args="--project,<GCP_PROJECT_ID>,--bucket,<STATIC_FEED_BUCKET>,--location,<BIGQUERY_LOCATION>,--pipeline-region,<REGION>,--pipeline-job,<PIPELINE_JOB_NAME>"
+gcloud run jobs execute <STATIC_PUBLISHER_JOB_NAME> --project=<GCP_PROJECT_ID> \
+  --region=<REGION> --wait
+```
 
-Current prep work already in the repo:
+Verify success logs, manifest date, referenced hashes, gzip sizes, approved fields,
+and a real browser load. A successful job is necessary but does not replace HTTP
+verification. Manifest publication occurs only after uploaded data validation;
+failed publication retains the old edition. Reflect any schedule pause/resume in
+local Terraform variables and reconcile state after imperative deployments.
 
-- a pipeline Dockerfile
-- a container entrypoint that writes `.bruin.yml` from environment variables
-- a default container command that runs `bruin run pipeline/bruin/pipeline.yml`
-- Terraform resources for the Artifact Registry repository, Cloud Run Job, and Cloud Scheduler trigger
-- Terraform resources for optional dedicated egress VPC, connector, NAT path, deny rules, and blocked-egress monitoring when restricted egress is deliberately enabled
-- a reusable Cloud Run Job and Cloud Scheduler configuration path
+## Pipeline, Reporting, and Archive Releases
 
-Rollout guidance:
+Keep their releases independent of the frontend. Build the pipeline image using
+`pipeline/bruin/Dockerfile`, pin the intended runtime digests, and manually smoke
+test changed jobs. The archive has its own `bronze_archive_container_image`
+override; do not overwrite it blindly during a pipeline-only release. A warehouse
+reset is an exceptional destructive operation, not a normal deployment step.
 
-- manual Cloud Run execution should still stay the first smoke check after image changes
-- keep restricted egress disabled for the low-cost dev posture unless static outbound IP or private VPC access becomes a real requirement
-- when restricted egress is enabled, keep the pipeline and Bronze archive schedulers paused until public article validation still succeeds through the connector-backed path
-- review blocked firewall logs after the first manual run and first scheduled run only when restricted egress is enabled; unusual publisher redirects may need rule tuning before steady-state activation
-- the reporting and Bronze archive schedulers are separate automation paths and should not be paused for a pipeline-only rollout unless their own runtime is being changed
-- the pipeline defaults to the GDELT HTTPS feed; SSL-verification overrides are not part of the deployed runtime path
-- a warehouse reset should happen before regular scheduled execution is activated for the clean-start rollout
+See [pipeline runtime instructions](../pipeline/bruin/README.md) and the
+[operations runbook](operations_runbook.md#image-and-deployment-debug).
 
-### 1A. Reporting Runtime
+## Live Data and Billing References
 
-Recommended target:
+After the October 2 story release, the default range retained 6,493 articles in
+4,532 groups (1,042,936 gzip bytes); the 30-day range retained 17,851 articles in
+13,135 groups (2,966,139 gzip bytes). These dated observations supersede the
+earlier same-day collapsed export, not fixed limits. Open pages retain their
+edition until reload.
 
-- separate Cloud Run Job
+The [September cost estimate](history/static_dashboard_cost_estimate_20260930.md)
+remains a dated, assumption-based budget. Request-based billing removes idle
+minimum-instance charges at min=0; requests, start/stop time, transfer, storage,
+and jobs can still cost money. No documentation claim establishes a current bill.
 
-Recommended flow:
-
-`Cloud Scheduler -> Cloud Run Job -> query BigQuery metrics -> emit DAILY_PIPELINE_SUMMARY log -> Monitoring email`
-
-Current implementation choice:
-
-- use native Monitoring email notifications for both:
-  - immediate pipeline failure alerts
-  - daily summary delivery
-- avoid a third-party email API dependency in this project phase
-- keep reporting on default Cloud Run outbound networking because it does not need article-fetching egress
-
-### 2. Application Runtime
-
-Recommended target:
-
-- direct public Cloud Run service
-
-Recommended flow:
-
-`Browser -> Cloud Run service -> Streamlit app -> BigQuery gold.positive_news_feed`
-
-Why this fits:
-
-- simple deployment model
-- scales down when idle
-- matches Streamlit's web-service execution model
-- keeps the app separate from pipeline orchestration
-
-Expected components:
-
-- Artifact Registry repository for the app container image
-- Cloud Run service for Streamlit
-- dedicated app service account
-- direct `run.app` HTTPS endpoint
-
-App service account responsibilities:
-
-- read from `gold.positive_news_feed`
-- run BigQuery query jobs
-- write logs to Cloud Logging
-
-The app should not need write access to Bronze or Silver.
-
-Current serving safety posture:
-
-- keep the app public and unauthenticated
-- keep `app_max_instance_count` conservative so abusive traffic cannot scale far
-- preserve the current bounded query model:
-  - fixed lookback options only
-  - fixed brief page size
-  - no free-form query/search inputs
-  - no unbounded row or page parameters
-
-Rollout guidance:
-
-- verify the direct `run.app` URL serves the app after deploy
-- re-test page refreshes, pagination, and filter changes on the direct Cloud Run URL
-- keep the instance cap conservative until real traffic justifies additional hardening
-- if public traffic later warrants stricter protection or custom-domain branding, the optional AppEdge slice can be enabled in front of the same Cloud Run service
-
-## Recommended Separation
-
-The pipeline and app should not share the same runtime identity.
-
-Keep these separate:
-
-- container images
-- Cloud Run resources
-- service accounts
-- environment variables
-- deployment cadence
-- egress posture for workloads that fetch external URLs versus workloads that only query first-party services, while keeping the active dev default on normal Cloud Run internet egress
-
-This keeps the architecture easier to reason about and easier to explain in a portfolio review.
-
-## Suggested Terraform Scope For Future Work
-
-When cloud deployment work starts, Terraform should likely add:
-
-- Artifact Registry repositories
-- Cloud Run Job for Bruin
-- Cloud Scheduler job for the pipeline cadence
-- optional controlled VPC egress only if static outbound IP, third-party IP allowlisting, or private VPC access becomes necessary
-- Cloud Run service for Streamlit
-- optional external HTTPS load balancer and Cloud Armor for future app hardening
-- service-account IAM for both runtimes
-- Secret Manager bindings if secrets are introduced
-
-The app hosting slice is sufficient for the active public deployment. The app-edge slice remains available as an optional future hardening layer.
-
-## Suggested Delivery Order
-
-1. Retention and archive operations for Bronze, Silver, and Gold
-1. Verify the Monitoring email recipient has confirmed any verification email
-2. Keep the public app healthy on direct Cloud Run
-3. Add CI or release workflow for image build and deployment
-
-## Open Questions
-
-- how often should the pipeline run in cloud automation
-- whether the pipeline and app should live in the same GCP project or be split later
-- what level of monitoring and alerting is worth adding for a portfolio project
+Historical rollout IDs/digests are preserved in the [rollout report](history/static_dashboard_deployment_20260930.md).
+For the next release, read live settings rather than deploying a historical digest
+or applying an old saved Terraform plan.

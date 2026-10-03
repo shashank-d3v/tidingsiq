@@ -1,0 +1,1397 @@
+{
+  "description": "Final reserved headline-level check: September 29 lexical candidate pairs were randomly selected from families excluded from both earlier fixtures. Labels assigned before evaluating the frozen v2 rules; no article-body ground truth. This set became a regression fixture after targeted publisher/schedule corrections; final scores are not untouched blind validation.",
+  "pairs": [
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "0c5527999c991df43a39a465cd4f36a621ed4d81e447bf8874e665872d2d5674",
+        "happy_factor": "79.54",
+        "ingested_at": "2026-08-13 00:30:34",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-13 00:00:00",
+        "serving_date": "2026-08-13",
+        "source_name": "wsls.com",
+        "title": "Jonas Brothers to headline halftime show for NFL season opener in Australia",
+        "tone_score": "5.90717299578059",
+        "url": "https://www.wsls.com/entertainment/2026/08/12/jonas-brothers-to-headline-halftime-show-for-nfl-season-opener-in-australia/"
+      },
+      "b": {
+        "article_id": "c76cb6d682732984a8d0828aab3074adc86156d6a3e89baa775de02dee28a359",
+        "happy_factor": "78.14",
+        "ingested_at": "2026-08-13 00:30:34",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-13 00:15:00",
+        "serving_date": "2026-08-13",
+        "source_name": "sentinelandenterprise.com",
+        "title": "Jonas Brothers to headline halftime show for NFL season opener",
+        "tone_score": "5.62770562770563",
+        "url": "https://www.sentinelandenterprise.com/2026/08/12/jonas-brothers-halftime-show/"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "af68e064c91be1c9adddf8a2ed73fb94204085084dea8e4ab1e2105b9c422c4a",
+        "happy_factor": "67.86",
+        "ingested_at": "2026-08-26 13:22:20",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 12:00:00",
+        "serving_date": "2026-08-26",
+        "source_name": "savonanews.it",
+        "title": "GrAudio Flash delle 11:50 del 26 agosto",
+        "tone_score": "3.57142857142857",
+        "url": "https://www.savonanews.it/2026/08/26/leggi-notizia/argomenti/graudio/articolo/graudio-flash-delle-1150-del-26-agosto-1.html"
+      },
+      "b": {
+        "article_id": "f5689be4060a8de732d6e16445309db7969c9adb047ea23b7308a9e22c1b237f",
+        "happy_factor": "67.86",
+        "ingested_at": "2026-09-28 11:30:24",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 08:45:00",
+        "serving_date": "2026-08-26",
+        "source_name": "savonanews.it",
+        "title": "GrAudio Flash delle 08:50 del 26 agosto",
+        "tone_score": "3.5714285714",
+        "url": "https://www.savonanews.it/2026/08/26/leggi-notizia/argomenti/graudio/articolo/graudio-flash-delle-0850-del-26-agosto-1.html"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "f168fc3e63991d8a0d4c1d3c32d6c8e9badaecea03137f205afa202a4a636501",
+        "happy_factor": "66.36",
+        "ingested_at": "2026-07-23 00:30:38",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-23 00:15:00",
+        "serving_date": "2026-07-23",
+        "source_name": "armidaleexpress.com.au",
+        "title": "Samsung: New smartwatches redefine Australian health management | The Armidale Express",
+        "tone_score": "3.27102803738318",
+        "url": "https://www.armidaleexpress.com.au/story/9315922/samsung-new-smartwatches-redefine-australian-health-management/"
+      },
+      "b": {
+        "article_id": "a8f5f8e3403b90946d349ab10a1697b80b85f254f1a275ed0b0a14a3e465bda0",
+        "happy_factor": "66.36",
+        "ingested_at": "2026-07-23 00:30:38",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-23 00:15:00",
+        "serving_date": "2026-07-23",
+        "source_name": "camdencourier.com.au",
+        "title": "Samsung: New smartwatches redefine Australian health management | Camden Haven Courier",
+        "tone_score": "3.27102803738318",
+        "url": "https://www.camdencourier.com.au/story/9315922/samsung-new-smartwatches-redefine-australian-health-management/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "2509be6964acb99cc6c534da2ee8a61c080ea0ae08e4d1f3edf5be23b9f29a5c",
+        "happy_factor": "83.44",
+        "ingested_at": "2026-09-28 11:30:59",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 14:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "krny.com",
+        "title": "'Not Suitable For Work' creator, cast react to show's cancellation | Y102",
+        "tone_score": "6.6889632107",
+        "url": "https://krny.com/2026/08/26/not-suitable-for-work-creator-cast-react-to-shows-cancellation/"
+      },
+      "b": {
+        "article_id": "365a79cc106136bbba2dc929eacd15a0c510ad0c0f097cde7aabd3ee691a448f",
+        "happy_factor": "81.65",
+        "ingested_at": "2026-09-28 11:30:59",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 13:45:00",
+        "serving_date": "2026-08-26",
+        "source_name": "1065thearch.com",
+        "title": "'Not Suitable For Work' creator, cast react to show's cancellation – 106.5 The Arch",
+        "tone_score": "6.3291139241",
+        "url": "https://www.1065thearch.com/arch-music-news/not-suitable-for-work-creator-cast-react-to-shows-cancellation/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "fcb7bedf26ac0b2317cb3b7810ff3374d059c424995d08ae0df8b5e912217877",
+        "happy_factor": "88.02",
+        "ingested_at": "2026-07-07 00:30:29",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-07 00:15:00",
+        "serving_date": "2026-07-07",
+        "source_name": "nbcdfw.com",
+        "title": "Adam Sandler gave Taylor Swift, Travis Kelce this marriage advice – NBC 5 Dallas-Fort Worth",
+        "tone_score": "7.60456273764259",
+        "url": "https://www.nbcdfw.com/entertainment/entertainment-news/adam-sandler-taylor-swift-travis-kelce-andy-reid/4045388/"
+      },
+      "b": {
+        "article_id": "7942b6cb80e629abe2406828d08fe5b6bc1ccee648f8344a2de981d4e0a6ae3f",
+        "happy_factor": "85.29",
+        "ingested_at": "2026-07-07 00:30:29",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-06 23:45:00",
+        "serving_date": "2026-07-06",
+        "source_name": "nbcphiladelphia.com",
+        "title": "Adam Sandler gave Taylor Swift, Travis Kelce this marriage advice – NBC10 Philadelphia",
+        "tone_score": "7.05882352941176",
+        "url": "https://www.nbcphiladelphia.com/entertainment/entertainment-news/adam-sandler-taylor-swift-travis-kelce-andy-reid/4428972/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "b797b39134534e590280357f146a60db84e48ed7f0823dd07bdf5145f7398e4f",
+        "happy_factor": "71.9",
+        "ingested_at": "2026-07-24 00:30:38",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-24 00:30:00",
+        "serving_date": "2026-07-24",
+        "source_name": "iheart.com",
+        "title": "When Success Feels Overwhelming | Loren LoRosa Gets Vulnerable | The Z92.3",
+        "tone_score": "4.37956204379562",
+        "url": "https://kiiz.iheart.com/featured/breakfast-club/content/2026-07-23-51-the-breakfast-club-when-success-feels-overwhelming-loren-lorosa-gets-vul/"
+      },
+      "b": {
+        "article_id": "292160c14d720d58e1920b37717c6b5f621d65a1a369818fbb98e8e77f9b71f0",
+        "happy_factor": "71.9",
+        "ingested_at": "2026-07-24 00:30:38",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-24 00:00:00",
+        "serving_date": "2026-07-24",
+        "source_name": "iheart.com",
+        "title": "When Success Feels Overwhelming | Loren LoRosa Gets Vulnerable | 105.3 The Beat",
+        "tone_score": "4.37956204379562",
+        "url": "https://beat1053.iheart.com/featured/breakfast-club/content/2026-07-23-51-the-breakfast-club-when-success-feels-overwhelming-loren-lorosa-gets-vul/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "d2c5cc953a5ccbf2599b9ee803b748c09f6cd489377a698ce8a77a3b7f8935d6",
+        "happy_factor": "66.89",
+        "ingested_at": "2026-09-28 07:54:54",
+        "language": "und",
+        "mentioned_country_name": "Gambia",
+        "published_at": "2026-09-28 06:15:00",
+        "serving_date": "2026-09-28",
+        "source_name": "hepburnadvocate.com.au",
+        "title": "Gaffel am Dom: Inside the 500-year-old Cologne beer hall | The Advocate - Hepburn",
+        "tone_score": "3.37711069418386",
+        "url": "https://www.hepburnadvocate.com.au/story/9353514/gaffel-am-dom-inside-the-500-year-old-cologne-beer-hall/"
+      },
+      "b": {
+        "article_id": "932f279ba4caa5187cc22d08ccd2cccedb7a8afdd986b794a5459d1814406299",
+        "happy_factor": "66.89",
+        "ingested_at": "2026-09-28 07:54:54",
+        "language": "und",
+        "mentioned_country_name": "Gambia",
+        "published_at": "2026-09-28 05:30:00",
+        "serving_date": "2026-09-28",
+        "source_name": "examiner.com.au",
+        "title": "Gaffel am Dom: Inside the 500-year-old Cologne beer hall | The Examiner",
+        "tone_score": "3.37711069418386",
+        "url": "https://www.examiner.com.au/story/9353514/gaffel-am-dom-inside-the-500-year-old-cologne-beer-hall/"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "0882f1e4e1ca74155aeed31f743f0686e7ac57847c569964f6656b06a1c87f36",
+        "happy_factor": "67.86",
+        "ingested_at": "2026-07-05 00:30:24",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-05 00:15:00",
+        "serving_date": "2026-07-05",
+        "source_name": "tvguide.co.uk",
+        "title": "Breakfast on BBC News: full details and when it's on",
+        "tone_score": "3.57142857142857",
+        "url": "https://www.tvguide.co.uk/schedule/e09e014e-84d2-5875-afe5-54c2a399671b/breakfast"
+      },
+      "b": {
+        "article_id": "ac43ec70fa4dc5ff926d1a1fceaeb35d8088cf6cc00f594ccea56b2aba3ea43d",
+        "happy_factor": "66.95",
+        "ingested_at": "2026-07-03 00:30:31",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-03 00:15:00",
+        "serving_date": "2026-07-03",
+        "source_name": "tvguide.co.uk",
+        "title": "Breakfast on BBC Two HD: full details and when it's on",
+        "tone_score": "3.38983050847458",
+        "url": "https://www.tvguide.co.uk/schedule/0f2fbc9c-d014-5fdb-b0b0-1b45ed9c6c26/breakfast"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "9ecf894c2b7794e2f20decfc713159376e69d239946d1579ab29291dd78055f0",
+        "happy_factor": "72.99",
+        "ingested_at": "2026-09-28 11:22:50",
+        "language": "en",
+        "mentioned_country_name": "Netherlands",
+        "published_at": "2026-09-19 00:00:00",
+        "serving_date": "2026-09-19",
+        "source_name": "wellingtontimes.com.au",
+        "title": "Discover top 10 experiences in the Netherlands' second city, Rotterdam | Wellington Times",
+        "tone_score": "4.5977011494",
+        "url": "https://www.wellingtontimes.com.au/story/9351538/discover-top-10-experiences-in-the-netherlands-second-city-rotterdam/"
+      },
+      "b": {
+        "article_id": "6ff766d23cd0e9868da56319debb72dc079d7a487c3412d3f49ed717ccd0f2ae",
+        "happy_factor": "72.99",
+        "ingested_at": "2026-09-28 11:22:50",
+        "language": "en",
+        "mentioned_country_name": "Netherlands",
+        "published_at": "2026-09-18 23:45:00",
+        "serving_date": "2026-09-18",
+        "source_name": "portnews.com.au",
+        "title": "Discover top 10 experiences in the Netherlands' second city, Rotterdam | Port Macquarie News",
+        "tone_score": "4.5977011494",
+        "url": "https://www.portnews.com.au/story/9351538/discover-top-10-experiences-in-the-netherlands-second-city-rotterdam/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "a84a0b79a7ea48dde71f9c9bdf5fca708eda46e7316ac7345762343ba2d72a7e",
+        "happy_factor": "75.42",
+        "ingested_at": "2026-07-25 00:30:28",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-25 00:30:00",
+        "serving_date": "2026-07-25",
+        "source_name": "iheart.com",
+        "title": "Matthew Knowles Reveals NEW Destiny's Child Music, Unreleased Videos & Futu | Real 105.1",
+        "tone_score": "5.08474576271187",
+        "url": "https://real1051.iheart.com/featured/breakfast-club/content/2026-07-24-51-the-breakfast-club-matthew-knowles-reveals-new-destinys-child-music-unre/"
+      },
+      "b": {
+        "article_id": "f235591c3350782d9035ff0e34aad5ef15e5897632d435eec16cc11eb8a30043",
+        "happy_factor": "75.42",
+        "ingested_at": "2026-07-25 00:30:28",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-25 00:15:00",
+        "serving_date": "2026-07-25",
+        "source_name": "iheart.com",
+        "title": "Matthew Knowles Reveals NEW Destiny's Child Music, Unreleased Videos & Futu | The Z92.3",
+        "tone_score": "5.08474576271187",
+        "url": "https://kiiz.iheart.com/featured/breakfast-club/content/2026-07-24-51-the-breakfast-club-matthew-knowles-reveals-new-destinys-child-music-unre/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "619f87d9526c3ff7d7efd9b143a60aca25f9c383f2aca22905265ddc64268cac",
+        "happy_factor": "79.8",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-11 00:30:00",
+        "serving_date": "2026-07-11",
+        "source_name": "ksnblocal4.com",
+        "title": "LOVB Nebraska block party with Dani Busboom Kelly and Jordan Larson",
+        "tone_score": "5.96026490066225",
+        "url": "https://www.ksnblocal4.com/2026/07/10/live-6pm-lovb-nebraska-block-party-with-dani-busboom-kelly-jordan-larson/"
+      },
+      "b": {
+        "article_id": "a037432528552c86a2193c76601702c3372009b82f220feb7a4f6c77d8462888",
+        "happy_factor": "75.42",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-10 23:45:00",
+        "serving_date": "2026-07-10",
+        "source_name": "knopnews2.com",
+        "title": "LIVE: LOVB Nebraska block party with Dani Busboom Kelly and Jordan Larson",
+        "tone_score": "5.08474576271187",
+        "url": "https://www.knopnews2.com/2026/07/10/live-6pm-lovb-nebraska-block-party-with-dani-busboom-kelly-jordan-larson/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "cda96d765341cf5c40ab0daf2cf61c810adf8f41972e3ec6cd71159d9b1427ad",
+        "happy_factor": "70.9",
+        "ingested_at": "2026-08-26 14:21:59",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 00:00:00",
+        "serving_date": "2026-08-26",
+        "source_name": "americantop40.com",
+        "title": "Rumer Willis Grateful For 'Huge Win' Amid Dad Bruce's Dementia Battle",
+        "tone_score": "3.77906976744186",
+        "url": "https://www.americantop40.com/content/2026-08-25-rumer-willis-grateful-for-huge-win-amid-dad-bruces-dementia-battle/"
+      },
+      "b": {
+        "article_id": "3aa9c94571d85a74e28744bc9ea2f89a97559864ba246f3d9bde2c1679740c4b",
+        "happy_factor": "70.9",
+        "ingested_at": "2026-08-26 14:07:30",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-25 23:15:00",
+        "serving_date": "2026-08-25",
+        "source_name": "iheart.com",
+        "title": "Rumer Willis Grateful For 'Huge Win' Amid Dad Bruce's Dementia Battle | Sunny 102.3 FM",
+        "tone_score": "3.77906976744186",
+        "url": "https://sunny102fm.iheart.com/content/2026-08-25-rumer-willis-grateful-for-huge-win-amid-dad-bruces-dementia-battle/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "1859396fdf94e6037d1c2f1537e0409d672c3c0e9f67490f2dc021fd6026f1d3",
+        "happy_factor": "78.13",
+        "ingested_at": "2026-07-14 00:30:28",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-13 23:45:00",
+        "serving_date": "2026-07-13",
+        "source_name": "ks95.com",
+        "title": "Noah Kahan's ﻿'The Great Divide﻿' certified Platinum – KS95 94.5",
+        "tone_score": "5.625",
+        "url": "https://www.ks95.com/noah-kahans-the-great-divide-certified-platinum/"
+      },
+      "b": {
+        "article_id": "c27554a4d5462c4eb2d99f9b64626a08588f78bd03a5145383ba76f66498a59e",
+        "happy_factor": "76.49",
+        "ingested_at": "2026-07-14 00:30:28",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-13 23:45:00",
+        "serving_date": "2026-07-13",
+        "source_name": "powerorlando.com",
+        "title": "Noah Kahan's ﻿'The Great Divide﻿' certified Platinum",
+        "tone_score": "5.29801324503311",
+        "url": "https://www.powerorlando.com/news/noah-kahans-the-great-divide-certified-platinum/AOMEPBHRLY25VNCFKQCNPWU26Y/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "36ed2ce91f6499b6299b688db8a93ce208d33b93bd054eaf983ea2cea81a0803",
+        "happy_factor": "72.99",
+        "ingested_at": "2026-09-28 11:22:50",
+        "language": "en",
+        "mentioned_country_name": "Netherlands",
+        "published_at": "2026-09-19 00:15:00",
+        "serving_date": "2026-09-19",
+        "source_name": "hardenexpress.com.au",
+        "title": "Discover top 10 experiences in the Netherlands' second city, Rotterdam | Harden Murrumburrah Express",
+        "tone_score": "4.5977011494",
+        "url": "https://www.hardenexpress.com.au/story/9351538/discover-top-10-experiences-in-the-netherlands-second-city-rotterdam/"
+      },
+      "b": {
+        "article_id": "f30f1a92dbe958cdad1eeef7fa4b2834fb8a5943defa856139e272fe5f833950",
+        "happy_factor": "72.99",
+        "ingested_at": "2026-09-28 11:22:50",
+        "language": "en",
+        "mentioned_country_name": "Netherlands",
+        "published_at": "2026-09-18 23:45:00",
+        "serving_date": "2026-09-18",
+        "source_name": "tenterfieldstar.com.au",
+        "title": "Discover top 10 experiences in the Netherlands' second city, Rotterdam | Tenterfield Star",
+        "tone_score": "4.5977011494",
+        "url": "https://www.tenterfieldstar.com.au/story/9351538/discover-top-10-experiences-in-the-netherlands-second-city-rotterdam/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "7d9684c984de881b23cd7283b491feb7d1a58f28ba1a8b8dee48e8d7e6ea764f",
+        "happy_factor": "85.35",
+        "ingested_at": "2026-07-16 00:30:27",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-15 23:45:00",
+        "serving_date": "2026-07-15",
+        "source_name": "kixi.com",
+        "title": "KISS reveals details of Ace Frehley tribute at KISS Kruise: Land-locked in Vegas – AM 880 KIXI",
+        "tone_score": "7.07070707070707",
+        "url": "https://kixi.com/kiss-reveals-details-of-ace-frehley-tribute-at-kiss-kruise-land-locked-in-vegas/"
+      },
+      "b": {
+        "article_id": "c5213a4a409ae29fad9f4400e1229b21b40a5bfd0b8eda584d6e24e0c19ec4aa",
+        "happy_factor": "83.33",
+        "ingested_at": "2026-07-16 00:30:27",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-16 00:15:00",
+        "serving_date": "2026-07-16",
+        "source_name": "eagledayton.com",
+        "title": "KISS reveals details of Ace Frehley tribute at KISS Kruise: Land-locked in Vegas",
+        "tone_score": "6.66666666666667",
+        "url": "https://www.eagledayton.com/news/kiss-reveals-details-ace-frehley-tribute-kiss-kruise-land-locked-vegas/ZBUIKOHERI2FLDNMCHWW5CXXCI/"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "8f6a70c9248692bcf978b74190e65ccad29cac8e674af9fb8afeab2d1eaf46d3",
+        "happy_factor": "80.93",
+        "ingested_at": "2026-07-14 00:30:28",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-14 00:30:00",
+        "serving_date": "2026-07-14",
+        "source_name": "nationnews.com",
+        "title": "Home - nationnews.com - Page 13666",
+        "tone_score": "6.18556701030928",
+        "url": "https://nationnews.com/page/13666/"
+      },
+      "b": {
+        "article_id": "a6b5b0713041d8a70cc345c34fe4434df60f4e2e7eba314152b3de6ced3e38bf",
+        "happy_factor": "71.28",
+        "ingested_at": "2026-07-15 00:30:33",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-15 00:00:00",
+        "serving_date": "2026-07-15",
+        "source_name": "nationnews.com",
+        "title": "Home - nationnews.com - Page 13667",
+        "tone_score": "4.25531914893617",
+        "url": "https://nationnews.com/page/13667/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "47741639ca61e9724ea2beac778dc9c9f87cd449d797f8384fce72927c9e6c8e",
+        "happy_factor": "94.28",
+        "ingested_at": "2026-09-28 11:16:12",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-09-04 00:30:00",
+        "serving_date": "2026-09-04",
+        "source_name": "thecourier.com.au",
+        "title": "Dulux unveils 2027 colour forecast for Australian homes | The Courier",
+        "tone_score": "8.8552915767",
+        "url": "https://www.thecourier.com.au/story/9339093/dulux-unveils-2027-colour-forecast-for-australian-homes/"
+      },
+      "b": {
+        "article_id": "77706d35338c7c80fadbaadfd8fe2cd5fe07ccbb6c5618438fd7b7982d9490c7",
+        "happy_factor": "92.48",
+        "ingested_at": "2026-09-28 11:16:12",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-09-04 00:30:00",
+        "serving_date": "2026-09-04",
+        "source_name": "edenmagnet.com.au",
+        "title": "Dulux unveils 2027 colour forecast for Australian homes | Magnet",
+        "tone_score": "8.4967320261",
+        "url": "https://www.edenmagnet.com.au/story/9339093/dulux-unveils-2027-colour-forecast-for-australian-homes/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "ad739ff4c5e8f9726680f7be659c597bc913b165da0bc9c80f9cdf98fe97f918",
+        "happy_factor": "70.62",
+        "ingested_at": "2026-07-06 00:30:30",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-06 00:15:00",
+        "serving_date": "2026-07-06",
+        "source_name": "macleayargus.com.au",
+        "title": "Australians embrace tiny houses as winter's top new travel trend | The Macleay Argus",
+        "tone_score": "4.12465627864345",
+        "url": "https://www.macleayargus.com.au/story/9303354/australians-embrace-tiny-houses-as-winters-top-new-travel-trend/"
+      },
+      "b": {
+        "article_id": "60c8fec0ab17ebbb70a2c3e3dd843b871b4e8d12ee5240be140c2ab8b2312ef7",
+        "happy_factor": "70.62",
+        "ingested_at": "2026-07-06 00:30:30",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-05 23:45:00",
+        "serving_date": "2026-07-05",
+        "source_name": "naroomanewsonline.com.au",
+        "title": "Australians embrace tiny houses as winter's top new travel trend | Narooma News",
+        "tone_score": "4.12465627864345",
+        "url": "https://www.naroomanewsonline.com.au/story/9303354/australians-embrace-tiny-houses-as-winters-top-new-travel-trend/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "327335c0738faed101602f25d967b15df6d308371aeba9f5bdff1f53269b79e9",
+        "happy_factor": "83.44",
+        "ingested_at": "2026-08-26 14:24:41",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 12:30:00",
+        "serving_date": "2026-08-26",
+        "source_name": "mix929.com",
+        "title": "'Not Suitable For Work' creator, cast react to show's cancellation | Mix 92.9 | Your Life, Your Music",
+        "tone_score": "6.68896321070234",
+        "url": "https://mix929.com/2026/08/26/not-suitable-for-work-creator-cast-react-to-shows-cancellation/"
+      },
+      "b": {
+        "article_id": "b0c37e7a5ce31769a4164be2f58d90dfe5dbea4a49e0426c4eb1b9945c59c9fa",
+        "happy_factor": "81.65",
+        "ingested_at": "2026-09-28 11:30:59",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 13:45:00",
+        "serving_date": "2026-08-26",
+        "source_name": "ks95.com",
+        "title": "'Not Suitable For Work' creator, cast react to show's cancellation – KS95 94.5",
+        "tone_score": "6.3291139241",
+        "url": "https://www.ks95.com/not-suitable-for-work-creator-cast-react-to-shows-cancellation/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "75a8a1909929aa59e963bd068ba848b79f03926e51640e56df8b211ec731b7e7",
+        "happy_factor": "76.34",
+        "ingested_at": "2026-09-28 11:25:54",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-09-26 00:00:00",
+        "serving_date": "2026-09-26",
+        "source_name": "portstephensexaminer.com.au",
+        "title": "From budget to luxe, here are the season's best Aussie cruises | Port Stephens Examiner",
+        "tone_score": "5.2674230146",
+        "url": "https://www.portstephensexaminer.com.au/story/9353319/from-budget-to-luxe-here-are-the-seasons-best-aussie-cruises/"
+      },
+      "b": {
+        "article_id": "043c06bab0be42ea7ea44a7b513f12ccfde2f8e0d0119d4e45782b9c6ac0e128",
+        "happy_factor": "74.3",
+        "ingested_at": "2026-09-28 11:25:54",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-09-26 00:00:00",
+        "serving_date": "2026-09-26",
+        "source_name": "edenmagnet.com.au",
+        "title": "From budget to luxe, here are the season's best Aussie cruises | Magnet",
+        "tone_score": "4.8599670511",
+        "url": "https://www.edenmagnet.com.au/story/9353319/from-budget-to-luxe-here-are-the-seasons-best-aussie-cruises/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "c900aa006aeda726f8231273f40a31f5c954ecd5675a2ab872c9f0f54d6faf2f",
+        "happy_factor": "70.67",
+        "ingested_at": "2026-09-28 11:32:48",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-30 00:30:00",
+        "serving_date": "2026-08-30",
+        "source_name": "ocregister.com",
+        "title": "Fans flock to Olivia Rodrigo's Daisy Chain Fields Festival in Irvine – Orange County Register",
+        "tone_score": "4.1336851363",
+        "url": "https://www.ocregister.com/2026/08/29/fans-flock-to-olivia-rodrigos-daisy-chain-fields-festival-in-irvine/"
+      },
+      "b": {
+        "article_id": "774b196fb88a1dfce2a1117640cc4ada7fb841ad880497a4c2e34f8b269ff00a",
+        "happy_factor": "70.67",
+        "ingested_at": "2026-09-28 11:32:48",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-29 23:45:00",
+        "serving_date": "2026-08-29",
+        "source_name": "whittierdailynews.com",
+        "title": "Fans flock to Olivia Rodrigo's Daisy Chain Fields Festival in Irvine – Whittier Daily News",
+        "tone_score": "4.1336851363",
+        "url": "https://www.whittierdailynews.com/2026/08/29/fans-flock-to-olivia-rodrigos-daisy-chain-fields-festival-in-irvine/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "47909414c5597e83708724de30479ecc6701b99229740d1b932f306697f17aeb",
+        "happy_factor": "86.8",
+        "ingested_at": "2026-08-20 00:30:27",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-20 00:30:00",
+        "serving_date": "2026-08-20",
+        "source_name": "y101.com",
+        "title": "Cynthia Erivo to be honored at American Ballet Theatre's 2026 Fall Gala",
+        "tone_score": "7.35930735930736",
+        "url": "https://y101.com/entertainment/2026-08-19-cynthia-erivo-to-be-honored-at-american-ballet-theatres-2026-fall-gala/"
+      },
+      "b": {
+        "article_id": "b485155889569d724d97a2a101a8d993c3f29e70958be0147c88a06c5d9f229c",
+        "happy_factor": "80.85",
+        "ingested_at": "2026-08-20 00:30:27",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-20 00:30:00",
+        "serving_date": "2026-08-20",
+        "source_name": "billboard.com",
+        "title": "Cynthia Erivo to Be Honored at American Ballet Theatre 2026 Fall Gala",
+        "tone_score": "6.17021276595745",
+        "url": "https://www.billboard.com/music/music-news/cynthia-erivo-american-ballet-theatre-2026-fall-gala-honor-1236320488/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "14b9a032d2e64a5f46289946c825239bc17d24bd1e9de684bab722bb7854d35c",
+        "happy_factor": "72.99",
+        "ingested_at": "2026-09-28 11:22:50",
+        "language": "en",
+        "mentioned_country_name": "Netherlands",
+        "published_at": "2026-09-19 00:00:00",
+        "serving_date": "2026-09-19",
+        "source_name": "northerndailyleader.com.au",
+        "title": "Discover top 10 experiences in the Netherlands' second city, Rotterdam | The Northern Daily Leader",
+        "tone_score": "4.5977011494",
+        "url": "https://www.northerndailyleader.com.au/story/9351538/discover-top-10-experiences-in-the-netherlands-second-city-rotterdam/"
+      },
+      "b": {
+        "article_id": "6ff766d23cd0e9868da56319debb72dc079d7a487c3412d3f49ed717ccd0f2ae",
+        "happy_factor": "72.99",
+        "ingested_at": "2026-09-28 11:22:50",
+        "language": "en",
+        "mentioned_country_name": "Netherlands",
+        "published_at": "2026-09-18 23:45:00",
+        "serving_date": "2026-09-18",
+        "source_name": "portnews.com.au",
+        "title": "Discover top 10 experiences in the Netherlands' second city, Rotterdam | Port Macquarie News",
+        "tone_score": "4.5977011494",
+        "url": "https://www.portnews.com.au/story/9351538/discover-top-10-experiences-in-the-netherlands-second-city-rotterdam/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "0211dde54f66048bc639d1f7315e31bc74b41291a59275d49fd96aac57484f1d",
+        "happy_factor": "92.98",
+        "ingested_at": "2026-08-08 00:30:30",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-08 00:00:00",
+        "serving_date": "2026-08-08",
+        "source_name": "ks95.com",
+        "title": "Chappell Roan plans The Super Graphic Spectacular fundraiser in October – KS95 94.5",
+        "tone_score": "8.19672131147541",
+        "url": "https://www.ks95.com/chappell-roan-plans-the-super-graphic-spectacular-fundraiser-in-october/"
+      },
+      "b": {
+        "article_id": "ec7649d17bc6ed433ac582474c4570d0449b1dd3537a8e986e05e0f3958bcf8e",
+        "happy_factor": "90.46",
+        "ingested_at": "2026-08-08 00:30:30",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-08 00:30:00",
+        "serving_date": "2026-08-08",
+        "source_name": "mix929.com",
+        "title": "Chappell Roan plans The Super Graphic Spectacular fundraiser in October",
+        "tone_score": "7.69230769230769",
+        "url": "https://mix929.com/2026/08/07/chappell-roan-plans-the-super-graphic-spectacular-fundraiser-in-october/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "f235591c3350782d9035ff0e34aad5ef15e5897632d435eec16cc11eb8a30043",
+        "happy_factor": "75.42",
+        "ingested_at": "2026-07-25 00:30:28",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-25 00:15:00",
+        "serving_date": "2026-07-25",
+        "source_name": "iheart.com",
+        "title": "Matthew Knowles Reveals NEW Destiny's Child Music, Unreleased Videos & Futu | The Z92.3",
+        "tone_score": "5.08474576271187",
+        "url": "https://kiiz.iheart.com/featured/breakfast-club/content/2026-07-24-51-the-breakfast-club-matthew-knowles-reveals-new-destinys-child-music-unre/"
+      },
+      "b": {
+        "article_id": "8dd89d893b781017eb5cfc69d31a6b438c269a68dcbb28f60e13d342bd766589",
+        "happy_factor": "75.42",
+        "ingested_at": "2026-07-25 00:30:28",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-24 23:45:00",
+        "serving_date": "2026-07-24",
+        "source_name": "iheart.com",
+        "title": "Matthew Knowles Reveals NEW Destiny's Child Music, Unreleased Videos & Futu | 97.9 WIBB",
+        "tone_score": "5.08474576271187",
+        "url": "https://wibb.iheart.com/featured/breakfast-club/content/2026-07-24-51-the-breakfast-club-matthew-knowles-reveals-new-destinys-child-music-unre/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "4c99d3df77682de3a1d743cab4ad465606fd1022bebed7b1aaf9612e2e0745c2",
+        "happy_factor": "66.18",
+        "ingested_at": "2026-08-07 00:30:33",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-07 00:15:00",
+        "serving_date": "2026-08-07",
+        "source_name": "wellingtontimes.com.au",
+        "title": "Eagle Route reveals South Africa's hidden gems in Free State | Wellington Times",
+        "tone_score": "2.83553875236295",
+        "url": "https://www.wellingtontimes.com.au/story/9323538/eagle-route-reveals-south-africas-hidden-gems-in-free-state/"
+      },
+      "b": {
+        "article_id": "405ad6c4dfec8a229ec2a62d3424560615faef21873d9c1dd2564460301dcd49",
+        "happy_factor": "66.18",
+        "ingested_at": "2026-08-07 00:30:33",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-07 00:15:00",
+        "serving_date": "2026-08-07",
+        "source_name": "ulladullatimes.com.au",
+        "title": "Eagle Route reveals South Africa's hidden gems in Free State | Milton Ulladulla Times",
+        "tone_score": "2.83553875236295",
+        "url": "https://www.ulladullatimes.com.au/story/9323538/eagle-route-reveals-south-africas-hidden-gems-in-free-state/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "64296dfb9c3c1eff730b22693bd68559bfc850eb44baf51ed83fbe8c39e27b3d",
+        "happy_factor": "82.0",
+        "ingested_at": "2026-08-07 00:30:33",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-07 00:30:00",
+        "serving_date": "2026-08-07",
+        "source_name": "krcgtv.com",
+        "title": "Rubber ducks splash into Chicago River for annual Special Olympics fundraiser",
+        "tone_score": "6.0",
+        "url": "https://krcgtv.com/news/offbeat/rubber-ducks-splash-into-chicago-river-for-annual-special-olympics-fundraiser"
+      },
+      "b": {
+        "article_id": "9ca891155d1565ebaa537d6640c47801eb4391c608ebb680623f357df187f852",
+        "happy_factor": "75.39",
+        "ingested_at": "2026-08-09 00:30:29",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-09 00:30:00",
+        "serving_date": "2026-08-09",
+        "source_name": "4029tv.com",
+        "title": "Rubber ducks splash into Chicago River for annual fundraiser",
+        "tone_score": "4.67836257309941",
+        "url": "https://www.4029tv.com/article/rubber-ducks-chicago-river-special-olympics-fundraiser/73369565"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "36ed2ce91f6499b6299b688db8a93ce208d33b93bd054eaf983ea2cea81a0803",
+        "happy_factor": "72.99",
+        "ingested_at": "2026-09-28 11:22:50",
+        "language": "en",
+        "mentioned_country_name": "Netherlands",
+        "published_at": "2026-09-19 00:15:00",
+        "serving_date": "2026-09-19",
+        "source_name": "hardenexpress.com.au",
+        "title": "Discover top 10 experiences in the Netherlands' second city, Rotterdam | Harden Murrumburrah Express",
+        "tone_score": "4.5977011494",
+        "url": "https://www.hardenexpress.com.au/story/9351538/discover-top-10-experiences-in-the-netherlands-second-city-rotterdam/"
+      },
+      "b": {
+        "article_id": "14b9a032d2e64a5f46289946c825239bc17d24bd1e9de684bab722bb7854d35c",
+        "happy_factor": "72.99",
+        "ingested_at": "2026-09-28 11:22:50",
+        "language": "en",
+        "mentioned_country_name": "Netherlands",
+        "published_at": "2026-09-19 00:00:00",
+        "serving_date": "2026-09-19",
+        "source_name": "northerndailyleader.com.au",
+        "title": "Discover top 10 experiences in the Netherlands' second city, Rotterdam | The Northern Daily Leader",
+        "tone_score": "4.5977011494",
+        "url": "https://www.northerndailyleader.com.au/story/9351538/discover-top-10-experiences-in-the-netherlands-second-city-rotterdam/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "8e43ae64f546b6c51bfec74e16a42ebe60864c5aea79ab2b808c9e728a330f98",
+        "happy_factor": "67.07",
+        "ingested_at": "2026-07-15 00:30:33",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-15 00:30:00",
+        "serving_date": "2026-07-15",
+        "source_name": "ulladullatimes.com.au",
+        "title": "W Hotel Prague: 1872 Grand Europa revived with 1920s style | Milton Ulladulla Times",
+        "tone_score": "3.41463414634146",
+        "url": "https://www.ulladullatimes.com.au/story/9305152/w-hotel-prague-1872-grand-europa-revived-with-1920s-style/"
+      },
+      "b": {
+        "article_id": "eec7c24deb8588ebdd8054a755020582b377a4d6ad98368318ff29aa5dbdd228",
+        "happy_factor": "67.07",
+        "ingested_at": "2026-07-15 00:30:33",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-15 00:00:00",
+        "serving_date": "2026-07-15",
+        "source_name": "illawarramercury.com.au",
+        "title": "W Hotel Prague: 1872 Grand Europa revived with 1920s style | Illawarra Mercury",
+        "tone_score": "3.41463414634146",
+        "url": "https://www.illawarramercury.com.au/story/9305152/w-hotel-prague-1872-grand-europa-revived-with-1920s-style/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "f410a45abd7aeb538424704ca3f70a116670b3be3df758ae177060a91cc13a0d",
+        "happy_factor": "72.99",
+        "ingested_at": "2026-09-28 11:22:50",
+        "language": "en",
+        "mentioned_country_name": "Netherlands",
+        "published_at": "2026-09-19 00:00:00",
+        "serving_date": "2026-09-19",
+        "source_name": "dailyliberal.com.au",
+        "title": "Discover top 10 experiences in the Netherlands' second city, Rotterdam | Daily Liberal",
+        "tone_score": "4.5977011494",
+        "url": "https://www.dailyliberal.com.au/story/9351538/discover-top-10-experiences-in-the-netherlands-second-city-rotterdam/"
+      },
+      "b": {
+        "article_id": "6ff766d23cd0e9868da56319debb72dc079d7a487c3412d3f49ed717ccd0f2ae",
+        "happy_factor": "72.99",
+        "ingested_at": "2026-09-28 11:22:50",
+        "language": "en",
+        "mentioned_country_name": "Netherlands",
+        "published_at": "2026-09-18 23:45:00",
+        "serving_date": "2026-09-18",
+        "source_name": "portnews.com.au",
+        "title": "Discover top 10 experiences in the Netherlands' second city, Rotterdam | Port Macquarie News",
+        "tone_score": "4.5977011494",
+        "url": "https://www.portnews.com.au/story/9351538/discover-top-10-experiences-in-the-netherlands-second-city-rotterdam/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "af68e8def7c552d9fc1815a9835a91e561ab75c4175ff35c0d76fd1c21090c24",
+        "happy_factor": "67.86",
+        "ingested_at": "2026-07-17 00:30:38",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-16 23:45:00",
+        "serving_date": "2026-07-16",
+        "source_name": "iheart.com",
+        "title": "TELL ME SOMETHING GOOD (THURS): Bobby Shares Big Updates On Eller And Stanl | 106.3 The Bear",
+        "tone_score": "3.57142857142857",
+        "url": "https://1063thebear.iheart.com/featured/bobby-bones/content/2026-07-16-1119-the-bobby-bones-show-tell-me-something-good-thurs-bobby-shares-big-upd/"
+      },
+      "b": {
+        "article_id": "910f1c7f9b4d90ae2b5e6904c209b29c438babd2e4cad1353d46696073cd6362",
+        "happy_factor": "67.86",
+        "ingested_at": "2026-07-17 00:30:38",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-16 23:45:00",
+        "serving_date": "2026-07-16",
+        "source_name": "iheart.com",
+        "title": "TELL ME SOMETHING GOOD (THURS): Bobby Shares Big Updates On Eller And Stanl | 100.3 Cat Country",
+        "tone_score": "3.57142857142857",
+        "url": "https://thecatfm.iheart.com/featured/bobby-bones/content/2026-07-16-1119-the-bobby-bones-show-tell-me-something-good-thurs-bobby-shares-big-upd/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "4b21331d09d96bc2ee659b02a19691b02fa11c0320031d0c1ae9b822e57107a4",
+        "happy_factor": "79.64",
+        "ingested_at": "2026-09-28 11:31:30",
+        "language": "en",
+        "mentioned_country_name": "France",
+        "published_at": "2026-08-27 00:30:00",
+        "serving_date": "2026-08-27",
+        "source_name": "eagledayton.com",
+        "title": "Final season of 'Emily in Paris' gets Netflix release date",
+        "tone_score": "5.9288537549",
+        "url": "https://www.eagledayton.com/entertainment/final-season-emily-paris-gets-netflix-release-date/NUDA32YWAQ4DLDFYHUZ6344GMQ/"
+      },
+      "b": {
+        "article_id": "22a4eff8696e27931482c4813f95e5f472cb4c0494627c655b5ff89f77e3a276",
+        "happy_factor": "79.64",
+        "ingested_at": "2026-09-28 11:31:30",
+        "language": "en",
+        "mentioned_country_name": "France",
+        "published_at": "2026-08-27 00:15:00",
+        "serving_date": "2026-08-27",
+        "source_name": "krny.com",
+        "title": "Final season of 'Emily in Paris' gets Netflix release date | Y102",
+        "tone_score": "5.9288537549",
+        "url": "https://krny.com/2026/08/26/final-season-of-emily-in-paris-gets-netflix-release-date/"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "a07026d9bfb24ceb7b1a1c47d7d835f94eec7ed7d03cac1b173bf1943697f70e",
+        "happy_factor": "75.37",
+        "ingested_at": "2026-09-28 11:17:44",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-07 00:15:00",
+        "serving_date": "2026-09-07",
+        "source_name": "republicanherald.com",
+        "title": "Sept. 7, 2026: Around the Region",
+        "tone_score": "5.0746268657",
+        "url": "https://www.republicanherald.com/2026/09/06/sept-7-2026-around-the-region/"
+      },
+      "b": {
+        "article_id": "9eeff001ae822fffadbbfb3577eb20c4a0c30bfd5afa435264753318233ee26b",
+        "happy_factor": "71.6",
+        "ingested_at": "2026-09-28 11:16:12",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-04 00:30:00",
+        "serving_date": "2026-09-04",
+        "source_name": "republicanherald.com",
+        "title": "Sept. 4, 2026: Around the Region",
+        "tone_score": "4.3209876543",
+        "url": "https://www.republicanherald.com/2026/09/03/sept-4-2026-around-the-region/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "ef21479f793c933f2461b07eaac957a49de307c16c02e2cac03e2bbe050a6e76",
+        "happy_factor": "76.69",
+        "ingested_at": "2026-07-04 00:30:26",
+        "language": "en",
+        "mentioned_country_name": "Belgium",
+        "published_at": "2026-07-04 00:00:00",
+        "serving_date": "2026-07-04",
+        "source_name": "channelnewsasia.com",
+        "title": "Belgian diamond group that won tariff relief gifted Trump a lavishly encrusted ring",
+        "tone_score": "4.93827160493827",
+        "url": "https://www.channelnewsasia.com/world/ring-trump-brussels-diamond-group-america-250-6231166"
+      },
+      "b": {
+        "article_id": "b452f31f6b69eecde05a704d61d6d920ac8ec790e7681fc94cb9d2d8dd49ac90",
+        "happy_factor": "72.35",
+        "ingested_at": "2026-07-04 00:30:26",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-04 00:15:00",
+        "serving_date": "2026-07-04",
+        "source_name": "nbcnewyork.com",
+        "title": "Diamond group that won tariff relief gifted Trump a lavish ring – NBC New York",
+        "tone_score": "4.06976744186047",
+        "url": "https://www.nbcnewyork.com/news/national-international/belgian-diamond-group-won-tariff-relief-gifted-trump-lavishly-encrusted-ring/6521356/"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "81cd508575ed280d394b088e3110b76fcbf598281a11740274e873d4dce9f3ea",
+        "happy_factor": "83.78",
+        "ingested_at": "2026-07-13 00:30:32",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-13 00:15:00",
+        "serving_date": "2026-07-13",
+        "source_name": "tvguide.co.uk",
+        "title": "Milo on 5 +1: full details and when it's on",
+        "tone_score": "6.75675675675676",
+        "url": "https://www.tvguide.co.uk/schedule/64042088-def7-528f-b312-3d80a007e77f/milo"
+      },
+      "b": {
+        "article_id": "1b72d5070db1310e5a5559179b7fa34397f5baa5cf0969a585ca40d28dc00fd5",
+        "happy_factor": "65.15",
+        "ingested_at": "2026-07-12 00:30:34",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-12 00:15:00",
+        "serving_date": "2026-07-12",
+        "source_name": "tvguide.co.uk",
+        "title": "Milo on 5 HD: full details and when it's on",
+        "tone_score": "3.03030303030303",
+        "url": "https://www.tvguide.co.uk/schedule/bf105d8d-8dfc-5459-afa9-7e27e7487069/milo"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "c03835beed35bf24ce399fd41f37a956a277fc9f930e1a80984d43d92742bfa0",
+        "happy_factor": "73.21",
+        "ingested_at": "2026-07-15 00:30:33",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-15 00:15:00",
+        "serving_date": "2026-07-15",
+        "source_name": "lowellsun.com",
+        "title": "Tom Cruise's love for 'Amores Perros' led him to 'Digger'",
+        "tone_score": "4.64285714285714",
+        "url": "https://www.lowellsun.com/2026/07/14/tom-cruise-digger/"
+      },
+      "b": {
+        "article_id": "9a108eaec86f9c9a4c80472f215c5c4dae9949dbda919991c0338dd3ec943f89",
+        "happy_factor": "67.39",
+        "ingested_at": "2026-07-15 00:30:33",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-15 00:00:00",
+        "serving_date": "2026-07-15",
+        "source_name": "yoursourceone.com",
+        "title": "Tom Cruise's love for 'Amores Perros' led him to 'Digger' | National News",
+        "tone_score": "3.47826086956522",
+        "url": "https://www.yoursourceone.com/news/national_news/tom-cruise-s-love-for-amores-perros-led-him-to-digger/article_7e107dc5-6878-512e-b44c-5439240b63f7.html"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "c49e78cb78c834054574afa0ed086a78e598609d05a42bf037d926a4877f499e",
+        "happy_factor": "72.2",
+        "ingested_at": "2026-07-22 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "Malaysia",
+        "published_at": "2026-07-22 00:15:00",
+        "serving_date": "2026-07-22",
+        "source_name": "hepburnadvocate.com.au",
+        "title": "Discover Sucimurni - Malaysia's ancient secret to pure happiness | The Advocate - Hepburn",
+        "tone_score": "4.43942814145974",
+        "url": "https://www.hepburnadvocate.com.au/story/9307981/discover-sucimurni-malaysias-ancient-secret-to-pure-happiness/"
+      },
+      "b": {
+        "article_id": "876a34c0037aa4943e12212e0d43b96e444fc77a79dae314ef717dcac928d8bf",
+        "happy_factor": "72.2",
+        "ingested_at": "2026-07-22 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "Malaysia",
+        "published_at": "2026-07-22 00:15:00",
+        "serving_date": "2026-07-22",
+        "source_name": "mudgeeguardian.com.au",
+        "title": "Discover Sucimurni - Malaysia's ancient secret to pure happiness | Mudgee Guardian",
+        "tone_score": "4.43942814145974",
+        "url": "https://www.mudgeeguardian.com.au/story/9307981/discover-sucimurni-malaysias-ancient-secret-to-pure-happiness/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "f962ccbc92a985cf0b2c53d390f4a7e0f7004bbe6d7976368a0f670f536675fd",
+        "happy_factor": "77.95",
+        "ingested_at": "2026-07-10 00:30:28",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-10 00:30:00",
+        "serving_date": "2026-07-10",
+        "source_name": "iheart.com",
+        "title": "Dakota Fanning 'Bursting With Happiness' Over Her & Sister Elle's Emmy Nods",
+        "tone_score": "5.59006211180124",
+        "url": "https://kissfmhv.iheart.com/content/2026-07-09-dakota-fanning-bursting-with-happiness-over-her-sister-elles-emmy-nods/"
+      },
+      "b": {
+        "article_id": "501a8360e195da8434426f2bc9f39fbb5408ebb75eda6750fdee219984fd13fb",
+        "happy_factor": "77.95",
+        "ingested_at": "2026-07-10 00:30:28",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-10 00:30:00",
+        "serving_date": "2026-07-10",
+        "source_name": "iheart.com",
+        "title": "Dakota Fanning 'Bursting With Happiness' Over Her & Sister Elle's Emmy Nods | Sunny 102.3 FM",
+        "tone_score": "5.59006211180124",
+        "url": "https://sunny102fm.iheart.com/content/2026-07-09-dakota-fanning-bursting-with-happiness-over-her-sister-elles-emmy-nods/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "47741639ca61e9724ea2beac778dc9c9f87cd449d797f8384fce72927c9e6c8e",
+        "happy_factor": "94.28",
+        "ingested_at": "2026-09-28 11:16:12",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-09-04 00:30:00",
+        "serving_date": "2026-09-04",
+        "source_name": "thecourier.com.au",
+        "title": "Dulux unveils 2027 colour forecast for Australian homes | The Courier",
+        "tone_score": "8.8552915767",
+        "url": "https://www.thecourier.com.au/story/9339093/dulux-unveils-2027-colour-forecast-for-australian-homes/"
+      },
+      "b": {
+        "article_id": "be414eec2fbaaf2fd5af8995ca730c37742ccc2f03abea9e8dacf1ffb51d75dd",
+        "happy_factor": "92.48",
+        "ingested_at": "2026-09-28 11:16:12",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-09-03 23:45:00",
+        "serving_date": "2026-09-03",
+        "source_name": "naroomanewsonline.com.au",
+        "title": "Dulux unveils 2027 colour forecast for Australian homes | Narooma News",
+        "tone_score": "8.4967320261",
+        "url": "https://www.naroomanewsonline.com.au/story/9339093/dulux-unveils-2027-colour-forecast-for-australian-homes/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "efd6cd79b31f433994fd839a4471deee4c9d9419a24510ec57562285f13c1c7c",
+        "happy_factor": "72.96",
+        "ingested_at": "2026-08-07 00:30:33",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-07 00:15:00",
+        "serving_date": "2026-08-07",
+        "source_name": "ulladullatimes.com.au",
+        "title": "Six reasons to stream My Brilliant Career reboot on Netflix; six reasons to stay loyal | Milton Ulladulla Times",
+        "tone_score": "4.59236326109391",
+        "url": "https://www.ulladullatimes.com.au/story/9324159/six-reasons-to-stream-my-brilliant-career-reboot-on-netflix-six-reasons-to-stay-loyal/"
+      },
+      "b": {
+        "article_id": "68344de009312f961f82f64bbff2989e8f72c9da15cae8df439964dd5bf4bbec",
+        "happy_factor": "72.94",
+        "ingested_at": "2026-08-07 00:30:33",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-07 00:15:00",
+        "serving_date": "2026-08-07",
+        "source_name": "crookwellgazette.com.au",
+        "title": "Six reasons to stream My Brilliant Career reboot on Netflix; six reasons to stay loyal | Crookwell Gazette",
+        "tone_score": "4.58762886597938",
+        "url": "https://www.crookwellgazette.com.au/story/9324159/six-reasons-to-stream-my-brilliant-career-reboot-on-netflix-six-reasons-to-stay-loyal/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "f5dc7a1bda414e043f8bf9b9bba963932ce9ffa4d01b01b8db4f483a1b7aef79",
+        "happy_factor": "67.07",
+        "ingested_at": "2026-07-15 00:30:33",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-15 00:30:00",
+        "serving_date": "2026-07-15",
+        "source_name": "tenterfieldstar.com.au",
+        "title": "W Hotel Prague: 1872 Grand Europa revived with 1920s style | Tenterfield Star",
+        "tone_score": "3.41463414634146",
+        "url": "https://www.tenterfieldstar.com.au/story/9305152/w-hotel-prague-1872-grand-europa-revived-with-1920s-style/"
+      },
+      "b": {
+        "article_id": "8e43ae64f546b6c51bfec74e16a42ebe60864c5aea79ab2b808c9e728a330f98",
+        "happy_factor": "67.07",
+        "ingested_at": "2026-07-15 00:30:33",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-15 00:30:00",
+        "serving_date": "2026-07-15",
+        "source_name": "ulladullatimes.com.au",
+        "title": "W Hotel Prague: 1872 Grand Europa revived with 1920s style | Milton Ulladulla Times",
+        "tone_score": "3.41463414634146",
+        "url": "https://www.ulladullatimes.com.au/story/9305152/w-hotel-prague-1872-grand-europa-revived-with-1920s-style/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "ec5f62f595115bd0ae1f327303aa7f2fb3be825ad1cd15edfcf5dfef1a5b512f",
+        "happy_factor": "69.9",
+        "ingested_at": "2026-07-29 00:30:25",
+        "language": "und",
+        "mentioned_country_name": "Isle of Man",
+        "published_at": "2026-07-28 23:45:00",
+        "serving_date": "2026-07-28",
+        "source_name": "juneesoutherncross.com.au",
+        "title": "Hotel Review: Pullman Port Douglas Sea Temple Resort and Spa | Southern Cross",
+        "tone_score": "3.98009950248756",
+        "url": "https://www.juneesoutherncross.com.au/story/9292736/hotel-review-pullman-port-douglas-sea-temple-resort-and-spa/"
+      },
+      "b": {
+        "article_id": "583b0b8fde4562f3b967b477ec3581c29579c34d990274960bb6982ef8d90ea1",
+        "happy_factor": "69.9",
+        "ingested_at": "2026-07-29 00:30:25",
+        "language": "und",
+        "mentioned_country_name": "Isle of Man",
+        "published_at": "2026-07-28 23:45:00",
+        "serving_date": "2026-07-28",
+        "source_name": "canberratimes.com.au",
+        "title": "Hotel Review: Pullman Port Douglas Sea Temple Resort and Spa | The Canberra Times",
+        "tone_score": "3.98009950248756",
+        "url": "https://www.canberratimes.com.au/story/9292736/hotel-review-pullman-port-douglas-sea-temple-resort-and-spa/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "96f8bcd8922c336c4fd108f8e340a40e7b6b568bae9f794ae93f4e3bcc5c1ec8",
+        "happy_factor": "68.52",
+        "ingested_at": "2026-09-28 11:24:25",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-22 23:45:00",
+        "serving_date": "2026-09-22",
+        "source_name": "iheart.com",
+        "title": "Bobby Bones Has Strong Opinions On What You're Officially Too Old To Do | 95.3 The Bull",
+        "tone_score": "3.7037037037",
+        "url": "https://953bull.iheart.com/featured/bobby-bones/content/2026-09-22-bobby-bones-has-strong-opinions-on-what-youre-officially-too-old-to-do/"
+      },
+      "b": {
+        "article_id": "049d4df9eb8bd130507a609fbd5c552117a344b7d701a017aa9b51ef2ce5b66c",
+        "happy_factor": "68.52",
+        "ingested_at": "2026-09-28 11:24:25",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-22 23:45:00",
+        "serving_date": "2026-09-22",
+        "source_name": "iheart.com",
+        "title": "Bobby Bones Has Strong Opinions On What You're Officially Too Old To Do | 96.5 The Bull",
+        "tone_score": "3.7037037037",
+        "url": "https://965thebull.iheart.com/featured/bobby-bones/content/2026-09-22-bobby-bones-has-strong-opinions-on-what-youre-officially-too-old-to-do/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "29e1b5f57254c0b442e876d382991ac024724b535e67f2b588f4c45bc912af8b",
+        "happy_factor": "67.73",
+        "ingested_at": "2026-07-22 00:30:29",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-22 00:15:00",
+        "serving_date": "2026-07-22",
+        "source_name": "geosuper.tv",
+        "title": "Knicks' Jalen Brunson says White House visit not discussed",
+        "tone_score": "3.54609929078014",
+        "url": "https://www.geosuper.tv/latest/58088-knicks-jalen-brunson-says-white-house-visit-not-discussed"
+      },
+      "b": {
+        "article_id": "d50216c6c332c66647cf1aee8f3a9a6a22c964eb805d13dda2746b1da657a493",
+        "happy_factor": "67.51",
+        "ingested_at": "2026-07-22 00:30:29",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-21 23:45:00",
+        "serving_date": "2026-07-21",
+        "source_name": "953thescore.com",
+        "title": "Knicks' Jalen Brunson says players have not discussed White House visit | 95.3 The Score",
+        "tone_score": "3.50194552529183",
+        "url": "https://www.953thescore.com/2026/07/21/knicks-jalen-brunson-says-players-have-not-discussed-white-house-visit/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "a461c00d0f077ff78da1beb9076d7ba34d6a3d4bde73e312b1c95dc244fc3e65",
+        "happy_factor": "70.4",
+        "ingested_at": "2026-08-26 13:53:52",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-21 00:15:00",
+        "serving_date": "2026-08-21",
+        "source_name": "narrominenewsonline.com.au",
+        "title": "The world's most beautiful railway stations - from NYC to London | Narromine News",
+        "tone_score": "4.07986111111111",
+        "url": "https://www.narrominenewsonline.com.au/story/9331256/the-worlds-most-beautiful-railway-stations-from-nyc-to-london/"
+      },
+      "b": {
+        "article_id": "a808341ccb8a7e8a4be4256a9935114e8f075d244b0d07a399058651f03ef8b3",
+        "happy_factor": "70.4",
+        "ingested_at": "2026-08-26 13:53:52",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-20 23:45:00",
+        "serving_date": "2026-08-20",
+        "source_name": "merimbulanewsweekly.com.au",
+        "title": "The world's most beautiful railway stations - from NYC to London | Merimbula News Weekly",
+        "tone_score": "4.07986111111111",
+        "url": "https://www.merimbulanewsweekly.com.au/story/9331256/the-worlds-most-beautiful-railway-stations-from-nyc-to-london/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "d8cb9a8d6368188fe4f8166d2720ecfe3653c8173528dfaf49cde9ca0b337594",
+        "happy_factor": "70.4",
+        "ingested_at": "2026-08-26 13:53:52",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-21 00:30:00",
+        "serving_date": "2026-08-21",
+        "source_name": "juneesoutherncross.com.au",
+        "title": "The world's most beautiful railway stations - from NYC to London | Southern Cross",
+        "tone_score": "4.07986111111111",
+        "url": "https://www.juneesoutherncross.com.au/story/9331256/the-worlds-most-beautiful-railway-stations-from-nyc-to-london/"
+      },
+      "b": {
+        "article_id": "a808341ccb8a7e8a4be4256a9935114e8f075d244b0d07a399058651f03ef8b3",
+        "happy_factor": "70.4",
+        "ingested_at": "2026-08-26 13:53:52",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-20 23:45:00",
+        "serving_date": "2026-08-20",
+        "source_name": "merimbulanewsweekly.com.au",
+        "title": "The world's most beautiful railway stations - from NYC to London | Merimbula News Weekly",
+        "tone_score": "4.07986111111111",
+        "url": "https://www.merimbulanewsweekly.com.au/story/9331256/the-worlds-most-beautiful-railway-stations-from-nyc-to-london/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "d8cb9a8d6368188fe4f8166d2720ecfe3653c8173528dfaf49cde9ca0b337594",
+        "happy_factor": "70.4",
+        "ingested_at": "2026-08-26 13:53:52",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-21 00:30:00",
+        "serving_date": "2026-08-21",
+        "source_name": "juneesoutherncross.com.au",
+        "title": "The world's most beautiful railway stations - from NYC to London | Southern Cross",
+        "tone_score": "4.07986111111111",
+        "url": "https://www.juneesoutherncross.com.au/story/9331256/the-worlds-most-beautiful-railway-stations-from-nyc-to-london/"
+      },
+      "b": {
+        "article_id": "f0a2631e9f7817c132dc27bfdf24f5ea164623c703975b29b8904d0baf136991",
+        "happy_factor": "70.4",
+        "ingested_at": "2026-08-26 13:43:38",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-20 23:30:00",
+        "serving_date": "2026-08-20",
+        "source_name": "tenterfieldstar.com.au",
+        "title": "The world's most beautiful railway stations - from NYC to London | Tenterfield Star",
+        "tone_score": "4.07986111111111",
+        "url": "https://www.tenterfieldstar.com.au/story/9331256/the-worlds-most-beautiful-railway-stations-from-nyc-to-london/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "434a860c471c0fccb3a03e90f0bfa4e81e8bed047c97a68ea9d2399a1bce4b64",
+        "happy_factor": "70.62",
+        "ingested_at": "2026-07-06 00:30:30",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-06 00:30:00",
+        "serving_date": "2026-07-06",
+        "source_name": "armidaleexpress.com.au",
+        "title": "Australians embrace tiny houses as winter's top new travel trend | The Armidale Express",
+        "tone_score": "4.12465627864345",
+        "url": "https://www.armidaleexpress.com.au/story/9303354/australians-embrace-tiny-houses-as-winters-top-new-travel-trend/"
+      },
+      "b": {
+        "article_id": "60c8fec0ab17ebbb70a2c3e3dd843b871b4e8d12ee5240be140c2ab8b2312ef7",
+        "happy_factor": "70.62",
+        "ingested_at": "2026-07-06 00:30:30",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-05 23:45:00",
+        "serving_date": "2026-07-05",
+        "source_name": "naroomanewsonline.com.au",
+        "title": "Australians embrace tiny houses as winter's top new travel trend | Narooma News",
+        "tone_score": "4.12465627864345",
+        "url": "https://www.naroomanewsonline.com.au/story/9303354/australians-embrace-tiny-houses-as-winters-top-new-travel-trend/"
+      }
+    }
+  ]
+}

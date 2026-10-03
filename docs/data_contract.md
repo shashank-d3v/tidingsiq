@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the planned warehouse contract for TidingsIQ. It is intentionally implementation-oriented: table names, field responsibilities, and quality expectations are specified now so Terraform, Bruin assets, and the Streamlit app can be built against a stable shape later.
+This document defines the implemented warehouse and public export contracts. Gold owns scoring and eligibility; a separate scheduled publisher produces the static files consumed by the public dashboard.
 
 The canonical serving table is:
 
@@ -18,11 +18,11 @@ Where upstream GDELT mappings are not yet validated, the internal field is still
 
 - Bronze preserves source fidelity and ingestion traceability.
 - Silver is the normalization and deterministic deduplication boundary.
-- Gold is the only table the app should query in v1.
+- The publisher reads the canonical Gold feed and Gold operational metrics. The public frontend does not query BigQuery.
 - Internal field names should remain stable even if upstream GDELT mappings change.
 - Unvalidated GDELT mappings must be marked as pending, not guessed.
 
-## Dataset and Table Plan
+## Dataset and Table Inventory
 
 | Layer | Table | Purpose |
 |---|---|---|
@@ -303,7 +303,7 @@ One appended operational run snapshot row.
 
 ## Deduplication Policy
 
-v1 deduplication should be deterministic and implemented in Silver. The current canonical tie-break policy is:
+Warehouse deduplication is deterministic and implemented in Silver. The current canonical tie-break policy is:
 
 1. group rows by `dedup_key`
 2. keep the row with the newest `published_at`
@@ -319,6 +319,52 @@ Current dedup-key strategy:
 
 Near-duplicate detection beyond deterministic rules is optional future work and must not block the first end-to-end release.
 
+## Public Static Export Contract
+
+The publisher selects only eligible Gold rows inside the inclusive 30-day UTC
+window through the latest Gold ingestion date reported by the metrics snapshot.
+The 11 source fields are:
+
+`article_id`, `serving_date`, `published_at`, `source_name`, `language`,
+`mentioned_country_name`, `title`, `url`, `tone_score`, `happy_factor`, `ingested_at`.
+
+The builder rejects repeated article IDs, adds a derived `story_id`, and writes
+all eligible variants to compact JSON plus gzip. Story assignment is separate
+from Silver warehouse canonicalization:
+
+- Cluster the full 30-day edition within each language before deriving ranges.
+- Match informative normalized headlines and URL identities across dates;
+  corroborated syndication and bounded fuzzy rules catch additional variants.
+- Preserve generic/recurring titles without URL or dated producer identity.
+- Require matching numbers/negation and a maximum 72-hour span for fuzzy matches;
+  each member must match the fixed cluster anchor.
+- Keep IDs deterministic for identical inputs; they are not permanent across editions.
+
+See [the matching specification](durable_story_deduplication.md#matching-and-serving)
+for thresholds, publisher normalization, entity checks and limitations.
+
+The browser applies date, language, geography and search filters before choosing
+one representative per story, ranked by descending score, timestamp and article
+ID. Display sorting does not change that representative. Cards, source/geography
+counts and Pulse summarize the selected representatives, not all exported rows.
+No warehouse rows are deleted or reclassified by presentation grouping.
+
+`manifest.json` supplies `schema_version`, `as_of`, `source`, `generated_at`,
+`latest_data_at`, `matcher_version`, article/story counts, suppression ratio and
+matching metrics. Each `7`/`30` range has a hashed filename, `rows`, `article_count`,
+`story_count`, `bytes` and `gzip_bytes`. The default is 7 days; 1/3-day views filter
+that file. Cutoffs include the edition date and previous N calendar dates.
+
+Publication first requires the latest configured pipeline execution to have
+succeeded and contain the metrics audit timestamp. It rechecks that execution
+immediately before manifest replacement. Failed/active or changed executions
+block publication even when metrics are fresh.
+
+Publication validates hashes, compression, counts, range membership, cross-range
+assignments and private audit consistency before uploading. Manifest replacement
+is last and generation-conditional after uploaded-byte verification. Freshness
+comes from pipeline ingestion, not whether an article was published today.
+
 ## Partitioning, Retention, and Archive
 
 Current chosen partition strategy:
@@ -330,7 +376,7 @@ Current retention targets:
 
 - Bronze: export after 45 days; retain at least 90 days in BigQuery to preserve Silver, then prune only checkpoint-covered rows outside both ingestion and publication horizons. GCS objects expire after 365 days
 - Silver: retain 90 days in BigQuery
-- Gold: retain 180 days in BigQuery
+- Gold: model cutoff of 180 days; available history is limited by the upstream 90-day Silver horizon
 
 Current implementation status:
 
@@ -347,5 +393,5 @@ Archive expectations for Bronze:
 
 ## Open Validation Items
 
-- Confirm whether positive and negative signals come from validated GDELT fields or whether a later Gold version should extend beyond `v1_tone_only`.
+- Validate richer GDELT signal fields before extending the active `v2_1_guardrailed_tone` model or promoting v3 shadow scoring.
 - Re-evaluate whether a separate publisher-country concept is worth adding later; the current contract only models article-mentioned geography.

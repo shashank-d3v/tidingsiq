@@ -1,5 +1,7 @@
 # Static dashboard payload measurement — September 29, 2026
 
+> Historical record: observations and estimates are dated, not current operating instructions. See the [documentation map](../README.md) for maintained guides.
+
 ## Conclusion
 
 A static public feed is feasible at the measured size. The default 7-day view

@@ -1,17 +1,18 @@
 # TidingsIQ Terraform Foundation
 
-This directory contains the first infrastructure slice for TidingsIQ. It provisions the minimum GCP resources needed to support the data pipeline and app:
+This directory contains the infrastructure modules for TidingsIQ. It provisions the minimum GCP resources needed to support the data pipeline and app:
 
 - BigQuery datasets: `bronze`, `silver`, `gold`
 - operational BigQuery datasets: `bronze_staging`, `gold_staging`
 - Bronze archive bucket with lifecycle deletion after the retention window
 - pipeline service account for Bruin workloads
-- conditional app service account for Streamlit reads when app hosting is enabled
-- minimum BigQuery and bucket IAM bindings for pipeline, reporting, app, and archive runtimes
+- static reader/publisher identities for public serving; retained legacy app identity when hosting is enabled
+- scoped BigQuery and bucket IAM bindings for pipeline, reporting, publisher, reader, and archive runtimes
 - applied pipeline automation resources for Artifact Registry, Cloud Run Jobs, and Cloud Scheduler
 - optional restricted-egress network path for future static outbound IP or private VPC-only dependencies
 - reporting resources for a daily Cloud Run summary job and Monitoring-based email notifications
-- optional app hosting resources for Artifact Registry and a Cloud Run service
+- app hosting resources for Artifact Registry and a Cloud Run service
+- static feed bucket, read-only frontend mount, daily publisher, schedule and failure alert
 - optional app-edge resources for future hardening via an external HTTPS load balancer, Cloud Armor, logging metrics, dashboards, and an instance-pressure alert
 
 ## Prerequisites
@@ -44,11 +45,11 @@ If `enable_restricted_egress = true` or `enable_app_edge = true`, the relevant n
 - `main.tf`: provider, datasets, service accounts, and IAM
 - `outputs.tf`: useful resource outputs
 - `terraform.tfvars.example`: starter local variable file
-- `future_multi_environment.md`: reference notes for a possible future multi-environment setup
 - `automation.tf`: pipeline automation resources
 - `restricted_egress.tf`: dedicated VPC, connector, firewall, NAT, and blocked-egress observability
 - `reporting.tf`: daily reporting job and email notification resources
-- `app_hosting.tf`: optional Streamlit app hosting resources
+- `app_hosting.tf`: frontend hosting, with static/legacy mode selected by inputs
+- `static_dashboard.tf`: private feed bucket, static identities, publisher, schedule and alert
 - `app_edge.tf`: optional external HTTPS load balancer, Cloud Armor, and app observability resources
 
 ## Current Network Posture
@@ -136,16 +137,19 @@ Examples in this document use placeholders such as `<GCP_PROJECT_ID>`, `<REGION>
 | `bronze_archive_delete_after_export` | No | `false` | Enables capped pruning outside the 90-day serving horizon after verified archival |
 | `bronze_archive_memory_limit` | No | `512Mi` | Memory for server-side archive orchestration |
 | `bronze_archive_max_delete_rows` | No | `20000` | Delete guardrail for the Bronze archive worker |
-| `enable_app_hosting` | No | `false` | Enables Artifact Registry and a direct public Cloud Run service for the Streamlit app |
+| `enable_app_hosting` | No | `false` | Enables Artifact Registry and a direct public Cloud Run service for the frontend |
 | `app_artifact_repository_id` | No | `tidingsiq-app` | Artifact Registry repository ID for the app image |
-| `app_container_image` | No | derived | Full image URI for the Streamlit app container |
-| `app_service_name` | No | `tidingsiq-app` | Cloud Run service name for the Streamlit app |
-| `app_gold_table` | No | derived | Fully qualified BigQuery table used by the hosted Streamlit app |
-| `app_memory_limit` | No | `1Gi` | Memory limit for the Streamlit Cloud Run container |
-| `app_min_instance_count` | No | `0` | Minimum Streamlit Cloud Run instances; keep `0` for scale-to-zero cost control |
-| `app_max_instance_count` | No | `2` | Maximum Streamlit Cloud Run instances |
-| `app_allow_unauthenticated` | No | `true` | Grants public invoke access to the Streamlit Cloud Run service |
-| `enable_app_edge` | No | `false` | Enables an optional future hardening layer with an external HTTPS load balancer, Cloud Armor, and app observability resources in front of the Streamlit app |
+| `app_container_image` | No | derived | Pinned image URI for the frontend container |
+| `app_service_name` | No | `tidingsiq-app` | Cloud Run service name for the frontend |
+| `app_gold_table` | No | derived | Legacy Streamlit Gold table; not injected in static mode |
+| `app_memory_limit` | No | `1Gi` | Legacy frontend memory; static mode uses 512Mi |
+| `app_min_instance_count` | No | `0` | Minimum frontend revision instances; keep `0` for scale-to-zero cost control |
+| `app_max_instance_count` | No | `2` | Maximum frontend revision instances |
+| `app_allow_unauthenticated` | No | `true` | Grants public invoke access to the frontend Cloud Run service |
+| `enable_static_dashboard` | No | `false` | Enables private feed, static identities/publisher and nginx hosting mode; requires app hosting and reporting |
+| `static_publisher_image` | When static enabled | `""` | Pinned publisher image digest |
+| `static_publish_schedule_paused` | No | `true` | Keep the new daily 06:30 IST publisher paused until a verified canary |
+| `enable_app_edge` | No | `false` | Enables an optional future hardening layer with an external HTTPS load balancer, Cloud Armor, and app observability resources in front of the frontend |
 | `app_domain_name` | Conditionally | `""` | DNS hostname served by the external HTTPS load balancer; required when `enable_app_edge = true` |
 | `app_rate_limit_count` | No | `120` | Per-IP Cloud Armor throttle threshold for the app |
 | `app_rate_limit_interval_sec` | No | `60` | Cloud Armor throttle interval in seconds for the app |
@@ -163,18 +167,32 @@ Reporting service account:
 - project role: `roles/bigquery.jobUser`
 - dataset role on `gold`: `roles/bigquery.dataViewer`
 
-App service account when `enable_app_hosting = true`:
+Legacy app service account, still provisioned when `enable_app_hosting = true`:
 - project role: `roles/bigquery.jobUser`
 - dataset role on `gold`: `roles/bigquery.dataViewer`
+
+Static reader when `enable_static_dashboard = true`:
+- bucket role on static feed bucket: `roles/storage.objectViewer`
+- active frontend identity, read-only GCS volume, no warehouse query path
+
+Static publisher when `enable_static_dashboard = true`:
+- project role: `roles/bigquery.jobUser`
+- dataset role on `gold`: `roles/bigquery.dataViewer`
+- bucket role on static feed bucket: `roles/storage.objectUser`
+- the reporting scheduler identity also receives `roles/run.invoker` on this job
+
+The legacy app identity is not selected by the static frontend. Its retained IAM
+is not removed by enabling static mode; review that separately before cleanup.
 
 Archive service account when `enable_bronze_archive_automation = true`:
 - project role: `roles/bigquery.jobUser`
 - dataset role on `bronze`: `roles/bigquery.dataEditor`
 - bucket role on Bronze archive bucket: `roles/storage.objectAdmin`
 
-This is the minimum working split for the planned architecture:
+This is the provisioned split for the current architecture:
 - the pipeline can create and update warehouse objects
-- reporting and the app can run query jobs but only read the serving dataset
+- reporting and publishing can submit queries but only read Gold
+- the static frontend can read the published files without querying BigQuery
 - archive runs with its own Bronze-only identity instead of reusing the pipeline service account
 
 `bronze_staging` and `gold_staging` exist only to support operational merge/staging load paths. They are not part of the logical Bronze/Silver/Gold contract exposed in the docs and app.
@@ -219,7 +237,7 @@ and alert-policy names for deployment verification.
 If Bronze archive automation is enabled, Terraform also provisions:
 
 - a dedicated Bronze archive execution service account with Bronze-only BigQuery access plus archive-bucket object administration
-- a dedicated Cloud Run Job that runs `python3 scripts/archive_bronze.py`
+- a dedicated Cloud Run Job that runs `python3 scripts/archive_bronze_incremental.py`
 - a scheduler service account with `roles/run.invoker` on the Bronze archive job
 - a Cloud Scheduler HTTP job for the archive cadence
 - a log-based metric for repeated archive failures
@@ -229,9 +247,21 @@ If Bronze archive automation is enabled, Terraform also provisions:
 If app hosting is enabled, Terraform also provisions:
 
 - an Artifact Registry Docker repository for the app image
-- a Cloud Run service for the Streamlit frontend
+- a Cloud Run service using the selected frontend image
+- static mode selects the reader identity and read-only GCS volume, with no legacy BigQuery environment variables
 - optional unauthenticated public invoke access on that Cloud Run service
 - direct public serving on the Cloud Run `run.app` URL by default
+
+If static mode is enabled, Terraform also provisions:
+
+- a private, versioned static-feed bucket with public access prevention
+- lifecycle deletion of private audits after 45 days and archived versions after seven newer versions
+- live hashed feed files retained without age expiry; storage grows until a separate
+  cleanup safely removes unreferenced editions
+- separate reader/publisher service accounts and scoped IAM
+- pipeline-job-scoped read-only execution access for the publisher success gate
+- a daily 06:30 IST publisher job/schedule (paused by default)
+- a publisher failure alert using the configured notification channel
 
 If app edge is enabled, Terraform also provisions:
 
@@ -264,13 +294,26 @@ Implementation notes:
 - `bronze_staging` and `gold_staging` are supporting operational datasets used by the current merge load paths.
 - `delete_contents_on_destroy` is disabled to avoid accidental dataset deletion behavior.
 - If stricter IAM boundaries are required later, move from dataset-wide editor access to more specific table or routine permissions after the first end-to-end slice is working.
-- If you revisit a multi-environment setup later, see `future_multi_environment.md`.
-- Current retention targets are Bronze 45 days with GCS archive, Silver 90 days, and Gold 180 days.
+- A future second environment must use separate variables, resource names where needed, and separate Terraform state/backend prefixes. The current module is single-environment.
+- Bronze exports after 45 days and prunes verified rows beyond 90 days; Silver has a 90-day cutoff. Gold has a 180-day model cutoff but its available history is constrained by Silver.
 - The Bronze archive bucket is part of Terraform, and the scheduled Bronze archive job reuses the pipeline image but runs under a dedicated archive service account.
-- The active archive worker persists a GCS checkpoint and immutable manifests. Repeated completed windows are no-ops. Optional pruning retains 90 days and enforces the deletion cap; see `docs/incident_20260928.md`.
+- The active archive worker persists a GCS checkpoint and immutable manifests. Repeated completed windows are no-ops. Optional pruning retains 90 days and enforces the deletion cap; see the [incident record](../../docs/history/incident_20260928.md).
 - Pipeline automation remains opt-in in code through `enable_pipeline_automation`.
 - Restricted egress remains opt-in in code through `enable_restricted_egress` and is intentionally disabled in the active dev deployment for cost control.
 - Keep the scheduler paused during future rollouts until a manual `gcloud run jobs execute ... --wait` succeeds against the deployed image after any reset or image change.
 - Pipeline reporting uses native Monitoring email notifications, so it does not require a third-party email API secret.
 - App hosting is also opt-in in code through `enable_app_hosting`.
 - App edge is also opt-in in code through `enable_app_edge`.
+
+## Static Deployment and Emergency Scaling
+
+Use the [deployment guide](../../docs/deployment_plan.md) for the isolated build
+contexts and first publisher canary. Update local image digests after a release.
+Service-level `scaling` is ignored by the app resource's lifecycle so a manual
+emergency stop survives Terraform operations. Explicitly inspect and resume
+service-level scaling only when the intended static revision and data are ready.
+
+Defaults above are module defaults, not live values. On 2 October 2026, all four
+schedules were enabled: pipeline 06:00, report 06:20, publisher 06:30, archive
+03:15/15:15 in Asia/Kolkata. The active app used static mode, request-based billing,
+min=0 and max=2. No apply was performed during that documentation verification.

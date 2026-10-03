@@ -242,3 +242,7 @@ override.tf.json
 logs/runs
 logs/*.log
 *.py[cod]
+
+# Local browser preview evidence
+/.playwright-cli/
+/output/playwright/

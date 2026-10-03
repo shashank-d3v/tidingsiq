@@ -1,4 +1,6 @@
-# TidingsIQ Streamlit App
+# TidingsIQ Streamlit App (Legacy)
+
+> Legacy development tool. The public service was replaced by the [static dashboard](../static/README.md) on 30 September 2026. The warehouse-backed behavior below applies only when running this app explicitly; it is not the production browser contract.
 
 This app is the local-first frontend for TidingsIQ. It queries only `gold.positive_news_feed` and renders three user-facing sections:
 
@@ -130,7 +132,7 @@ Loading behavior:
 - a page-level loading screen appears on initial Brief load, Brief filter changes, Brief sort changes, Brief pagination changes, and section switches such as `The Brief -> Pulse`
 - the loading screen is presentation-only; it does not change the underlying Gold contract or Pulse chart definitions
 
-Current implementation intentionally stays local-first for Brief browsing responsiveness. The planned future direction is documented in [Authoritative Fetching With Controlled Query Cost](../../docs/authoritative_fetching_query_cost.md): move truth-defining Brief filters, counts, pagination, and filter-option generation into authoritative BigQuery queries while keeping Gold as the only serving source and keeping query cost bounded with short-lived caching.
+The former query-per-filter proposal was superseded by daily static publication. This legacy implementation retains its existing local filtering; see the [current architecture](../../docs/architecture.md) for public serving.
 
 Current expected columns:
 
@@ -164,9 +166,10 @@ UI note:
 - link safety is enforced at render time in the Streamlit layer
 - unsupported or unsafe URL schemes are shown as non-clickable text so the browser never receives them as `href` values
 
-## Future Operations Horizon
+## Relationship to Production
 
 The app hosting path is intentionally separate from the scheduled pipeline path:
 
 - pipeline automation: Cloud Scheduler -> Cloud Run Job -> Bruin -> BigQuery
-- app hosting: Cloud Run service -> Streamlit -> BigQuery Gold
+- public app: Cloud Run nginx -> private published feed; no direct BigQuery queries
+- this legacy app: explicit local/container execution -> BigQuery Gold

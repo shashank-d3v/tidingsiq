@@ -2,207 +2,140 @@
 
 ## Purpose
 
-TidingsIQ is designed as a small but credible ELT system for global news intelligence. The project demonstrates how to build a warehouse-centric pipeline that ingests external news metadata, standardizes it in BigQuery, and serves a filtered analytical experience through a simple frontend.
+TidingsIQ is a batch ELT system for constructive-news discovery. BigQuery owns
+normalization, scoring, eligibility, and operational metrics. A separate publisher
+creates public feed files; visitor interactions operate on those files in the
+browser. This separation keeps public browsing independent of warehouse scans.
 
-The architecture is intentionally batch-oriented and minimal. The goal is a clear, reviewable design that can be implemented incrementally without introducing unnecessary services.
+Current runtime configuration was checked on **2 October 2026**. Dated rollout
+and incident evidence is kept in [history](history/README.md).
 
 ## High-Level Diagram
 
 ```mermaid
 flowchart LR
-    SRC["GDELT GKG 2.1"] --> BRUIN["Bruin Bronze Ingestion"]
-    BRUIN --> BQ_B["BigQuery Bronze"]
-    BQ_B --> BQ_S["BigQuery Silver"]
-    BQ_S --> BQ_G["BigQuery Gold<br/>positive_news_feed"]
-    BQ_G --> APP["Streamlit Dashboard"]
-    BQ_G --> METRICS["Gold Operational Metrics<br/>pipeline_run_metrics"]
-    METRICS --> APP
-
-    TF["Terraform"] --> GCP["GCP Resources<br/>BigQuery, IAM, Bucket, Cloud Run"]
-    GCP --> BRUIN
-    GCP --> APP
-
-    SCHED["Cloud Scheduler"] --> JOB["Cloud Run Job"]
-    JOB --> BRUIN
+    Source["GDELT GKG 2.1"] --> Ingest["Bruin Python ingestion"]
+    Ingest --> Bronze["BigQuery Bronze"]
+    Bronze --> Silver["Silver normalization and deduplication"]
+    Silver --> Gold["Gold scoring and eligibility"]
+    Gold --> Metrics["Gold operational metrics"]
+    Gold --> Publisher["Static publisher job"]
+    Metrics --> Publisher
+    Metrics --> Report["Reporting job and Monitoring alerts"]
+    Publisher --> Feed["Private GCS: verified feed + manifest"]
+    Feed --> Frontend["Cloud Run nginx: read-only mount"]
+    Frontend --> Browser["Brief, Pulse, Methodology"]
+    Bronze --> Archive["Checkpointed archive job"]
+    Archive --> Parquet["Private GCS: immutable Parquet batches"]
+    Scheduler["Cloud Scheduler"] --> Ingest
+    Scheduler --> Publisher
+    Scheduler --> Report
+    Scheduler --> Archive
 ```
 
-## System Boundary
-
-In scope:
-- GDELT as the upstream news metadata source
-- GCP infrastructure provisioned with Terraform
-- BigQuery datasets for Bronze, Silver, and Gold models
-- Bruin-managed ingestion, transformation, orchestration, and data quality checks
-- Streamlit as the consumer-facing application
-
-Out of scope for v1:
-- event streaming
-- custom ML sentiment models
-- complex source reputation scoring
-- multi-tenant application concerns
+Terraform provisions datasets, identities, buckets, containers' hosting resources,
+schedules, and alerts. Bruin runs the asset graph inside the pipeline job.
 
 ## Component Responsibilities
 
-### 1. Terraform
+### Source and ingestion
 
-Terraform owns reproducible cloud setup. The first version should provision only what the pipeline requires to run:
-- BigQuery datasets
-- operational Bronze and Gold staging datasets for merge loads
-- a GCS bucket for Bronze archive once retention is implemented
-- service accounts
-- IAM bindings
-- any minimal supporting configuration needed for local-to-cloud execution
+The pipeline reads a bounded set of GDELT GKG 15-minute exports over HTTPS.
+Manifest selection, publication lag, retries, and per-file outcomes are recorded
+so an incomplete source window is distinguishable from low news volume. Historical
+repairs are explicit bounded operations; they do not redefine live completeness.
+See [source findings](gdelt_findings.md) and the [pipeline guide](../pipeline/bruin/README.md).
 
-Terraform should not contain speculative resources in the first pass.
+### Warehouse
 
-### 2. GDELT Source
+| Layer | Responsibility |
+|---|---|
+| Bronze | Preserve source records, ingestion IDs, and source-attempt history |
+| Silver | Normalize metadata; URL-first canonicalization and deterministic tie breaks |
+| Gold | Guardrailed Happy Factor, eligibility, exclusion reasons, operational metrics |
+| Staging datasets | Operational merge/load support, not public serving data |
 
-GDELT is the upstream source of article-level or document-level news metadata used by the pipeline.
+`gold.positive_news_feed` is the canonical scored contract. It includes excluded
+rows for auditability; the publisher reads only eligible rows. The active score
+is `v2_1_guardrailed_tone`, with `v1_1_title_rules` and a floor of 65. The v3 shadow
+model remains separate and is not promoted by the static rollout.
 
-Current implementation choice:
-- Phase 3 uses GDELT GKG 2.1 15-minute export files as the Bronze ingestion source.
+### Static publisher
 
-Still pending validation:
-- whether positive and negative emotional signals should be mapped directly from GKG fields or derived later
-- how much of downstream language coverage comes from native `TranslationInfo` versus deterministic inference
+`scripts/publish_static_feed.py` runs once daily after pipeline/report schedules.
+It requires the latest Cloud Run pipeline execution to have succeeded and the
+metrics audit timestamp to fall inside that execution. It rechecks the execution
+before manifest replacement, rejecting a changed or unsuccessful run. It also
+validates recent metrics, Gold ingestion freshness, source completeness, and
+low-volume streaks before exporting 11 approved source fields. The builder adds
+`story_id` to each public record. Each query has a
+500 MB maximum billed-byte setting.
 
-The internal contract remains stable even where some upstream mappings are still intentionally nullable.
+The builder assigns story IDs across the full 30-day edition using normalized
+headlines, URL identity, dated syndication identities, corroborating slugs and
+bounded fuzzy matching within a language. All eligible variants remain in both
+range files. Browser filters run before selecting the highest-score/newest/ID
+representative; cards, counts and Pulse use those representatives. Warehouse rows
+and eligibility remain unchanged. See [matching rules and limitations](durable_story_deduplication.md).
 
-### 3. Bruin Ingestion Layer
+The job creates hashed 7-day and 30-day JSON/gzip files, checks uploaded bytes,
+and replaces `manifest.json` last using a GCS generation precondition. Failed or
+stale runs retain the previous edition; overlapping older runs cannot overwrite
+a newer successful manifest. Date labels come from ingestion metadata, not a
+hardcoded date or a requirement for today's article publication dates.
 
-Bruin Python assets will:
-- fetch a bounded GDELT GKG input window
-- parse only the fields needed for downstream modeling
-- resolve language using native `TranslationInfo` first and title-based inference second
-- resolve article geography from `V2Locations` into `mentioned_country`
-- attach ingestion metadata
-- load an idempotent Bronze table keyed by the GKG record identifier
+### Public frontend
 
-The ingestion step should be idempotent at the batch level. Replay should be controlled through ingestion window parameters, not by manual table cleanup.
+nginx serves six allowlisted assets plus versioned feed routes. Its service
+identity can read only the feed bucket through the provisioned static-reader
+binding; the volume is read-only. The frontend contains no BigQuery client,
+credentials, local fixtures, Python helpers, or development server.
 
-### 4. BigQuery Transformation Layer
+The browser loads the 7-day file first and fetches 30 days only on selection.
+Search, filters, score sorting, pagination, and Pulse are local operations. Pulse
+summarizes the current eligible selection, not warehouse-wide health. Operational
+health stays in the reporting/Monitoring path. No polling or WebSockets keep an
+idle page active; an open page loads a new edition on refresh.
 
-Bruin SQL assets will materialize three logical layers:
+The service uses request-based billing, minimum zero, maximum two, 1 vCPU and
+512 MiB. Feed responses use gzip and immutable cache headers; the manifest has a
+60-second cache lifetime. GCS mount caching can add brief publication visibility
+lag. A loaded edition older than 36 hours produces a visible notice.
 
-- `bronze`: landed source records plus ingestion metadata
-- `silver`: cleaned, normalized, and deduplicated article records
-- `gold`: application-facing scored records plus feed-eligibility metadata
+### Reporting and archival
 
-Supporting infrastructure also includes `bronze_staging` and `gold_staging`, which are operational datasets used by merge load paths and are not part of the consumer-facing warehouse contract.
+Reporting reads Gold summaries and emits `DAILY_PIPELINE_SUMMARY` for Monitoring.
+The archive worker is `scripts/archive_bronze_incremental.py`: a conditional GCS
+lock, persisted checkpoint, immutable batch paths, full-row Parquet verification,
+and guarded pruning prevent repeated full-history exports and premature deletion.
+The older `archive_bronze.py` is reserved for explicitly scoped recovery exports.
 
-BigQuery is both the storage layer and the compute layer. No separate processing engine is required for v1.
+## Retention and Boundaries
 
-Retention targets for the current design:
-- Bronze stays queryable in BigQuery for 45 days
-- Silver stays queryable in BigQuery for 90 days
-- Gold stays queryable in BigQuery for 180 days
-- Bronze records older than 45 days should be archived to GCS before BigQuery cleanup
-- Bronze archive objects should be retained in GCS for 365 days and then deleted by lifecycle policy
+| Data | Current policy |
+|---|---|
+| Bronze | Export after 45 days; retain at least 90 days before verified, checkpoint-covered pruning outside both ingestion/publication horizons |
+| Silver | Model filters to 90 days using publication time with ingestion fallback |
+| Gold | Model cutoff is 180 days; upstream Silver's horizon limits available history |
+| Bronze archive objects | Lifecycle expiry after 365 days |
+| Static feed objects | Live hashed files have no age expiry; private audits expire after 45 days; archived versions are removed after seven newer versions |
 
-Current implementation state:
-- the Bronze archive bucket and its 365-day lifecycle are provisioned in Terraform
-- Silver filters itself to the most recent 90 days
-- Gold filters itself to the most recent 180 days
-- the Bronze archive worker is implemented as `scripts/archive_bronze.py` and can run manually or as a dedicated scheduled Cloud Run Job
+Pruning is capped per execution, so retained Bronze can exceed the target horizon
+while a backlog is processed. No unverified rows are deleted to force a deadline.
+See the [operations runbook](operations_runbook.md) for rollback and lock recovery.
 
-### 5. Data Quality Layer
+## Current Cadence
 
-Checks should run as close to the transformations as possible. Initial checks should focus on:
-- required fields not null in Silver and Gold
-- uniqueness of primary identifiers
-- valid score ranges for `happy_factor`
-- duplicate rate visibility after Silver deduplication
-- eligible-feed guardrails that block hard-deny titles and unresolved soft-deny titles
+All schedules use `Asia/Kolkata`: pipeline 06:00, report 06:20, publisher 06:30,
+archive 03:15 and 15:15. These are independent schedules, not a transactional
+workflow; the publisher's freshness/completeness checks protect publication if
+upstream work runs late or fails. Live schedule state is a dated observation,
+not the Terraform default for a new environment.
 
-### 6. Streamlit Serving Layer
+## Scope and Limits
 
-The Streamlit app queries only the Gold model in v1. It is not responsible for business logic beyond query parameterization and presentation.
-
-Current UI controls:
-- lookback window in days
-- detected language filter
-- mentioned geography filter
-- presentation sort order
-
-These controls belong inline with the Brief's `Recommended` section header as a compact control bar. The language and geography controls now present as summarized popover triggers in the closed state, keeping the toolbar single-line while moving multi-select editing plus `Apply` and `Clear` actions into the popover panel.
-
-The app should remain thin. It can apply lightweight local filters and presentation ordering over the current lookback window, but warehouse scoring and eligibility decisions still belong in Gold. The Brief reads only the warehouse-defined eligible feed, while Pulse is intentionally warehouse-wide and independent from the Brief's browsing state. The current app also renders an explicit page-level loading state during BigQuery-backed Brief refreshes and section switches so reruns do not present as a frozen interface. Any future scheduled execution of the Bruin pipeline belongs in GCP batch infrastructure rather than the Streamlit runtime.
-
-Current Pulse serving shape:
-- one consolidated dashboard query path reads `gold.pipeline_run_metrics` for latest stage counts and recent trend history
-- a second consolidated query path reads `gold.positive_news_feed` for eligibility counts, exclusion reasons, and score-distribution buckets
-- the frontend renders these warehouse results directly and does not recompute Pulse logic client-side
-- the dashboard is meant to explain warehouse state, narrowing, and exclusions rather than editorial browsing output
-
-## End-to-End Flow
-
-1. Terraform provisions the minimum GCP and BigQuery footprint.
-2. Bruin ingestion fetches a bounded GDELT window and lands data in `bronze.gdelt_news_raw`.
-3. Bruin SQL transforms Bronze data into `silver.gdelt_news_refined`.
-4. Bruin SQL builds `gold.positive_news_feed`, including `happy_factor`.
-5. Bruin SQL maintains `gold.positive_feed_guardrail_terms`, which supplies the title-rule guardrails used by Gold.
-6. Streamlit queries Gold and returns filtered results to the user.
-7. The pipeline can run locally or through the deployed Cloud Run Job, with the Cloud Scheduler cadence activated only after a successful manual smoke test against the deployed image.
-
-## Data Model Strategy
-
-### Bronze
-
-Bronze is append-oriented and traceable. It should preserve the source record shape closely enough to debug parsing and replay issues.
-
-### Silver
-
-Silver is the normalization boundary. URL cleanup, title cleanup, timestamp normalization, and deterministic deduplication belong here.
-
-Canonical meaning:
-- Silver keeps one retained canonical row for each story candidate
-- additional matching records are marked as duplicates rather than treated as missing downstream data
-
-Current metadata posture:
-- `source_domain` is a derived publisher/source-domain field
-- `mentioned_country` means article-mentioned geography, not publisher origin
-- publisher country remains out of scope
-
-### Gold
-
-Gold is the stable consumer contract. It should contain only fields needed by the app and enough metadata to explain the scoring logic.
-
-Current implementation choice:
-- Gold keeps only canonical Silver rows where `is_duplicate = false`
-- `base_happy_factor` remains a deterministic normalization of `tone_score`
-- `happy_factor_version = 'v2_1_guardrailed_tone'`
-- `happy_factor` is the guardrailed score derived from `base_happy_factor`, title allow bonuses, and title deny penalties
-- `is_positive_feed_eligible` is the serving gate for the default app feed
-- `exclusion_reason` records why a scored row is retained in Gold but excluded from the default feed
-- title rules come from `gold.positive_feed_guardrail_terms`
-
-## Operational Principles
-
-- Prefer scheduled batch processing over frequent small loads.
-- Keep the ingestion window bounded to control cost and replay behavior.
-- Make transformations deterministic so reruns do not create duplicate Gold records.
-- Treat uncertain GDELT mappings as explicit implementation decisions, not hidden assumptions.
-- Keep the active BigQuery footprint intentionally small through explicit retention windows.
-- Archive Bronze before deletion so replay and audit remain possible without keeping all history in BigQuery.
-- Preserve enough metadata in Gold and operational aggregates so Pulse can explain narrowing, exclusion, and score distribution without inventing client-side logic.
-
-## Known Decisions
-
-- BigQuery is the only warehouse and compute platform.
-- Bruin is the orchestrator and transformation framework.
-- The app will depend on one canonical serving table: `gold.positive_news_feed`.
-- The first release uses a configurable threshold, not a complex ranking product.
-- Gold separates score from eligibility so ranking and feed safety remain explainable.
-- The current scoring model uses guardrailed tone rather than raw tone-only ranking.
-- Retention targets are Bronze 45 days, Silver 90 days, and Gold 180 days.
-- Bronze archive should land in GCS rather than remain indefinitely in BigQuery.
-- Archived Bronze objects should expire after 365 days in GCS.
-- Bronze export and cleanup currently run as a manual operation rather than a scheduled job.
-- Language and article geography are informational metadata, not publisher-origin claims or serving gates.
-- The current methodology is intentionally bounded: no full-article semantic model, no factual verification layer, and no source-trust scoring layer.
-
-## Open Items
-
-- Confirm which upstream fields map to positive and negative emotional indicators beyond `V2Tone`.
-- Decide whether the current title-rule guardrails are strict enough or should be expanded further after broader sampling.
-- Decide whether Bronze archival is implemented as a Bruin-driven export step, a scheduled BigQuery export job, or an external batch script.
+The system does not perform full-article fact checking, semantic clustering,
+stream processing, or multi-tenant access control. The dashboard is publicly
+readable; BigQuery and the feed bucket are not made public by that choice.
+The original Streamlit app remains in source as a legacy tool and receives no
+production traffic. Optional edge/restricted-egress infrastructure is disabled.

@@ -50,6 +50,12 @@ bigquery_location = "<BIGQUERY_LOCATION>"
 # app_container_image = "<APP_IMAGE_URI>"
 # app_service_name = "<APP_SERVICE_NAME>"
 # app_memory_limit = "1Gi"
+# app_min_instance_count = 0
+# app_max_instance_count = 2
+# enable_static_dashboard = true
+# static_publisher_image = "<STATIC_PUBLISHER_IMAGE_DIGEST>"
+# Start paused; resume only after a verified publisher canary.
+# static_publish_schedule_paused = true
 # app_allow_unauthenticated = true
 #
 # Optional future hardening only:

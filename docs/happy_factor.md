@@ -107,7 +107,7 @@ The guardrail layer addresses a real failure mode from the earlier implementatio
 The current model improves that without pretending to solve sentiment with custom NLP.
 
 It also makes the warehouse easier to interpret operationally:
-- Pulse can show the full scored Gold population, not only served rows
+- Operational reporting can describe excluded and eligible Gold rows separately
 - exclusion buckets can be read as deliberate serving decisions, not as warehouse loss
 - feed narrowing from Bronze to eligible Gold remains inspectable stage by stage
 
@@ -124,9 +124,10 @@ This allows:
 
 ## UI Usage
 
-- The Brief should read only rows where `is_positive_feed_eligible = true`
-- Pulse should read the broader Gold population plus operational aggregates so score distribution and exclusion reasons remain visible warehouse-wide
-- app-side browsing controls should not redefine warehouse eligibility logic
+- The public publisher selects only rows where `is_positive_feed_eligible = true`
+- Public Pulse summarizes the current deduplicated eligible selection; broader Gold distributions and exclusions belong to operational reporting
+- Browser filters and presentation deduplication do not redefine warehouse scores or eligibility
+- Badges use 65–69 amber, 70–79 sage, 80–89 green, and 90–100 deeper green accents, always alongside the numeric score
 
 ## Validation Expectations
 

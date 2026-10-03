@@ -1,5 +1,7 @@
 # Gold Scoring V3 Shadow Rollout
 
+> Experimental warehouse path, not the public scoring contract. The static publisher reads `gold.positive_news_feed` with v2.1 scoring; this shadow model has not been promoted by the static deployment.
+
 ## Added Assets
 
 - `gold.scoring_eval_labels`: empty benchmark-label table for manual review results.
@@ -26,7 +28,7 @@ Current `v3` defaults intentionally leave upstream GDELT-derived signal adjustme
 - Unit tests cover deterministic score math, URL-status handling, and rollout-script SQL builders.
 - URL validation now includes SSRF hardening before request dispatch and before every followed redirect, with blocked targets logged and surfaced as `unavailable`.
 - Live validation for this path should combine a manual Cloud Run job execution with warehouse checks on `gold.url_validation_results` and a log search for `Blocked URL target`.
-- Full `bruin validate` still depends on live BigQuery access and could not complete in the sandboxed environment used for implementation.
+- Full `bruin validate` requires warehouse access. The original implementation session could not complete that check; this historical limitation does not establish the result of later pipeline runs.
 
 ## Known Follow-Ups
 

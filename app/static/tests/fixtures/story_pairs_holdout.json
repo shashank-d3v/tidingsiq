@@ -1,0 +1,2093 @@
+{
+  "description": "Independent headline-level review of randomly sampled September 29 export pairs from story families excluded from the October 2 development fixture; labels were assigned before production evaluation. No article-body ground truth. This set became a regression fixture after targeted publisher/schedule corrections; final scores are not untouched blind validation.",
+  "pairs": [
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "1b3151b1b03f5c3a3a95aab973b86453ed7f0595679d4bf5296580de58f1ab9b",
+        "happy_factor": "83.46",
+        "ingested_at": "2026-08-26 13:22:20",
+        "language": "en",
+        "mentioned_country_name": "Hong Kong",
+        "published_at": "2026-08-26 12:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "finanznachrichten.de",
+        "title": "The Hong Kong Jockey Club: PBC 2026 marks its 10th anniversary, bringing together global leaders to Leap for Impact",
+        "tone_score": "6.69144981412639",
+        "url": "https://www.finanznachrichten.de/nachrichten-2026-08/69412302-the-hong-kong-jockey-club-pbc-2026-marks-its-10th-anniversary-bringing-together-global-leaders-to-leap-for-impact-008.htm"
+      },
+      "b": {
+        "article_id": "d4850435751c819ca183b5068410723e03db01e36a738ec2b7449149acad14c2",
+        "happy_factor": "82.97",
+        "ingested_at": "2026-08-26 13:22:20",
+        "language": "en",
+        "mentioned_country_name": "Hong Kong",
+        "published_at": "2026-08-26 12:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "prnewswire.com",
+        "title": "PBC 2026 marks its 10th anniversary, bringing together global leaders to \"Leap for Impact\"",
+        "tone_score": "6.59340659340659",
+        "url": "http://www.prnewswire.com/news-releases/pbc-2026-marks-its-10th-anniversary-bringing-together-global-leaders-to-leap-for-impact-302860524.html"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "c20502db548bdde51ade12a68f92657fab69090685e1e41f9c4b503ed2d2254a",
+        "happy_factor": "67.86",
+        "ingested_at": "2026-08-26 13:22:20",
+        "language": "it",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 12:00:00",
+        "serving_date": "2026-08-26",
+        "source_name": "savonanews.it",
+        "title": "GrAudio edizione delle 12:30 del 26 agosto",
+        "tone_score": "3.57142857142857",
+        "url": "https://www.savonanews.it/2026/08/26/leggi-notizia/argomenti/graudio/articolo/graudio-edizione-delle-1230-del-26-agosto-1.html"
+      },
+      "b": {
+        "article_id": "4aaace5387fd59cbf7b890b0d972d7b6be2ceab3a65b9977384b9e61368eff9b",
+        "happy_factor": "67.86",
+        "ingested_at": "2026-09-28 11:30:24",
+        "language": "it",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 08:45:00",
+        "serving_date": "2026-08-26",
+        "source_name": "savonanews.it",
+        "title": "GrAudio edizione delle 09:30 del 26 agosto",
+        "tone_score": "3.5714285714",
+        "url": "https://www.savonanews.it/2026/08/26/leggi-notizia/argomenti/graudio/articolo/graudio-edizione-delle-0930-del-26-agosto-1.html"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "c752a1939795f34a2b09449f8abb4a33ec7510ca2ea8a585b38b468374b59a64",
+        "happy_factor": "77.57",
+        "ingested_at": "2026-09-28 11:18:56",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-09-10 00:15:00",
+        "serving_date": "2026-09-10",
+        "source_name": "portnews.com.au",
+        "title": "Eat Play Stay: Spring/Summer guide for regional adventures | Port Macquarie News",
+        "tone_score": "5.5147058824",
+        "url": "https://www.portnews.com.au/story/9335890/eat-play-stay-springsummer-guide-for-regional-adventures/"
+      },
+      "b": {
+        "article_id": "455c85c83ccc6374ed7bfc87091cb85fdd852b83c61ab64d9a03e34819518837",
+        "happy_factor": "77.37",
+        "ingested_at": "2026-09-28 11:18:56",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-09-10 00:15:00",
+        "serving_date": "2026-09-10",
+        "source_name": "sconeadvocate.com.au",
+        "title": "Eat Play Stay: Spring/Summer guide for regional adventures | The Scone Advocate",
+        "tone_score": "5.4744525547",
+        "url": "https://www.sconeadvocate.com.au/story/9335890/eat-play-stay-springsummer-guide-for-regional-adventures/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "a538056fa286ff22f5b4960402e99311cb4e715a5f4df88b50f7138ec4ae3366",
+        "happy_factor": "69.3",
+        "ingested_at": "2026-09-28 11:20:45",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-14 00:15:00",
+        "serving_date": "2026-09-14",
+        "source_name": "irrigator.com.au",
+        "title": "Silver Moon cruise offers quiet luxury on voyage through Japan | The Irrigator",
+        "tone_score": "3.8590604027",
+        "url": "https://www.irrigator.com.au/story/9345612/silver-moon-cruise-offers-quiet-luxury-on-voyage-through-japan/"
+      },
+      "b": {
+        "article_id": "c35e2a773cd248f04c1c61cc86bbd43db1063139b0c53bb4278a099bea52fbb6",
+        "happy_factor": "69.3",
+        "ingested_at": "2026-09-28 11:20:45",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-13 23:45:00",
+        "serving_date": "2026-09-13",
+        "source_name": "hepburnadvocate.com.au",
+        "title": "Silver Moon cruise offers quiet luxury on voyage through Japan | The Advocate - Hepburn",
+        "tone_score": "3.8590604027",
+        "url": "https://www.hepburnadvocate.com.au/story/9345612/silver-moon-cruise-offers-quiet-luxury-on-voyage-through-japan/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "b1be734ccdb474cd4e8e81ab3b31a695a38d267b657d4e0a588ea06bd5e63c71",
+        "happy_factor": "73.26",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-11 00:30:00",
+        "serving_date": "2026-07-11",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST #581 - Luke Combs on Money, Fame & Giving Bobby New Dad Advice | 97 Kicks FM",
+        "tone_score": "4.65116279069767",
+        "url": "https://97kicksfm.iheart.com/featured/bobby-bones/content/2026-07-10-834-feeling-things-with-amy-ka-bobbycast-581-luke-combs-on-money-fame-givin/"
+      },
+      "b": {
+        "article_id": "815bb9d85420acfe13820b42eccdf6e7c9cc0d01d4f165f9e0f91873233a163c",
+        "happy_factor": "73.26",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-11 00:15:00",
+        "serving_date": "2026-07-11",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST #581 - Luke Combs on Money, Fame & Giving Bobby New Dad Advice | 105.7 The Bull",
+        "tone_score": "4.65116279069767",
+        "url": "https://bull1057.iheart.com/featured/bobby-bones/content/2026-07-10-834-feeling-things-with-amy-ka-bobbycast-581-luke-combs-on-money-fame-givin/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "04864a4c02faf0cbdd7a041f7e026a76717e61db9a1bcb2c356ac8a873454eaa",
+        "happy_factor": "70.08",
+        "ingested_at": "2026-07-03 00:30:31",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-03 00:00:00",
+        "serving_date": "2026-07-03",
+        "source_name": "gleninnesexaminer.com.au",
+        "title": "Paspaley family launch luxury Kimberley expedition cruising | Glen Innes Examiner",
+        "tone_score": "4.01606425702811",
+        "url": "https://www.gleninnesexaminer.com.au/story/9301395/paspaley-family-launch-luxury-kimberley-expedition-cruising/"
+      },
+      "b": {
+        "article_id": "598818f6881e8048b312cb790b54039aa31f4dcbf25126c6c6537fae64eeb9e7",
+        "happy_factor": "70.08",
+        "ingested_at": "2026-07-03 00:30:31",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-02 23:45:00",
+        "serving_date": "2026-07-02",
+        "source_name": "narrominenewsonline.com.au",
+        "title": "Paspaley family launch luxury Kimberley expedition cruising | Narromine News",
+        "tone_score": "4.01606425702811",
+        "url": "https://www.narrominenewsonline.com.au/story/9301395/paspaley-family-launch-luxury-kimberley-expedition-cruising/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "bfce0652c43b24c5d8f3aa73839d04b4017d5554d36b8b9cfe00fb597d101728",
+        "happy_factor": "66.67",
+        "ingested_at": "2026-07-04 00:30:26",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-04 00:15:00",
+        "serving_date": "2026-07-04",
+        "source_name": "goskagit.com",
+        "title": "Taylor Swift and Travis Kelce are married in elaborate Madison Square Garden ceremony",
+        "tone_score": "3.33333333333333",
+        "url": "http://www.goskagit.com/news/nation/taylor-swift-and-travis-kelce-are-married-in-elaborate-madison-square-garden-ceremony/article_721cb989-21c2-5438-a69b-9944e1eab4c0.html"
+      },
+      "b": {
+        "article_id": "c9dee29eeee77b15932d92788ee6ed3c455814a3ca92501c105906479f1dfba0",
+        "happy_factor": "66.24",
+        "ingested_at": "2026-07-04 00:30:26",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-04 00:30:00",
+        "serving_date": "2026-07-04",
+        "source_name": "nbcphiladelphia.com",
+        "title": "Taylor Swift and Travis Kelce are married in elaborate ceremony – NBC10 Philadelphia",
+        "tone_score": "3.24825986078886",
+        "url": "https://www.nbcphiladelphia.com/entertainment/entertainment-news/taylor-swift-travis-kelce-married/4427791/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "691eed42233e5558e5b3aa86b2d0460a582c7c487313ec9d97c49e839bf1eda6",
+        "happy_factor": "73.26",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-11 00:30:00",
+        "serving_date": "2026-07-11",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST #581 - Luke Combs on Money, Fame & Giving Bobby New Dad Advice | Kicker 95.1",
+        "tone_score": "4.65116279069767",
+        "url": "https://kykr.iheart.com/featured/bobby-bones/content/2026-07-10-834-feeling-things-with-amy-ka-bobbycast-581-luke-combs-on-money-fame-givin/"
+      },
+      "b": {
+        "article_id": "5b18b69c5bfa8d98ba9d692495066922429ab5ac873706edc3e8365312109f1d",
+        "happy_factor": "73.26",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-11 00:00:00",
+        "serving_date": "2026-07-11",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST #581 - Luke Combs on Money, Fame & Giving Bobby New Dad Advice | 95.5 The Bull",
+        "tone_score": "4.65116279069767",
+        "url": "https://955thebull.iheart.com/featured/bobby-bones/content/2026-07-10-834-feeling-things-with-amy-ka-bobbycast-581-luke-combs-on-money-fame-givin/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "af27241c26172d401a30f26a2ec24608d96518e39bd38a664abcfddfc539afcc",
+        "happy_factor": "70.7",
+        "ingested_at": "2026-09-28 11:21:33",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-15 23:45:00",
+        "serving_date": "2026-09-15",
+        "source_name": "finanznachrichten.de",
+        "title": "ShortDot SA: ShortDot Reveals 80 Short, Memorable gTLD Strings Across 40 ICANN Applications",
+        "tone_score": "4.1407867495",
+        "url": "https://www.finanznachrichten.de/nachrichten-2026-09/69589387-shortdot-sa-shortdot-reveals-80-short-memorable-gtld-strings-across-40-icann-applications-200.htm"
+      },
+      "b": {
+        "article_id": "d5bec5f1972220a31abc8dfad624510df694b6f2243268f0ee7f015544341864",
+        "happy_factor": "70.12",
+        "ingested_at": "2026-09-28 11:21:33",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-15 23:45:00",
+        "serving_date": "2026-09-15",
+        "source_name": "pr-inside.com",
+        "title": "ShortDot Reveals 80 Short, Memorable gTLD Strings Across 40 ICANN Applications ...",
+        "tone_score": "4.0241448692",
+        "url": "https://www.pr-inside.com/shortdot-reveals-80-short-memorable-gtld-strings-across-40-icann-applications-r5223374.htm"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "cbca07bae208307b77a8cc01ed24ce3b2f89b80f884c9b378bccc8784c49bbd2",
+        "happy_factor": "68.4",
+        "ingested_at": "2026-09-28 11:15:26",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-09-02 23:45:00",
+        "serving_date": "2026-09-02",
+        "source_name": "readingeagle.com",
+        "title": "Sculpture unveiled at the African Landing Memorial at Virginia's Fort Monroe was years in the making – Reading Eagle",
+        "tone_score": "3.6809815951",
+        "url": "https://www.readingeagle.com/2026/09/02/rediscovering-fort-monroes-past/"
+      },
+      "b": {
+        "article_id": "b7d3671db1dd5292bcebd2aefbd7ff04a7ffd85509d6888a5f3bb88780b5280e",
+        "happy_factor": "68.4",
+        "ingested_at": "2026-09-28 11:15:26",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-09-02 23:45:00",
+        "serving_date": "2026-09-02",
+        "source_name": "reporterherald.com",
+        "title": "Sculpture unveiled at the African Landing Memorial at Virginia's Fort Monroe was years in the making – Loveland Reporter-Herald",
+        "tone_score": "3.6809815951",
+        "url": "https://www.reporterherald.com/2026/09/02/rediscovering-fort-monroes-past/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "74416931ff11533a541b89cd43c051d040e05fa92b532138afeed1b476e516ec",
+        "happy_factor": "67.24",
+        "ingested_at": "2026-07-29 00:30:25",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-29 00:00:00",
+        "serving_date": "2026-07-29",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST - Gary Vee on Finding Social Media Success, Embracing AI & Americ | BIG 104.7",
+        "tone_score": "3.44827586206897",
+        "url": "https://big1047.iheart.com/featured/bobby-bones/content/2026-07-28-1119-the-bobby-bones-show-bobbycast-gary-vee-on-finding-social-media-succes/"
+      },
+      "b": {
+        "article_id": "3f2c704740cc973e543dd0c5eb340a89544f50d11b9bfd50af2ef83ff775f27e",
+        "happy_factor": "67.24",
+        "ingested_at": "2026-07-29 00:30:25",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-28 23:45:00",
+        "serving_date": "2026-07-28",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST - Gary Vee on Finding Social Media Success, Embracing AI & Americ | Kicker 95.1",
+        "tone_score": "3.44827586206897",
+        "url": "https://kykr.iheart.com/featured/bobby-bones/content/2026-07-28-1119-the-bobby-bones-show-bobbycast-gary-vee-on-finding-social-media-succes/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "980b852c738b5b347a5dcd2dcd1f2f663c1aecb56f9a33a4df9287e4177eae44",
+        "happy_factor": "86.08",
+        "ingested_at": "2026-08-26 13:53:52",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-21 00:15:00",
+        "serving_date": "2026-08-21",
+        "source_name": "iheart.com",
+        "title": "Mattel Introduces Marilyn Monroe Doll on Her 100th Birthday | Mix 94.5",
+        "tone_score": "7.21649484536082",
+        "url": "https://mymix945.iheart.com/featured/jana/content/2026-08-20-mattel-introduces-marilyn-monroe-doll-on-her-100th-birthday/"
+      },
+      "b": {
+        "article_id": "ea65ecea54a304a9dd332542cb7d1419465c73f5149900cd7e26a1930cb95a43",
+        "happy_factor": "86.08",
+        "ingested_at": "2026-08-26 13:43:38",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-20 23:15:00",
+        "serving_date": "2026-08-20",
+        "source_name": "iheart.com",
+        "title": "Mattel Introduces Marilyn Monroe Doll on Her 100th Birthday | Magic 107.9",
+        "tone_score": "7.21649484536082",
+        "url": "https://magic1079.iheart.com/featured/jana/content/2026-08-20-mattel-introduces-marilyn-monroe-doll-on-her-100th-birthday/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "f9aa5ad95d4493fe0292ff40734c268ec1344d284ac7b5896497b52d35cca78a",
+        "happy_factor": "95.55",
+        "ingested_at": "2026-07-31 00:30:29",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-31 00:30:00",
+        "serving_date": "2026-07-31",
+        "source_name": "mudgeeguardian.com.au",
+        "title": "Public Education Week: Unlocking bright futures from August 3 | Mudgee Guardian",
+        "tone_score": "9.11016949152542",
+        "url": "https://www.mudgeeguardian.com.au/story/9306936/public-education-week-unlocking-bright-futures-from-august-3/"
+      },
+      "b": {
+        "article_id": "92d4540a4bf92bf47b033a9cf3512626ba4366833a7367cf5099eb3033f6791a",
+        "happy_factor": "95.55",
+        "ingested_at": "2026-07-31 00:30:29",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-31 00:15:00",
+        "serving_date": "2026-07-31",
+        "source_name": "narrominenewsonline.com.au",
+        "title": "Public Education Week: Unlocking bright futures from August 3 | Narromine News",
+        "tone_score": "9.11016949152542",
+        "url": "https://www.narrominenewsonline.com.au/story/9306936/public-education-week-unlocking-bright-futures-from-august-3/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "d8724f3f24230299ffa13cf27c4a0ac6e942e3b8d812f3b9e0db5d59fa89213f",
+        "happy_factor": "65.13",
+        "ingested_at": "2026-09-28 11:26:22",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-27 00:15:00",
+        "serving_date": "2026-09-27",
+        "source_name": "batemansbaypost.com.au",
+        "title": "MSC Seaview butler reveals how to get the most from cruises | Bay Post-Moruya Examiner",
+        "tone_score": "3.025210084",
+        "url": "https://www.batemansbaypost.com.au/story/9352554/msc-seaview-butler-reveals-how-to-get-the-most-from-cruises/"
+      },
+      "b": {
+        "article_id": "9c2288ce0b221c47b0cc523e807a1e76f305d873a342100159336496f2bfd7c7",
+        "happy_factor": "65.13",
+        "ingested_at": "2026-09-28 11:26:22",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-26 23:45:00",
+        "serving_date": "2026-09-26",
+        "source_name": "greatlakesadvocate.com.au",
+        "title": "MSC Seaview butler reveals how to get the most from cruises | Great Lakes Advocate",
+        "tone_score": "3.025210084",
+        "url": "https://www.greatlakesadvocate.com.au/story/9352554/msc-seaview-butler-reveals-how-to-get-the-most-from-cruises/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "b7d645ff1146de0d072f16c1db719c23f79dd38ad542bd5292d8fe4d8a98a63a",
+        "happy_factor": "77.52",
+        "ingested_at": "2026-08-05 00:30:28",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-05 00:30:00",
+        "serving_date": "2026-08-05",
+        "source_name": "portnews.com.au",
+        "title": "Teen karate champ Savannah Boundy's gold medal revenge on bullies | Port Macquarie News",
+        "tone_score": "5.5045871559633",
+        "url": "https://www.portnews.com.au/story/9324129/teen-karate-champ-savannah-boundys-gold-medal-revenge-on-bullies/"
+      },
+      "b": {
+        "article_id": "1781bc12c17c0f1bf137857a9cd6dd1fb611c4bb4dfb4f5f927bb12de70a1c54",
+        "happy_factor": "77.23",
+        "ingested_at": "2026-08-05 00:30:28",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-05 00:00:00",
+        "serving_date": "2026-08-05",
+        "source_name": "singletonargus.com.au",
+        "title": "Teen karate champ Savannah Boundy's gold medal revenge on bullies | The Singleton Argus",
+        "tone_score": "5.44629349470499",
+        "url": "https://www.singletonargus.com.au/story/9324129/teen-karate-champ-savannah-boundys-gold-medal-revenge-on-bullies/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "15d4947dff8999719d0052f7af4bc4812b964023638624c843f87d69143e8791",
+        "happy_factor": "72.73",
+        "ingested_at": "2026-09-28 11:30:59",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 14:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "iheart.com",
+        "title": "Analog Room Trend / Remembering the 1 and only Dolly Parton / New Dads in t | Mix 103.3",
+        "tone_score": "4.5454545455",
+        "url": "https://mix1033.iheart.com/featured/murphy-sam-jodi/content/2026-08-26-1119-murphy-sam-jodi-analog-room-trend-remembering-the-1-and-only-dolly-par/"
+      },
+      "b": {
+        "article_id": "02eb4c4d0568545906679c21fa0260f89b345b601e4740d4bfeca62e75122fd4",
+        "happy_factor": "72.73",
+        "ingested_at": "2026-09-28 11:30:59",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 13:30:00",
+        "serving_date": "2026-08-26",
+        "source_name": "iheart.com",
+        "title": "Analog Room Trend / Remembering the 1 and only Dolly Parton / New Dads in t | Mix 97.3",
+        "tone_score": "4.5454545455",
+        "url": "https://mix973wheeling.iheart.com/featured/murphy-sam-jodi/content/2026-08-26-1119-murphy-sam-jodi-analog-room-trend-remembering-the-1-and-only-dolly-par/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "be78ebed10fcb27a4a4cb4cc1ebd5687f21a0e2f382c0b7df931beead35fa931",
+        "happy_factor": "69.42",
+        "ingested_at": "2026-08-08 00:30:30",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-07 23:45:00",
+        "serving_date": "2026-08-07",
+        "source_name": "kixi.com",
+        "title": "Yes announces half-speed remaster of ﻿'Magnification'﻿ album – AM 880 KIXI",
+        "tone_score": "3.88349514563107",
+        "url": "https://kixi.com/yes-announces-half-speed-remaster-of-magnification-album/"
+      },
+      "b": {
+        "article_id": "67af3f6f3d989fe994d1b4683b4a9b5c06c0e1ef621ab1672def830f1351b759",
+        "happy_factor": "66.13",
+        "ingested_at": "2026-08-08 00:30:30",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-08 00:15:00",
+        "serving_date": "2026-08-08",
+        "source_name": "1073theeagle.com",
+        "title": "Yes announces half-speed remaster of ﻿'Magnification'﻿ album",
+        "tone_score": "3.2258064516129",
+        "url": "https://www.1073theeagle.com/news/yes-announces-half-speed-remaster-magnification-album/NPH7ONYSM44YJNOS3G72VBAQBE/"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "1bb518022cba13c28adfebb8351fa834a21660c283dfec6332a88654a536ea18",
+        "happy_factor": "69.94",
+        "ingested_at": "2026-08-18 00:30:27",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-18 00:30:00",
+        "serving_date": "2026-08-18",
+        "source_name": "wdbo.com",
+        "title": "How much does assisted living cost in Florida?",
+        "tone_score": "3.98713826366559",
+        "url": "https://www.wdbo.com/news/how-much-does/BU25ER5WXI6R7JY4XQZOYZNGTA/"
+      },
+      "b": {
+        "article_id": "bf9288ad16305b9c0a943867d6f9ee26b730de9dd61e56795b982efccd1cb86e",
+        "happy_factor": "69.92",
+        "ingested_at": "2026-08-18 00:30:27",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-18 00:15:00",
+        "serving_date": "2026-08-18",
+        "source_name": "eagledayton.com",
+        "title": "How much does assisted living cost in Ohio?",
+        "tone_score": "3.98457583547558",
+        "url": "https://www.eagledayton.com/news/how-much-does/ACH43OTXHI5U5JVPBBHLZGOHSA/"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "40885ab445d3af0be72c730a45543ce75d5209240893ae8a4e5363ce0a90f6a3",
+        "happy_factor": "67.86",
+        "ingested_at": "2026-09-28 11:30:59",
+        "language": "it",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 14:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "targatocn.it",
+        "title": "GrAudio edizione delle 14:30 del 26 agosto",
+        "tone_score": "3.5714285714",
+        "url": "https://www.targatocn.it/2026/08/26/leggi-notizia/argomenti/graudio/articolo/graudio-edizione-delle-1430-del-26-agosto-1.html"
+      },
+      "b": {
+        "article_id": "4aaace5387fd59cbf7b890b0d972d7b6be2ceab3a65b9977384b9e61368eff9b",
+        "happy_factor": "67.86",
+        "ingested_at": "2026-09-28 11:30:24",
+        "language": "it",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 08:45:00",
+        "serving_date": "2026-08-26",
+        "source_name": "savonanews.it",
+        "title": "GrAudio edizione delle 09:30 del 26 agosto",
+        "tone_score": "3.5714285714",
+        "url": "https://www.savonanews.it/2026/08/26/leggi-notizia/argomenti/graudio/articolo/graudio-edizione-delle-0930-del-26-agosto-1.html"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "42a8f349d9dc48f3521c993f4f394bab35ce020579b69df3339642e10e7da958",
+        "happy_factor": "89.16",
+        "ingested_at": "2026-07-04 00:30:26",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-04 00:30:00",
+        "serving_date": "2026-07-04",
+        "source_name": "chvnradio.com",
+        "title": "Event: Naija Market Day - CHVNRadio: Southern Manitoba's hub for local and Christian news, and adult contemporary Christian programming.",
+        "tone_score": "7.83132530120482",
+        "url": "https://www.chvnradio.com/events/226040"
+      },
+      "b": {
+        "article_id": "ad272fe2cc81ffb14d215c615a3d3cf2724b5a5a4ab3f2d9a2542b4e3ac08f3c",
+        "happy_factor": "72.22",
+        "ingested_at": "2026-07-04 00:30:26",
+        "language": "en",
+        "mentioned_country_name": "Canada",
+        "published_at": "2026-07-04 00:30:00",
+        "serving_date": "2026-07-04",
+        "source_name": "chvnradio.com",
+        "title": "Event: WORLD CUP WATCH PARY - CHVNRadio: Southern Manitoba's hub for local and Christian news, and adult contemporary Christian programming.",
+        "tone_score": "4.44444444444444",
+        "url": "https://www.chvnradio.com/events/226937"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "c07304c99cc8d61a23e699b636b9d2d51960737e9a096416a4761e6520beb694",
+        "happy_factor": "69.74",
+        "ingested_at": "2026-08-26 14:21:59",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-26 00:30:00",
+        "serving_date": "2026-08-26",
+        "source_name": "hepburnadvocate.com.au",
+        "title": "Dolly Parton: Nashville exhibition reveals her defy-all-odds story | The Advocate - Hepburn",
+        "tone_score": "3.94736842105263",
+        "url": "https://www.hepburnadvocate.com.au/story/9337532/dolly-parton-nashville-exhibition-reveals-her-defy-all-odds-story/"
+      },
+      "b": {
+        "article_id": "9d78c26beab694117de07060e2d560ab3da5d49aa8e8df1ec67830dc01866a4b",
+        "happy_factor": "69.74",
+        "ingested_at": "2026-08-26 14:21:59",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-26 00:30:00",
+        "serving_date": "2026-08-26",
+        "source_name": "irrigator.com.au",
+        "title": "Dolly Parton: Nashville exhibition reveals her defy-all-odds story | The Irrigator",
+        "tone_score": "3.94736842105263",
+        "url": "https://www.irrigator.com.au/story/9337532/dolly-parton-nashville-exhibition-reveals-her-defy-all-odds-story/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "2ca7278e47df4a55f6db43cb399c3517fdce09cf36a0e90071bee963ba152a45",
+        "happy_factor": "76.67",
+        "ingested_at": "2026-08-07 00:30:33",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-07 00:30:00",
+        "serving_date": "2026-08-07",
+        "source_name": "iheart.com",
+        "title": "Ask the Husband: What Murphy Really Thinks About Jodi - AFTER THE SHOW 8/6 | 105.9 KGBX",
+        "tone_score": "5.33333333333333",
+        "url": "https://kgbx.iheart.com/featured/murphy-sam-jodi/content/2026-08-06-1119-murphy-sam-jodi-ask-the-husband-what-murphy-really-thinks-about-jodi-a/"
+      },
+      "b": {
+        "article_id": "d155e5430551e1569e39ec92e531192f7a62834a0ad60489d77c873c992b60c4",
+        "happy_factor": "76.67",
+        "ingested_at": "2026-08-07 00:30:33",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-07 00:00:00",
+        "serving_date": "2026-08-07",
+        "source_name": "iheart.com",
+        "title": "Ask the Husband: What Murphy Really Thinks About Jodi - AFTER THE SHOW 8/6 | Mix 97.3",
+        "tone_score": "5.33333333333333",
+        "url": "https://mix973wheeling.iheart.com/featured/murphy-sam-jodi/content/2026-08-06-1119-murphy-sam-jodi-ask-the-husband-what-murphy-really-thinks-about-jodi-a/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "113d7b798b55f33e34a1d44e502b901475f42ec3234665a8333036d6fa09a7b6",
+        "happy_factor": "79.07",
+        "ingested_at": "2026-08-26 13:22:20",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-26 12:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "wiog.com",
+        "title": "How Taylor Swift and Travis Kelce's Star-Studded Wedding Maintained a Small-Town Feel | 102.5 WIOG",
+        "tone_score": "5.81395348837209",
+        "url": "https://www.wiog.com/2026/08/26/how-taylor-swift-and-travis-kelces-star-studded-wedding-maintained-a-small-town-feel/"
+      },
+      "b": {
+        "article_id": "d1973b5498e931806343e0ef6a196ad611a82b6163e1ce3ec6c38633b0e1a422",
+        "happy_factor": "79.07",
+        "ingested_at": "2026-09-28 11:30:24",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-26 09:00:00",
+        "serving_date": "2026-08-26",
+        "source_name": "q98fm.com",
+        "title": "How Taylor Swift and Travis Kelce's Star-Studded Wedding Maintained a Small-Town Feel | ALWAYS Q98",
+        "tone_score": "5.8139534884",
+        "url": "https://www.q98fm.com/2026/08/26/how-taylor-swift-and-travis-kelces-star-studded-wedding-maintained-a-small-town-feel/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "cfa2f5881cd1fad9e53661d043180cdb11e8dafb8a710d1d0c561353f161037d",
+        "happy_factor": "66.74",
+        "ingested_at": "2026-08-11 00:30:27",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-11 00:30:00",
+        "serving_date": "2026-08-11",
+        "source_name": "thecourier.com.au",
+        "title": "San Diego is where the California dream really comes true | The Courier",
+        "tone_score": "3.34865397242285",
+        "url": "https://www.thecourier.com.au/story/9124054/san-diego-is-where-the-california-dream-really-comes-true/"
+      },
+      "b": {
+        "article_id": "2d6aff53091373bbf45b2779fc0fdef92c86387940c1086ec77554f965e0798d",
+        "happy_factor": "66.74",
+        "ingested_at": "2026-08-11 00:30:27",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-11 00:00:00",
+        "serving_date": "2026-08-11",
+        "source_name": "hepburnadvocate.com.au",
+        "title": "San Diego is where the California dream really comes true | The Advocate - Hepburn",
+        "tone_score": "3.34865397242285",
+        "url": "https://www.hepburnadvocate.com.au/story/9124054/san-diego-is-where-the-california-dream-really-comes-true/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "5432dbd185a12be046b20c9a04bf0815e0a77556a42b816cab1f40b3d7dbfd3c",
+        "happy_factor": "66.35",
+        "ingested_at": "2026-08-31 00:30:32",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-31 00:00:00",
+        "serving_date": "2026-08-31",
+        "source_name": "yasstribune.com.au",
+        "title": "Four best places to eat and drink in Tallinn, Estonia's capital | Yass Tribune",
+        "tone_score": "3.27044025157233",
+        "url": "https://www.yasstribune.com.au/story/9337481/four-best-places-to-eat-and-drink-in-tallinn-estonias-capital/"
+      },
+      "b": {
+        "article_id": "48f72de05d4d75b294aacef999118aa4590aa4c84eed478a3e21e218b879eefb",
+        "happy_factor": "66.35",
+        "ingested_at": "2026-08-31 00:30:32",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-30 23:45:00",
+        "serving_date": "2026-08-30",
+        "source_name": "hepburnadvocate.com.au",
+        "title": "Four best places to eat and drink in Tallinn, Estonia's capital | The Advocate - Hepburn",
+        "tone_score": "3.27044025157233",
+        "url": "https://www.hepburnadvocate.com.au/story/9337481/four-best-places-to-eat-and-drink-in-tallinn-estonias-capital/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "586cde51d375c904136ab2dd96e677b5f20ece49e19685eaddeb59cec92b92d1",
+        "happy_factor": "65.59",
+        "ingested_at": "2026-07-25 00:30:28",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-25 00:00:00",
+        "serving_date": "2026-07-25",
+        "source_name": "thecourier.com.au",
+        "title": "Behind the scenes: five ways to help Australian theatre | The Courier",
+        "tone_score": "3.11750599520384",
+        "url": "https://www.thecourier.com.au/story/9316854/behind-the-scenes-five-ways-to-help-australian-theatre/"
+      },
+      "b": {
+        "article_id": "2dd236fb40230c2570f925ea76b1587b2c247efff5216a6f7514c4486e6c8c0c",
+        "happy_factor": "65.59",
+        "ingested_at": "2026-07-25 00:30:28",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-24 23:45:00",
+        "serving_date": "2026-07-24",
+        "source_name": "naroomanewsonline.com.au",
+        "title": "Behind the scenes: five ways to help Australian theatre | Narooma News",
+        "tone_score": "3.11750599520384",
+        "url": "https://www.naroomanewsonline.com.au/story/9316854/behind-the-scenes-five-ways-to-help-australian-theatre/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "197f39ffa55251cb33b4a35ef7fa140ec8f487a30fad97513ded77828acb2ace",
+        "happy_factor": "74.39",
+        "ingested_at": "2026-07-04 00:30:26",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-04 00:15:00",
+        "serving_date": "2026-07-04",
+        "source_name": "iheart.com",
+        "title": "THE BIG PODCAST - ALL NEW BIG Interviews With Rick Ross, YG, and Jo Koy | T | 103.7 The Beat",
+        "tone_score": "4.8780487804878",
+        "url": "https://thebeat1037.iheart.com/featured/big-boy-s-neighborhood/content/2026-07-03-51-big-boys-neighborhood-podca-the-big-podcast-all-new-big-interviews-with-/"
+      },
+      "b": {
+        "article_id": "faff1cc710f0f50055309f2ce38640c5e691a4a236783d932445b2a25bb484cd",
+        "happy_factor": "74.39",
+        "ingested_at": "2026-07-04 00:30:26",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-04 00:00:00",
+        "serving_date": "2026-07-04",
+        "source_name": "iheart.com",
+        "title": "THE BIG PODCAST - ALL NEW BIG Interviews With Rick Ross, YG, and Jo Koy | T | The Z92.3",
+        "tone_score": "4.8780487804878",
+        "url": "https://kiiz.iheart.com/featured/big-boy-s-neighborhood/content/2026-07-03-51-big-boys-neighborhood-podca-the-big-podcast-all-new-big-interviews-with-/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "fb7d14a6edaa3837e476257615d8bcc2deb940ff2477ebc58de79934b562691f",
+        "happy_factor": "100.0",
+        "ingested_at": "2026-08-31 00:30:32",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-31 00:30:00",
+        "serving_date": "2026-08-31",
+        "source_name": "tdtnews.com",
+        "title": "Daisy Chain Fields benefit festival rallies young fans for women's well-being, in photos | Nation World",
+        "tone_score": "16.2162162162162",
+        "url": "https://www.tdtnews.com/news/nation_world/article_36c65014-8acc-5e6e-95bf-c5a45b1313f5.html"
+      },
+      "b": {
+        "article_id": "b73b4fbf9b7f3e72bc12409f0d061af6e40a61db0585a1a9a5199324fd5f8a00",
+        "happy_factor": "100.0",
+        "ingested_at": "2026-08-31 00:30:32",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-31 00:15:00",
+        "serving_date": "2026-08-31",
+        "source_name": "reflector.com",
+        "title": "Daisy Chain Fields benefit festival rallies young fans for women's well-being, in photos | National",
+        "tone_score": "16.2162162162162",
+        "url": "http://www.reflector.com/news/national/daisy-chain-fields-benefit-festival-rallies-young-fans-for-women-s-well-being-in-photos/article_90616bdf-fdf1-5b70-acee-1ae6a9dbac80.html"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "7e5c41d4cd06e4ee4cf13ce2d288db74bd4a9fa01039caca8b0a02b7455ece2d",
+        "happy_factor": "74.22",
+        "ingested_at": "2026-09-28 11:32:21",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-29 00:00:00",
+        "serving_date": "2026-08-29",
+        "source_name": "juneesoutherncross.com.au",
+        "title": "Owen: 11-year-old raises $4,000 for McGrath Foundation nurses | Southern Cross",
+        "tone_score": "4.8449612403",
+        "url": "https://www.juneesoutherncross.com.au/story/9337652/owen-11-year-old-raises-4000-for-mcgrath-foundation-nurses/"
+      },
+      "b": {
+        "article_id": "dd8398d525c218bbc2f33aee5d59c8f9d45eff5a034d04bebaabc57fe5ae8f5f",
+        "happy_factor": "74.22",
+        "ingested_at": "2026-09-28 11:32:21",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-28 23:45:00",
+        "serving_date": "2026-08-28",
+        "source_name": "therural.com.au",
+        "title": "Owen: 11-year-old raises $4,000 for McGrath Foundation nurses | The Rural",
+        "tone_score": "4.8449612403",
+        "url": "https://www.therural.com.au/story/9337652/owen-11-year-old-raises-4000-for-mcgrath-foundation-nurses/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "7de6a24f8853afef35a3e56862bc4caa85c5b27e4aff0642e6a106c82a92e7e8",
+        "happy_factor": "65.13",
+        "ingested_at": "2026-09-28 11:26:22",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-27 00:30:00",
+        "serving_date": "2026-09-27",
+        "source_name": "macleayargus.com.au",
+        "title": "MSC Seaview butler reveals how to get the most from cruises | The Macleay Argus",
+        "tone_score": "3.025210084",
+        "url": "https://www.macleayargus.com.au/story/9352554/msc-seaview-butler-reveals-how-to-get-the-most-from-cruises/"
+      },
+      "b": {
+        "article_id": "bd8f7f12181cb2d8d495e0e98ccd048e03bb42bb31cd0ca4776d3e8f6c4411cf",
+        "happy_factor": "65.13",
+        "ingested_at": "2026-09-28 11:26:22",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-27 00:15:00",
+        "serving_date": "2026-09-27",
+        "source_name": "portnews.com.au",
+        "title": "MSC Seaview butler reveals how to get the most from cruises | Port Macquarie News",
+        "tone_score": "3.025210084",
+        "url": "https://www.portnews.com.au/story/9352554/msc-seaview-butler-reveals-how-to-get-the-most-from-cruises/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "9cb1b5f8f93034e645528be766b4aef67929f1dbd95b56cb1f9a861f635e178f",
+        "happy_factor": "70.16",
+        "ingested_at": "2026-09-28 11:31:30",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-27 00:15:00",
+        "serving_date": "2026-08-27",
+        "source_name": "fox21online.com",
+        "title": "Best Western Has a Luxury Side and Most Travelers Don't Know It Exists | US & World News",
+        "tone_score": "4.0329218107",
+        "url": "https://www.fox21online.com/news/national/best-western-has-a-luxury-side-and-most-travelers-don-t-know-it-exists/article_db10fa59-43e8-5f0b-b472-b09bd64fdd1e.html"
+      },
+      "b": {
+        "article_id": "6b730144c628cc78c31b5e56540e4b5df02a36b61c488c4a66167b7681fc2354",
+        "happy_factor": "70.16",
+        "ingested_at": "2026-09-28 11:31:30",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-27 00:15:00",
+        "serving_date": "2026-08-27",
+        "source_name": "suncommercial.com",
+        "title": "Best Western Has a Luxury Side and Most Travelers Don't Know It Exists | National",
+        "tone_score": "4.0329218107",
+        "url": "https://www.suncommercial.com/gcdailyworld/news/national/article_2cce2a6d-6eef-5d83-9eff-749291e70058.html"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "c334813e6d90bab58c08d7eca964c020a43500a41b2af6d0628c1708137147cf",
+        "happy_factor": "95.55",
+        "ingested_at": "2026-07-31 00:30:29",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-31 00:15:00",
+        "serving_date": "2026-07-31",
+        "source_name": "macleayargus.com.au",
+        "title": "Public Education Week: Unlocking bright futures from August 3 | The Macleay Argus",
+        "tone_score": "9.11016949152542",
+        "url": "https://www.macleayargus.com.au/story/9306936/public-education-week-unlocking-bright-futures-from-august-3/"
+      },
+      "b": {
+        "article_id": "0d7eee4cc11cba95d88cea0ebb9ad1447b0e3e98c49d30944e12777c692a44ce",
+        "happy_factor": "95.55",
+        "ingested_at": "2026-07-31 00:30:29",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-31 00:15:00",
+        "serving_date": "2026-07-31",
+        "source_name": "portnews.com.au",
+        "title": "Public Education Week: Unlocking bright futures from August 3 | Port Macquarie News",
+        "tone_score": "9.11016949152542",
+        "url": "https://www.portnews.com.au/story/9306936/public-education-week-unlocking-bright-futures-from-august-3/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "8e5150d0b1a20b27016892b5ed91498cb0f5fddc70c14868069e865954978cea",
+        "happy_factor": "76.85",
+        "ingested_at": "2026-08-08 00:30:30",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-08 00:15:00",
+        "serving_date": "2026-08-08",
+        "source_name": "hits973.com",
+        "title": "Members of KATSEYE dropping like flies: Sophia announces 'mental health' break",
+        "tone_score": "5.36912751677852",
+        "url": "https://www.hits973.com/news/members-katseye-dropping-like-flies-sophia-announces-mental-health-break/PN5KVNYWCM7NFATPO5K5ER72PI/"
+      },
+      "b": {
+        "article_id": "9ea08921076c9cf2a1eb8a4b7e46ae0287325447af53b7524e4959686ab07039",
+        "happy_factor": "75.76",
+        "ingested_at": "2026-08-08 00:30:30",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-08 00:00:00",
+        "serving_date": "2026-08-08",
+        "source_name": "ks95.com",
+        "title": "Members of KATSEYE dropping like flies: Sophia announces 'mental health' break – KS95 94.5",
+        "tone_score": "5.15151515151515",
+        "url": "https://www.ks95.com/members-of-katseye-dropping-like-flies-sophia-announces-mental-health-break/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "30f54511ebaa3d8829c32cb47080b6798f3f60ba4762b0281caee6361409249d",
+        "happy_factor": "68.97",
+        "ingested_at": "2026-07-10 00:30:28",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-10 00:30:00",
+        "serving_date": "2026-07-10",
+        "source_name": "iheart.com",
+        "title": "Chappell Roan Makes Confession About One Of Her Most Popular Hits | Magic 107.7",
+        "tone_score": "3.79310344827586",
+        "url": "https://magic107.iheart.com/content/2026-07-08-chappell-roan-makes-confession-about-one-of-her-most-popular-hits/"
+      },
+      "b": {
+        "article_id": "1e5a12d80fb4d1a14036fcc395dc75dc964c00c83ae295decba21500e42cb03f",
+        "happy_factor": "68.97",
+        "ingested_at": "2026-07-10 00:30:28",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-10 00:30:00",
+        "serving_date": "2026-07-10",
+        "source_name": "iheart.com",
+        "title": "Chappell Roan Makes Confession About One Of Her Most Popular Hits | Sunny 102.3 FM",
+        "tone_score": "3.79310344827586",
+        "url": "https://sunny102fm.iheart.com/content/2026-07-08-chappell-roan-makes-confession-about-one-of-her-most-popular-hits/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "d8724f3f24230299ffa13cf27c4a0ac6e942e3b8d812f3b9e0db5d59fa89213f",
+        "happy_factor": "65.13",
+        "ingested_at": "2026-09-28 11:26:22",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-27 00:15:00",
+        "serving_date": "2026-09-27",
+        "source_name": "batemansbaypost.com.au",
+        "title": "MSC Seaview butler reveals how to get the most from cruises | Bay Post-Moruya Examiner",
+        "tone_score": "3.025210084",
+        "url": "https://www.batemansbaypost.com.au/story/9352554/msc-seaview-butler-reveals-how-to-get-the-most-from-cruises/"
+      },
+      "b": {
+        "article_id": "ef5b51dcce4472fe08d2d0befa43b2dac0e07eab672cfa213ea49d3c35310645",
+        "happy_factor": "65.13",
+        "ingested_at": "2026-09-28 11:26:22",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-26 23:45:00",
+        "serving_date": "2026-09-26",
+        "source_name": "dailyliberal.com.au",
+        "title": "MSC Seaview butler reveals how to get the most from cruises | Daily Liberal",
+        "tone_score": "3.025210084",
+        "url": "https://www.dailyliberal.com.au/story/9352554/msc-seaview-butler-reveals-how-to-get-the-most-from-cruises/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "691eed42233e5558e5b3aa86b2d0460a582c7c487313ec9d97c49e839bf1eda6",
+        "happy_factor": "73.26",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-11 00:30:00",
+        "serving_date": "2026-07-11",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST #581 - Luke Combs on Money, Fame & Giving Bobby New Dad Advice | Kicker 95.1",
+        "tone_score": "4.65116279069767",
+        "url": "https://kykr.iheart.com/featured/bobby-bones/content/2026-07-10-834-feeling-things-with-amy-ka-bobbycast-581-luke-combs-on-money-fame-givin/"
+      },
+      "b": {
+        "article_id": "e55eb2305baede6226b9ab8d933ad96ec3c0afbbd4fe20f69dd9351aac7f5ddb",
+        "happy_factor": "73.26",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-11 00:00:00",
+        "serving_date": "2026-07-11",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST #581 - Luke Combs on Money, Fame & Giving Bobby New Dad Advice | 98.7 WMZQ",
+        "tone_score": "4.65116279069767",
+        "url": "https://wmzq.iheart.com/featured/bobby-bones/content/2026-07-10-834-feeling-things-with-amy-ka-bobbycast-581-luke-combs-on-money-fame-givin/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "2ab88f8eb909b0481a746b998262272db658a0504699689f70f2b4d4041b8fff",
+        "happy_factor": "69.07",
+        "ingested_at": "2026-09-28 11:17:44",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-09-07 00:15:00",
+        "serving_date": "2026-09-07",
+        "source_name": "inverelltimes.com.au",
+        "title": "Banyula: Koala habitat restoration earns premium carbon credits | The Inverell Times",
+        "tone_score": "3.813559322",
+        "url": "https://www.inverelltimes.com.au/story/9343177/banyula-koala-habitat-restoration-earns-premium-carbon-credits/"
+      },
+      "b": {
+        "article_id": "041e0644e058b51c8978950da9396982d98472e22709ab230a7f1fb92b398f91",
+        "happy_factor": "69.07",
+        "ingested_at": "2026-09-28 11:17:44",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-09-07 00:15:00",
+        "serving_date": "2026-09-07",
+        "source_name": "edenmagnet.com.au",
+        "title": "Banyula: Koala habitat restoration earns premium carbon credits | Magnet",
+        "tone_score": "3.813559322",
+        "url": "https://www.edenmagnet.com.au/story/9343177/banyula-koala-habitat-restoration-earns-premium-carbon-credits/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "b1be734ccdb474cd4e8e81ab3b31a695a38d267b657d4e0a588ea06bd5e63c71",
+        "happy_factor": "73.26",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-11 00:30:00",
+        "serving_date": "2026-07-11",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST #581 - Luke Combs on Money, Fame & Giving Bobby New Dad Advice | 97 Kicks FM",
+        "tone_score": "4.65116279069767",
+        "url": "https://97kicksfm.iheart.com/featured/bobby-bones/content/2026-07-10-834-feeling-things-with-amy-ka-bobbycast-581-luke-combs-on-money-fame-givin/"
+      },
+      "b": {
+        "article_id": "691eed42233e5558e5b3aa86b2d0460a582c7c487313ec9d97c49e839bf1eda6",
+        "happy_factor": "73.26",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-11 00:30:00",
+        "serving_date": "2026-07-11",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST #581 - Luke Combs on Money, Fame & Giving Bobby New Dad Advice | Kicker 95.1",
+        "tone_score": "4.65116279069767",
+        "url": "https://kykr.iheart.com/featured/bobby-bones/content/2026-07-10-834-feeling-things-with-amy-ka-bobbycast-581-luke-combs-on-money-fame-givin/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "9116d5e97ca1e35604b5250cd04573356db44039094e75c072a517b4ba765763",
+        "happy_factor": "68.49",
+        "ingested_at": "2026-08-26 14:24:41",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 13:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "wdbo.com",
+        "title": "Dolly Parton: Singer's wit, humor was as sharp as her music – WDBO",
+        "tone_score": "3.69881109643329",
+        "url": "https://www.wdbo.com/news/trending/dolly-parton-singers-wit-humor-was-sharp-her-music/DJ7CKLVWWJEZVNIZZG27UT2W4Q/"
+      },
+      "b": {
+        "article_id": "d4f3079c22ec7467449b96c83ce3d83ff15247c2376a46e5e9a0ccf99603e569",
+        "happy_factor": "68.49",
+        "ingested_at": "2026-08-26 13:22:20",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 11:30:00",
+        "serving_date": "2026-08-26",
+        "source_name": "wgauradio.com",
+        "title": "Dolly Parton: Singer's wit, humor was as sharp as her music – WGAU",
+        "tone_score": "3.69881109643329",
+        "url": "https://www.wgauradio.com/news/trending/dolly-parton-singers-wit-humor-was-sharp-her-music/DJ7CKLVWWJEZVNIZZG27UT2W4Q/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "15d4947dff8999719d0052f7af4bc4812b964023638624c843f87d69143e8791",
+        "happy_factor": "72.73",
+        "ingested_at": "2026-09-28 11:30:59",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 14:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "iheart.com",
+        "title": "Analog Room Trend / Remembering the 1 and only Dolly Parton / New Dads in t | Mix 103.3",
+        "tone_score": "4.5454545455",
+        "url": "https://mix1033.iheart.com/featured/murphy-sam-jodi/content/2026-08-26-1119-murphy-sam-jodi-analog-room-trend-remembering-the-1-and-only-dolly-par/"
+      },
+      "b": {
+        "article_id": "7e598d084b8510a654b9f9f5cf3edd614b57b4966c888769254777cc16c243b4",
+        "happy_factor": "72.73",
+        "ingested_at": "2026-08-26 14:24:41",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 13:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "iheart.com",
+        "title": "Analog Room Trend / Remembering the 1 and only Dolly Parton / New Dads in t | Q105",
+        "tone_score": "4.54545454545455",
+        "url": "https://q105fm.iheart.com/featured/murphy-sam-jodi/content/2026-08-26-1119-murphy-sam-jodi-analog-room-trend-remembering-the-1-and-only-dolly-par/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "83eebc4b26caf96211e7f7b689bb198c868d1fb390c527c9dcfa1c9e659271e7",
+        "happy_factor": "70.08",
+        "ingested_at": "2026-07-03 00:30:31",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-03 00:30:00",
+        "serving_date": "2026-07-03",
+        "source_name": "oberonreview.com.au",
+        "title": "Paspaley family launch luxury Kimberley expedition cruising | Oberon Review",
+        "tone_score": "4.01606425702811",
+        "url": "https://www.oberonreview.com.au/story/9301395/paspaley-family-launch-luxury-kimberley-expedition-cruising/"
+      },
+      "b": {
+        "article_id": "7b5b15c3bd9adf448ef58f8be4e6a65c6adea9fd96cefb209ef4aae536850eec",
+        "happy_factor": "69.37",
+        "ingested_at": "2026-07-03 00:30:31",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-02 23:45:00",
+        "serving_date": "2026-07-02",
+        "source_name": "edenmagnet.com.au",
+        "title": "Paspaley family launch luxury Kimberley expedition cruising | Magnet",
+        "tone_score": "3.87409200968523",
+        "url": "https://www.edenmagnet.com.au/story/9301395/paspaley-family-launch-luxury-kimberley-expedition-cruising/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "a5e4f7b6d552f84c7cbb1592b2e326ef05292a6168715bfd6221a2e331f4908f",
+        "happy_factor": "75.57",
+        "ingested_at": "2026-08-20 00:30:27",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-20 00:15:00",
+        "serving_date": "2026-08-20",
+        "source_name": "naroomanewsonline.com.au",
+        "title": "Australians embrace vintage caravans in analogue travel trend | Narooma News",
+        "tone_score": "5.11425462459195",
+        "url": "https://www.naroomanewsonline.com.au/story/9332241/australians-embrace-vintage-caravans-in-analogue-travel-trend/"
+      },
+      "b": {
+        "article_id": "aefeaad51710a306ca4b4d96b9524169e99efb0efb2d6811c3faabe0f6612e2e",
+        "happy_factor": "75.57",
+        "ingested_at": "2026-08-20 00:30:27",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-20 00:00:00",
+        "serving_date": "2026-08-20",
+        "source_name": "merimbulanewsweekly.com.au",
+        "title": "Australians embrace vintage caravans in analogue travel trend | Merimbula News Weekly",
+        "tone_score": "5.11425462459195",
+        "url": "https://www.merimbulanewsweekly.com.au/story/9332241/australians-embrace-vintage-caravans-in-analogue-travel-trend/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "2cb024c8c0cfa2bf5d1b03ed4ee1c896b617ae9b6a69f72b369ffd341763c0f4",
+        "happy_factor": "73.26",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-11 00:15:00",
+        "serving_date": "2026-07-11",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST #581 - Luke Combs on Money, Fame & Giving Bobby New Dad Advice | 100.5 The Wolf",
+        "tone_score": "4.65116279069767",
+        "url": "https://1005thewolf.iheart.com/featured/bobby-bones/content/2026-07-10-834-feeling-things-with-amy-ka-bobbycast-581-luke-combs-on-money-fame-givin/"
+      },
+      "b": {
+        "article_id": "4efa611a15da453aaa6ea956e4e80c5dd375aca778c8fa93a4362d1b932849a0",
+        "happy_factor": "73.26",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-10 23:45:00",
+        "serving_date": "2026-07-10",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST #581 - Luke Combs on Money, Fame & Giving Bobby New Dad Advice | 107.3 WRWD",
+        "tone_score": "4.65116279069767",
+        "url": "https://wrwdcountry.iheart.com/featured/bobby-bones/content/2026-07-10-834-feeling-things-with-amy-ka-bobbycast-581-luke-combs-on-money-fame-givin/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "97b45152bf68f4e4bd6a5e10226bd4a0947b849b2077ef0c5c6bee7aa62dd5a7",
+        "happy_factor": "70.9",
+        "ingested_at": "2026-07-21 00:30:31",
+        "language": "und",
+        "mentioned_country_name": "Argentina",
+        "published_at": "2026-07-21 00:15:00",
+        "serving_date": "2026-07-21",
+        "source_name": "nbcmiami.com",
+        "title": "Messi pens letter to Argentina fans after World Cup defeat – NBC 6 South Florida",
+        "tone_score": "4.17910447761194",
+        "url": "https://www.nbcmiami.com/world-cup/lionel-messi-message-argentina-fans-defeat/3836251/"
+      },
+      "b": {
+        "article_id": "682bc3954d2c8a472a93aa78c0df87500bbaa4ded76b5a2ddd16d7f67fc6b4ea",
+        "happy_factor": "70.71",
+        "ingested_at": "2026-07-21 00:30:31",
+        "language": "und",
+        "mentioned_country_name": "Argentina",
+        "published_at": "2026-07-21 00:30:00",
+        "serving_date": "2026-07-21",
+        "source_name": "nbcwashington.com",
+        "title": "Messi pens letter to Argentina fans after World Cup defeat – NBC4 Washington",
+        "tone_score": "4.14201183431953",
+        "url": "https://www.nbcwashington.com/world-cup/lionel-messi-message-argentina-fans-defeat/4132166/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "7375163fec8c20f2fd6ed7e72050328305e18d3ff48fc40246c787a7477d0e96",
+        "happy_factor": "76.13",
+        "ingested_at": "2026-08-26 14:21:59",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-26 00:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "wsoctv.com",
+        "title": "Dolly Parton: Tributes pour in for music legend",
+        "tone_score": "5.22648083623693",
+        "url": "https://www.wsoctv.com/news/trending/dolly-parton-tributes-pour-music-legend/R55LAPMVAVAKDLTEMLTCTZ5DFI/"
+      },
+      "b": {
+        "article_id": "23083ffff7996ef48790296eb824bc4b4a2a72e73b6fe0b0d3991943ee88d03c",
+        "happy_factor": "68.45",
+        "ingested_at": "2026-08-26 14:24:41",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-26 12:45:00",
+        "serving_date": "2026-08-26",
+        "source_name": "vocm.com",
+        "title": "Tributes Pouring in for Music Legend Dolly Parton",
+        "tone_score": "3.690036900369",
+        "url": "https://vocm.com/2026/08/26/308171/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "bb4abcd950a1e64c07d5a666d358ddd8bac9a7d40abff69e9ad80b9994947cc8",
+        "happy_factor": "77.23",
+        "ingested_at": "2026-08-05 00:30:28",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-05 00:15:00",
+        "serving_date": "2026-08-05",
+        "source_name": "edenmagnet.com.au",
+        "title": "Teen karate champ Savannah Boundy's gold medal revenge on bullies | Magnet",
+        "tone_score": "5.44629349470499",
+        "url": "https://www.edenmagnet.com.au/story/9324129/teen-karate-champ-savannah-boundys-gold-medal-revenge-on-bullies/"
+      },
+      "b": {
+        "article_id": "1c56b3a1cc48fa5d69249807d066b6f38927024b55a6a3e7b12e2fad7a5b5390",
+        "happy_factor": "77.23",
+        "ingested_at": "2026-08-05 00:30:28",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-05 00:15:00",
+        "serving_date": "2026-08-05",
+        "source_name": "tenterfieldstar.com.au",
+        "title": "Teen karate champ Savannah Boundy's gold medal revenge on bullies | Tenterfield Star",
+        "tone_score": "5.44629349470499",
+        "url": "https://www.tenterfieldstar.com.au/story/9324129/teen-karate-champ-savannah-boundys-gold-medal-revenge-on-bullies/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "7db824c26d5f8b650a9e752f360af545579fa938193c9295d0bab6da6dbe7420",
+        "happy_factor": "66.54",
+        "ingested_at": "2026-08-26 14:21:59",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-26 00:00:00",
+        "serving_date": "2026-08-26",
+        "source_name": "muswellbrookchronicle.com.au",
+        "title": "Cruise traditions: unpacking the ultimate, classic ship menu | Muswellbrook Chronicle",
+        "tone_score": "3.30827067669173",
+        "url": "https://www.muswellbrookchronicle.com.au/story/9330290/cruise-traditions-unpacking-the-ultimate-classic-ship-menu/"
+      },
+      "b": {
+        "article_id": "34abe09ef1c59d7d3b57c1d4466bf4a4e7aa663b8bf63fd27042037d036c0a62",
+        "happy_factor": "66.54",
+        "ingested_at": "2026-08-26 14:07:30",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-25 23:30:00",
+        "serving_date": "2026-08-25",
+        "source_name": "cessnockadvertiser.com.au",
+        "title": "Cruise traditions: unpacking the ultimate, classic ship menu | The Advertiser - Cessnock",
+        "tone_score": "3.30827067669173",
+        "url": "https://www.cessnockadvertiser.com.au/story/9330290/cruise-traditions-unpacking-the-ultimate-classic-ship-menu/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "272dcc4da70c59483c16e88f2511949231444544cc37afe84b1aba7e56d4b2ec",
+        "happy_factor": "73.31",
+        "ingested_at": "2026-08-05 00:30:28",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-05 00:30:00",
+        "serving_date": "2026-08-05",
+        "source_name": "ulladullatimes.com.au",
+        "title": "Cruise theme nights are changing and this is the latest trend | Milton Ulladulla Times",
+        "tone_score": "4.66101694915254",
+        "url": "https://www.ulladullatimes.com.au/story/9318320/cruise-theme-nights-are-changing-and-this-is-the-latest-trend/"
+      },
+      "b": {
+        "article_id": "d7b5441b463babf41ffba784ce455469a6fc71c2662d0d5ff46ca59603d67c6b",
+        "happy_factor": "73.31",
+        "ingested_at": "2026-08-05 00:30:28",
+        "language": "en",
+        "mentioned_country_name": "Maldives",
+        "published_at": "2026-08-04 23:45:00",
+        "serving_date": "2026-08-04",
+        "source_name": "westernadvocate.com.au",
+        "title": "Cruise theme nights are changing and this is the latest trend | Western Advocate",
+        "tone_score": "4.66101694915254",
+        "url": "https://www.westernadvocate.com.au/story/9318320/cruise-theme-nights-are-changing-and-this-is-the-latest-trend/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "3e3e39919b8c3ef0cb613d8eb9e791ce3417fdc4ece19d5ccefa1e84e6d9c738",
+        "happy_factor": "71.42",
+        "ingested_at": "2026-07-22 00:30:29",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-22 00:30:00",
+        "serving_date": "2026-07-22",
+        "source_name": "newcastleherald.com.au",
+        "title": "Expedia reveals Australia's top trending island escapes | Newcastle Herald",
+        "tone_score": "4.28441203281677",
+        "url": "https://www.newcastleherald.com.au/story/9311727/expedia-reveals-australias-top-trending-island-escapes/"
+      },
+      "b": {
+        "article_id": "7a51dadc731ae1b4a13b962aeb4363170095aa790d2c8dc8a32609603697870c",
+        "happy_factor": "71.42",
+        "ingested_at": "2026-07-22 00:30:29",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-22 00:00:00",
+        "serving_date": "2026-07-22",
+        "source_name": "naroomanewsonline.com.au",
+        "title": "Expedia reveals Australia's top trending island escapes | Narooma News",
+        "tone_score": "4.28441203281677",
+        "url": "https://www.naroomanewsonline.com.au/story/9311727/expedia-reveals-australias-top-trending-island-escapes/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "57f70e9db1a51b813e2e8c35a78734b1bd16b0a17077b26a9d543ca523d91f3c",
+        "happy_factor": "67.24",
+        "ingested_at": "2026-07-29 00:30:25",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-29 00:15:00",
+        "serving_date": "2026-07-29",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST - Gary Vee on Finding Social Media Success, Embracing AI & Americ | 100.7 KOLT FM",
+        "tone_score": "3.44827586206897",
+        "url": "https://koltfm.iheart.com/featured/bobby-bones/content/2026-07-28-1119-the-bobby-bones-show-bobbycast-gary-vee-on-finding-social-media-succes/"
+      },
+      "b": {
+        "article_id": "71ecde25853163ded39b857105ad2ba623517a56be20835c246d1b39c58bc7c8",
+        "happy_factor": "67.24",
+        "ingested_at": "2026-07-29 00:30:25",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-28 23:45:00",
+        "serving_date": "2026-07-28",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST - Gary Vee on Finding Social Media Success, Embracing AI & Americ | 98.7 WOVK",
+        "tone_score": "3.44827586206897",
+        "url": "https://wovk.iheart.com/featured/bobby-bones/content/2026-07-28-1119-the-bobby-bones-show-bobbycast-gary-vee-on-finding-social-media-succes/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "f7aed04da550a3a20d3e4a26f002cb4e71ceefbcec64fea40241be9e17692344",
+        "happy_factor": "73.26",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-11 00:30:00",
+        "serving_date": "2026-07-11",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST #581 - Luke Combs on Money, Fame & Giving Bobby New Dad Advice | Dayton's New Country 103.9",
+        "tone_score": "4.65116279069767",
+        "url": "https://newcountry1039fm.iheart.com/featured/bobby-bones/content/2026-07-10-834-feeling-things-with-amy-ka-bobbycast-581-luke-combs-on-money-fame-givin/"
+      },
+      "b": {
+        "article_id": "19eab5da135f699a493cc21a8853c056e9fb842c2dd42c66d257ce2534341e7f",
+        "happy_factor": "73.26",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-11 00:15:00",
+        "serving_date": "2026-07-11",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST #581 - Luke Combs on Money, Fame & Giving Bobby New Dad Advice | Country 100.5",
+        "tone_score": "4.65116279069767",
+        "url": "https://country1005.iheart.com/featured/bobby-bones/content/2026-07-10-834-feeling-things-with-amy-ka-bobbycast-581-luke-combs-on-money-fame-givin/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "b72f57f8894ba721d20f2dfa28fb4e9aec9986c30dbfc95d89a806b0e3908525",
+        "happy_factor": "72.73",
+        "ingested_at": "2026-09-28 11:30:59",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 14:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "iheart.com",
+        "title": "Analog Room Trend / Remembering the 1 and only Dolly Parton / New Dads in t | Mix 94.5",
+        "tone_score": "4.5454545455",
+        "url": "https://mymix945.iheart.com/featured/murphy-sam-jodi/content/2026-08-26-1119-murphy-sam-jodi-analog-room-trend-remembering-the-1-and-only-dolly-par/"
+      },
+      "b": {
+        "article_id": "592d3c22c40e523e92cb2fa08914013d3eec83194cc099e600b093b65bf8fc72",
+        "happy_factor": "72.73",
+        "ingested_at": "2026-09-28 11:30:59",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 13:45:00",
+        "serving_date": "2026-08-26",
+        "source_name": "iheart.com",
+        "title": "Analog Room Trend / Remembering the 1 and only Dolly Parton / New Dads in t | 96.1 The River",
+        "tone_score": "4.5454545455",
+        "url": "https://961theriver.iheart.com/featured/murphy-sam-jodi/content/2026-08-26-1119-murphy-sam-jodi-analog-room-trend-remembering-the-1-and-only-dolly-par/"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "d2269b7fe9719ae1d731e8bc0914089f44c0a8cb15d3b839e4ceb8b44a717260",
+        "happy_factor": "88.41",
+        "ingested_at": "2026-08-18 00:30:27",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-17 23:45:00",
+        "serving_date": "2026-08-17",
+        "source_name": "steinbachonline.com",
+        "title": "Event: Actors Academy - Grade 4-5 - SteinbachOnline.com - Local news, Weather, Sports, Free Classifieds and Job Listings for Steinbach, Manitoba",
+        "tone_score": "7.28155339805825",
+        "url": "https://steinbachonline.com/events/225776"
+      },
+      "b": {
+        "article_id": "441a7cc5a39c2858b956eccedfca848c22efcb8ff6054b65188ca796de970dc3",
+        "happy_factor": "88.06",
+        "ingested_at": "2026-08-18 00:30:27",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-17 23:45:00",
+        "serving_date": "2026-08-17",
+        "source_name": "steinbachonline.com",
+        "title": "Event: Actors Academy - K-Grade 1 - SteinbachOnline.com - Local news, Weather, Sports, Free Classifieds and Job Listings for Steinbach, Manitoba",
+        "tone_score": "7.21153846153846",
+        "url": "https://steinbachonline.com/events/225768"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "691eed42233e5558e5b3aa86b2d0460a582c7c487313ec9d97c49e839bf1eda6",
+        "happy_factor": "73.26",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-11 00:30:00",
+        "serving_date": "2026-07-11",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST #581 - Luke Combs on Money, Fame & Giving Bobby New Dad Advice | Kicker 95.1",
+        "tone_score": "4.65116279069767",
+        "url": "https://kykr.iheart.com/featured/bobby-bones/content/2026-07-10-834-feeling-things-with-amy-ka-bobbycast-581-luke-combs-on-money-fame-givin/"
+      },
+      "b": {
+        "article_id": "0d2f2d6dc88cb5d8d0acda123945a221c4173635c61f70dc07945722c0ef8f23",
+        "happy_factor": "73.26",
+        "ingested_at": "2026-07-11 00:30:29",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-07-10 23:45:00",
+        "serving_date": "2026-07-10",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST #581 - Luke Combs on Money, Fame & Giving Bobby New Dad Advice | 106.7 The Bull",
+        "tone_score": "4.65116279069767",
+        "url": "https://1067thebull.iheart.com/featured/bobby-bones/content/2026-07-10-834-feeling-things-with-amy-ka-bobbycast-581-luke-combs-on-money-fame-givin/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "e8e5ed2324cf5e05fe8f0ec06cca3123b8c21eada36f5f5f1ba3e2eaf4489f6b",
+        "happy_factor": "69.22",
+        "ingested_at": "2026-09-28 11:17:44",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-09-07 00:30:00",
+        "serving_date": "2026-09-07",
+        "source_name": "centralwesterndaily.com.au",
+        "title": "Turning a crowded Royal Caribbean cruise into a romantic getaway | Central Western Daily",
+        "tone_score": "3.8434163701",
+        "url": "https://www.centralwesterndaily.com.au/story/9179542/turning-a-crowded-royal-caribbean-cruise-into-a-romantic-getaway/"
+      },
+      "b": {
+        "article_id": "c9e39c59fad2669e468fe081e3eb02e1114a78051246096efc2f4acc8db897e9",
+        "happy_factor": "68.08",
+        "ingested_at": "2026-09-28 11:17:44",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-09-07 00:15:00",
+        "serving_date": "2026-09-07",
+        "source_name": "edenmagnet.com.au",
+        "title": "Turning a crowded Royal Caribbean cruise into a romantic getaway | Magnet",
+        "tone_score": "3.6153289949",
+        "url": "https://www.edenmagnet.com.au/story/9179542/turning-a-crowded-royal-caribbean-cruise-into-a-romantic-getaway/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "3bd36fc874e9e4462d415a056da48b50229282b47c3b2c7ec0ef7fb691334a46",
+        "happy_factor": "75.57",
+        "ingested_at": "2026-08-20 00:30:27",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-20 00:15:00",
+        "serving_date": "2026-08-20",
+        "source_name": "macleayargus.com.au",
+        "title": "Australians embrace vintage caravans in analogue travel trend | The Macleay Argus",
+        "tone_score": "5.11425462459195",
+        "url": "https://www.macleayargus.com.au/story/9332241/australians-embrace-vintage-caravans-in-analogue-travel-trend/"
+      },
+      "b": {
+        "article_id": "9492501fe8f9f725668ed419b769d72ca1cb120360f1c0123e0c2cad1f0cef64",
+        "happy_factor": "75.57",
+        "ingested_at": "2026-08-20 00:30:27",
+        "language": "und",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-20 00:00:00",
+        "serving_date": "2026-08-20",
+        "source_name": "portnews.com.au",
+        "title": "Australians embrace vintage caravans in analogue travel trend | Port Macquarie News",
+        "tone_score": "5.11425462459195",
+        "url": "https://www.portnews.com.au/story/9332241/australians-embrace-vintage-caravans-in-analogue-travel-trend/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "cc2dbf34a51c5545527739b09affa146c8701a49b7405e73a6aa3e2a546cbdf2",
+        "happy_factor": "74.25",
+        "ingested_at": "2026-08-03 00:30:29",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-03 00:30:00",
+        "serving_date": "2026-08-03",
+        "source_name": "nvi.com.au",
+        "title": "University of New England experts reveal potential future careers | Namoi Valley Independent",
+        "tone_score": "4.8494983277592",
+        "url": "https://www.nvi.com.au/story/9322399/university-of-new-england-experts-reveal-potential-future-careers/"
+      },
+      "b": {
+        "article_id": "77443639f66cef88549e30e2293b2e74e00a2e0f759f977f03c585634a05274d",
+        "happy_factor": "74.25",
+        "ingested_at": "2026-08-03 00:30:29",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-03 00:15:00",
+        "serving_date": "2026-08-03",
+        "source_name": "muswellbrookchronicle.com.au",
+        "title": "University of New England experts reveal potential future careers | Muswellbrook Chronicle",
+        "tone_score": "4.8494983277592",
+        "url": "https://www.muswellbrookchronicle.com.au/story/9322399/university-of-new-england-experts-reveal-potential-future-careers/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "0f6ded7f7468b077813a701737e3717ddbbef0e5f30df96b382044a6b66bed18",
+        "happy_factor": "83.33",
+        "ingested_at": "2026-08-26 13:22:20",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-26 11:30:00",
+        "serving_date": "2026-08-26",
+        "source_name": "prokerala.com",
+        "title": "Beyonce, Eminem mourn the demise of Dolly Parton",
+        "tone_score": "6.66666666666667",
+        "url": "https://www.prokerala.com/news/articles/a1804969.html"
+      },
+      "b": {
+        "article_id": "538157f2dc6fa02477be97b99beeb647e9d8f9f1c21ec802f0efd1c427677677",
+        "happy_factor": "82.38",
+        "ingested_at": "2026-08-26 13:22:20",
+        "language": "und",
+        "mentioned_country_name": "India",
+        "published_at": "2026-08-26 12:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "orissapost.com",
+        "title": "Beyonce, Eminem mourn demise of Dolly Parton",
+        "tone_score": "6.47668393782383",
+        "url": "https://www.orissapost.com/beyonce-eminem-mourn-demise-of-dolly-parton/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "2ced5ceabcaae4afd040eb14b7720bff40197abf2be7785464633220a8e43325",
+        "happy_factor": "67.82",
+        "ingested_at": "2026-09-28 11:32:48",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-30 00:30:00",
+        "serving_date": "2026-08-30",
+        "source_name": "examiner.com.au",
+        "title": "Zoe Wunderberg | Dolly Parton's kindness is a legacy beyond music | The Examiner",
+        "tone_score": "3.5645472062",
+        "url": "https://www.examiner.com.au/story/9339447/zoe-wunderberg-dolly-partons-kindness-is-a-legacy-beyond-music/"
+      },
+      "b": {
+        "article_id": "1676084e8756a5666e759e3eee511d24be710cf9aa5dab3e6d61bd912af7cd05",
+        "happy_factor": "66.92",
+        "ingested_at": "2026-09-28 11:32:48",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-29 23:45:00",
+        "serving_date": "2026-08-29",
+        "source_name": "edenmagnet.com.au",
+        "title": "Zoe Wunderberg | Dolly Parton's kindness is a legacy beyond music | Magnet",
+        "tone_score": "3.3849129594",
+        "url": "https://www.edenmagnet.com.au/story/9339447/zoe-wunderberg-dolly-partons-kindness-is-a-legacy-beyond-music/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "b9aac928cc80038a22d5833738ea0d05c1982bd41215e3c5aacf730cf64844db",
+        "happy_factor": "69.25",
+        "ingested_at": "2026-09-28 11:16:52",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-09-05 00:00:00",
+        "serving_date": "2026-09-05",
+        "source_name": "tickerreport.com",
+        "title": "Brian Adams Sells 6,371 Shares of Kymera Therapeutics (NASDAQ:KYMR) Stock",
+        "tone_score": "3.8506417736",
+        "url": "https://www.tickerreport.com/banking-finance/13573730/brian-adams-sells-6371-shares-of-kymera-therapeutics-nasdaqkymr-stock.html"
+      },
+      "b": {
+        "article_id": "63de07f04195fdededfeade6b3fcbab13195dd74007a89e3d20957f806fd805d",
+        "happy_factor": "68.6",
+        "ingested_at": "2026-09-28 11:16:52",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-09-05 00:00:00",
+        "serving_date": "2026-09-05",
+        "source_name": "dailypolitical.com",
+        "title": "Kymera Therapeutics (NASDAQ:KYMR) Insider Brian Adams Sells 6,371 Shares of Stock",
+        "tone_score": "3.7199124726",
+        "url": "https://www.dailypolitical.com/2026/09/04/kymera-therapeutics-nasdaqkymr-insider-brian-adams-sells-6371-shares-of-stock.html"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "62bd471a73dccf4bd6bca11aae56d2143b976c97630010e1fe1a1de099ec95a2",
+        "happy_factor": "69.74",
+        "ingested_at": "2026-08-26 14:21:59",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-26 00:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "armidaleexpress.com.au",
+        "title": "Dolly Parton: Nashville exhibition reveals her defy-all-odds story | The Armidale Express",
+        "tone_score": "3.94736842105263",
+        "url": "https://www.armidaleexpress.com.au/story/9337532/dolly-parton-nashville-exhibition-reveals-her-defy-all-odds-story/"
+      },
+      "b": {
+        "article_id": "1d0f1e606d918c22d36375384902ce52f7434c8e761f16341eb679a6796b5c07",
+        "happy_factor": "69.74",
+        "ingested_at": "2026-08-26 14:21:59",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-26 00:00:00",
+        "serving_date": "2026-08-26",
+        "source_name": "portnews.com.au",
+        "title": "Dolly Parton: Nashville exhibition reveals her defy-all-odds story | Port Macquarie News",
+        "tone_score": "3.94736842105263",
+        "url": "https://www.portnews.com.au/story/9337532/dolly-parton-nashville-exhibition-reveals-her-defy-all-odds-story/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "a1f6de8c704a8d1f82f093d1a6209e4def2fc11386abe3478e661c9042bcbbb3",
+        "happy_factor": "72.03",
+        "ingested_at": "2026-09-28 11:18:22",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-09-09 00:30:00",
+        "serving_date": "2026-09-09",
+        "source_name": "nbcnewyork.com",
+        "title": "TSA brings back gate access for some people without plane tickets – NBC New York",
+        "tone_score": "4.406779661",
+        "url": "https://www.nbcnewyork.com/news/national-international/tsa-gate-access-without-plane-tickets/6544957/"
+      },
+      "b": {
+        "article_id": "0578ad14a502ca9a2213c3decaf754de5ecacedd521f4c9f5dff45af39d3128a",
+        "happy_factor": "70.48",
+        "ingested_at": "2026-09-28 11:18:22",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-09-09 00:30:00",
+        "serving_date": "2026-09-09",
+        "source_name": "thedailytimes.com",
+        "title": "TSA brings back gate access for some people without plane tickets 25 years after 9/11",
+        "tone_score": "4.0955631399",
+        "url": "http://www.thedailytimes.com/ap/business/tsa-brings-back-gate-access-for-some-people-without-plane-tickets-25-years-after-9/article_ae2bfaad-d5c0-5070-a9a4-4926c127e449.html"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "1b802137baa80696fed119b1dcc8abb790727d5894cbf528542aa6cc03c8062d",
+        "happy_factor": "73.91",
+        "ingested_at": "2026-08-07 00:30:33",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-07 00:30:00",
+        "serving_date": "2026-08-07",
+        "source_name": "stockandland.com.au",
+        "title": "In the blood: raffle delivers valuable funds for future | Stock & Land",
+        "tone_score": "4.78142076502732",
+        "url": "https://www.stockandland.com.au/story/9319767/in-the-blood-raffle-delivers-valuable-funds-for-future/"
+      },
+      "b": {
+        "article_id": "ed385020e88f86c8943057a151bd739da9bbcf3eb048d89cabf8a577fa11de2d",
+        "happy_factor": "70.86",
+        "ingested_at": "2026-08-07 00:30:33",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-07 00:15:00",
+        "serving_date": "2026-08-07",
+        "source_name": "crookwellgazette.com.au",
+        "title": "In the blood: raffle delivers valuable funds for future | Crookwell Gazette",
+        "tone_score": "4.17246175243394",
+        "url": "https://www.crookwellgazette.com.au/story/9319767/in-the-blood-raffle-delivers-valuable-funds-for-future/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "32f2398f6361b86d8a217a17b3c1b42034356cf67814c8d45a35c877850bf258",
+        "happy_factor": "69.7",
+        "ingested_at": "2026-08-26 14:24:41",
+        "language": "en",
+        "mentioned_country_name": "Liechtenstein",
+        "published_at": "2026-08-26 12:45:00",
+        "serving_date": "2026-08-26",
+        "source_name": "liberianobserver.com",
+        "title": "Dr. Norman Calls for National Unity in Diversity, Practical Patriotism",
+        "tone_score": "3.93939393939394",
+        "url": "https://www.liberianobserver.com/news/dr-norman-calls-for-national-unity-in-diversity-practical-patriotism/article_02926623-3867-4b45-9e8d-0f5c2b65cb22.html"
+      },
+      "b": {
+        "article_id": "bd5276606dee3d5e18c5ca9930b31d3962795dd942c496ee12519ec676f1fe49",
+        "happy_factor": "69.52",
+        "ingested_at": "2026-08-26 14:24:41",
+        "language": "en",
+        "mentioned_country_name": "Liechtenstein",
+        "published_at": "2026-08-26 13:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "allafrica.com",
+        "title": "Liberia: Dr. Norman Calls for National Unity in Diversity, Practical Patriotism",
+        "tone_score": "3.9039039039039",
+        "url": "https://allafrica.com/stories/202608260360.html"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "519239371f427b5bdb6c5920de0e6296b68455d1d0cba476cb2c2d514548ecf7",
+        "happy_factor": "74.22",
+        "ingested_at": "2026-09-28 11:32:21",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-29 00:15:00",
+        "serving_date": "2026-08-29",
+        "source_name": "wellingtontimes.com.au",
+        "title": "Owen: 11-year-old raises $4,000 for McGrath Foundation nurses | Wellington Times",
+        "tone_score": "4.8449612403",
+        "url": "https://www.wellingtontimes.com.au/story/9337652/owen-11-year-old-raises-4000-for-mcgrath-foundation-nurses/"
+      },
+      "b": {
+        "article_id": "7e5c41d4cd06e4ee4cf13ce2d288db74bd4a9fa01039caca8b0a02b7455ece2d",
+        "happy_factor": "74.22",
+        "ingested_at": "2026-09-28 11:32:21",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-29 00:00:00",
+        "serving_date": "2026-08-29",
+        "source_name": "juneesoutherncross.com.au",
+        "title": "Owen: 11-year-old raises $4,000 for McGrath Foundation nurses | Southern Cross",
+        "tone_score": "4.8449612403",
+        "url": "https://www.juneesoutherncross.com.au/story/9337652/owen-11-year-old-raises-4000-for-mcgrath-foundation-nurses/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "b72f57f8894ba721d20f2dfa28fb4e9aec9986c30dbfc95d89a806b0e3908525",
+        "happy_factor": "72.73",
+        "ingested_at": "2026-09-28 11:30:59",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 14:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "iheart.com",
+        "title": "Analog Room Trend / Remembering the 1 and only Dolly Parton / New Dads in t | Mix 94.5",
+        "tone_score": "4.5454545455",
+        "url": "https://mymix945.iheart.com/featured/murphy-sam-jodi/content/2026-08-26-1119-murphy-sam-jodi-analog-room-trend-remembering-the-1-and-only-dolly-par/"
+      },
+      "b": {
+        "article_id": "15d4947dff8999719d0052f7af4bc4812b964023638624c843f87d69143e8791",
+        "happy_factor": "72.73",
+        "ingested_at": "2026-09-28 11:30:59",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-08-26 14:15:00",
+        "serving_date": "2026-08-26",
+        "source_name": "iheart.com",
+        "title": "Analog Room Trend / Remembering the 1 and only Dolly Parton / New Dads in t | Mix 103.3",
+        "tone_score": "4.5454545455",
+        "url": "https://mix1033.iheart.com/featured/murphy-sam-jodi/content/2026-08-26-1119-murphy-sam-jodi-analog-room-trend-remembering-the-1-and-only-dolly-par/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "03f756a9f373bdf1ed70162d6019e199cdbf70380559feac697742af863de6eb",
+        "happy_factor": "74.44",
+        "ingested_at": "2026-07-25 00:30:28",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-25 00:30:00",
+        "serving_date": "2026-07-25",
+        "source_name": "muswellbrookchronicle.com.au",
+        "title": "Australian of the Year: Why nominating quiet achievers matters | Muswellbrook Chronicle",
+        "tone_score": "4.88702049395691",
+        "url": "https://www.muswellbrookchronicle.com.au/story/9316697/australian-of-the-year-why-nominating-quiet-achievers-matters/"
+      },
+      "b": {
+        "article_id": "83b35bf528c503a5b315b30c157da5c8e2d8adf9f82116ab0799e538ff5712d5",
+        "happy_factor": "74.44",
+        "ingested_at": "2026-07-25 00:30:28",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-07-24 23:45:00",
+        "serving_date": "2026-07-24",
+        "source_name": "naroomanewsonline.com.au",
+        "title": "Australian of the Year: Why nominating quiet achievers matters | Narooma News",
+        "tone_score": "4.88702049395691",
+        "url": "https://www.naroomanewsonline.com.au/story/9316697/australian-of-the-year-why-nominating-quiet-achievers-matters/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "e4dd8541946d123331532b288124ce0bb2900b53fd47f83ae43056e01e4425ae",
+        "happy_factor": "74.22",
+        "ingested_at": "2026-09-28 11:32:21",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-29 00:15:00",
+        "serving_date": "2026-08-29",
+        "source_name": "redlandcitybulletin.com.au",
+        "title": "Owen: 11-year-old raises $4,000 for McGrath Foundation nurses | Redland City Bulletin",
+        "tone_score": "4.8449612403",
+        "url": "https://www.redlandcitybulletin.com.au/story/9337652/owen-11-year-old-raises-4000-for-mcgrath-foundation-nurses/"
+      },
+      "b": {
+        "article_id": "7e5c41d4cd06e4ee4cf13ce2d288db74bd4a9fa01039caca8b0a02b7455ece2d",
+        "happy_factor": "74.22",
+        "ingested_at": "2026-09-28 11:32:21",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "published_at": "2026-08-29 00:00:00",
+        "serving_date": "2026-08-29",
+        "source_name": "juneesoutherncross.com.au",
+        "title": "Owen: 11-year-old raises $4,000 for McGrath Foundation nurses | Southern Cross",
+        "tone_score": "4.8449612403",
+        "url": "https://www.juneesoutherncross.com.au/story/9337652/owen-11-year-old-raises-4000-for-mcgrath-foundation-nurses/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "565342b05f3a4daf8d4831106f05d7c4ed8014833ab29ef91f1bf42cc7504e02",
+        "happy_factor": "69.3",
+        "ingested_at": "2026-09-28 11:20:45",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-14 00:15:00",
+        "serving_date": "2026-09-14",
+        "source_name": "camdencourier.com.au",
+        "title": "Silver Moon cruise offers quiet luxury on voyage through Japan | Camden Haven Courier",
+        "tone_score": "3.8590604027",
+        "url": "https://www.camdencourier.com.au/story/9345612/silver-moon-cruise-offers-quiet-luxury-on-voyage-through-japan/"
+      },
+      "b": {
+        "article_id": "ba87fb7e038b930bad7102e0c1900edeb48564cd523cf06b32f07e935ea72a2b",
+        "happy_factor": "69.3",
+        "ingested_at": "2026-09-28 11:20:45",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "published_at": "2026-09-14 00:00:00",
+        "serving_date": "2026-09-14",
+        "source_name": "thecourier.com.au",
+        "title": "Silver Moon cruise offers quiet luxury on voyage through Japan | The Courier",
+        "tone_score": "3.8590604027",
+        "url": "https://www.thecourier.com.au/story/9345612/silver-moon-cruise-offers-quiet-luxury-on-voyage-through-japan/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "45a7168b04acc780a02298e976d0604c051b8f0b5ad70a8dcb536c707809d4c6",
+        "happy_factor": "75.71",
+        "ingested_at": "2026-08-26 13:57:21",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-22 00:30:00",
+        "serving_date": "2026-08-22",
+        "source_name": "fox7austin.com",
+        "title": "Boerne is Texas' only finalist for Hallmark's Merriest Christmas Town",
+        "tone_score": "5.14285714285714",
+        "url": "https://www.fox7austin.com/news/boerne-is-texas-only-finalist-hallmarks-merriest-christmas-town"
+      },
+      "b": {
+        "article_id": "0d0b837cbb9f7a57e1f63ce61e56d25818155cf2e980027ff200fd1c303ff2d3",
+        "happy_factor": "74.07",
+        "ingested_at": "2026-08-26 13:43:38",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-20 23:15:00",
+        "serving_date": "2026-08-20",
+        "source_name": "975kgkl.com",
+        "title": "Boerne Is Texas's Only Finalist In Hallmark's Merriest Christmas Town",
+        "tone_score": "4.81400437636762",
+        "url": "https://975kgkl.com/ixp/514/p/boerne-merriest-christmas-town-finalist/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "57f70e9db1a51b813e2e8c35a78734b1bd16b0a17077b26a9d543ca523d91f3c",
+        "happy_factor": "67.24",
+        "ingested_at": "2026-07-29 00:30:25",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-29 00:15:00",
+        "serving_date": "2026-07-29",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST - Gary Vee on Finding Social Media Success, Embracing AI & Americ | 100.7 KOLT FM",
+        "tone_score": "3.44827586206897",
+        "url": "https://koltfm.iheart.com/featured/bobby-bones/content/2026-07-28-1119-the-bobby-bones-show-bobbycast-gary-vee-on-finding-social-media-succes/"
+      },
+      "b": {
+        "article_id": "2051052c1fa587c39bd6f4468eda5326d04075640a81b72eaabb7598fc79013e",
+        "happy_factor": "67.24",
+        "ingested_at": "2026-07-29 00:30:25",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-07-29 00:15:00",
+        "serving_date": "2026-07-29",
+        "source_name": "iheart.com",
+        "title": "BOBBYCAST - Gary Vee on Finding Social Media Success, Embracing AI & Americ | 100.5 The Wolf",
+        "tone_score": "3.44827586206897",
+        "url": "https://1005thewolf.iheart.com/featured/bobby-bones/content/2026-07-28-1119-the-bobby-bones-show-bobbycast-gary-vee-on-finding-social-media-succes/"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "2d9d8526349ec0b0ad8687842cc8746da52698bbc3afd4d8fe2c9a93d82490b6",
+        "happy_factor": "99.05",
+        "ingested_at": "2026-08-26 13:37:14",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-24 23:15:00",
+        "serving_date": "2026-08-24",
+        "source_name": "independent.com",
+        "title": "Santa Ynez Tribal Health Clinic to Host Community Resource Health Fair",
+        "tone_score": "9.40988835725678",
+        "url": "https://www.independent.com/2026/08/24/santa-ynez-tribal-health-clinic-to-host-community-resource-health-fair/"
+      },
+      "b": {
+        "article_id": "e85d9a5655f3408a1cdeba0e92ecbb525d9d64b8b061d22584a0a3ea0b457ff8",
+        "happy_factor": "96.09",
+        "ingested_at": "2026-08-26 14:03:24",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "published_at": "2026-08-25 00:00:00",
+        "serving_date": "2026-08-25",
+        "source_name": "noozhawk.com",
+        "title": "Santa Ynez Tribal Health Clinic Offers Community Resource Health Fair",
+        "tone_score": "8.81834215167548",
+        "url": "https://www.noozhawk.com/santa-ynez-tribal-health-clinic-offers-community-resource-health-fair/"
+      }
+    }
+  ]
+}

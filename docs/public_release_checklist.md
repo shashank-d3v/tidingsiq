@@ -1,32 +1,46 @@
 # Public Release Checklist
 
-## Containment
+Use for a new release; unchecked items below are requirements, not claims that a
+particular rollout has passed. Current procedures are in the [deployment guide](deployment_plan.md).
 
-- Confirm the GDELT default is `https://data.gdeltproject.org/gdeltv2` and redirects remain host/path validated.
-- Confirm deployed runtimes reject `GDELT_BASE_URL` overrides that do not resolve to `data.gdeltproject.org`.
-- Confirm Bronze fails closed on corrupt ZIPs, unreadable ZIP members, wrong row widths, malformed timestamps, elevated malformed-row ratios, and sudden accepted-row collapse.
-- Confirm the existing Cloud Monitoring pipeline failure alert path is active for containment failures.
+## Source and Publication
 
-## Public App
+- Confirm the GDELT default is HTTPS and redirects remain host/path validated.
+- Preserve bounded retries, input validation, source-attempt tracking and incomplete-window alerting.
+- Verify the latest pipeline execution succeeded and contains the metrics audit
+  timestamp; failed/active runs and execution changes must block publication.
+- Check the publisher's metrics freshness, Gold ingestion time, completeness and low-volume gates.
+- Confirm bucket lifecycle rules do not expire live feed files; retain all files
+  referenced by the current manifest during any cleanup.
+- Run a publisher canary; verify hashed JSON/gzip files before manifest promotion.
+- Confirm failure retains the previous edition and older overlapping work cannot replace newer data.
+- Verify matcher version, 11 source fields plus `story_id`, article/story counts,
+  consistent cross-range assignments, and private audit consistency.
+- Confirm filters precede grouping and display sort preserves representatives.
 
-- Confirm the app remains public and unauthenticated on the direct Cloud Run `run.app` URL.
-- Confirm the Cloud Run app service ingress accepts direct internet traffic rather than requiring a load balancer path.
-- Confirm the app service account remains read-only against `gold` and the app still serves only the bounded Gold-backed UI.
-- Confirm the Cloud Run service reports `Ready=True` after deploy.
-- Confirm normal browsing smoke tests pass on the direct `run.app` URL:
-  - page refreshes
-  - pagination
-  - filter changes
+## Public Artifact and Access
 
-## Rollout Notes
+- Build the frontend through `app/static/build_production.py`, not the repository root.
+- Exclude local data, developer labels, credentials, tests, helper scripts and documentation.
+- Keep the feed bucket private with a read-only frontend mount and objectViewer identity.
+- Keep Gold/job-submission access on the publisher, not on the public frontend.
+- Confirm only intended public routes work; `.env`, `.git`, Python helpers and directory listings return 404.
+- Confirm Cloud Run `Ready=True`, the intended static revision receives traffic, and gzip/CSP/cache headers are present.
 
-- The current portfolio posture intentionally favors simpler operations over edge hardening.
-- If traffic later justifies stricter protection, the optional AppEdge path can be re-enabled in Terraform.
-- Keep `app_max_instance_count` conservative so unexpected public traffic cannot scale the service far.
+## Browser and Cost Checks
 
-## Accepted Residual Risk
+- Test refresh, date/language/geography filters, search, sorting, pagination, and empty results.
+- Test Pulse and Methodology, mobile layout, and score badge contrast/labels.
+- Confirm the larger file is lazy-loaded and loaded filters/pages cause no warehouse calls.
+- Check the console and network for errors, polling, unexpected origins and WebSockets.
+- Keep request-based billing, min=0, conservative max instances; do not undo an emergency manual stop accidentally.
+- After a successful rollout, verify the publisher schedule and mirror settings in Terraform inputs.
 
-- Accepted upstream residual risk: GDELT publication and CDN propagation can lag; TidingsIQ uses bounded retries, partial-load metadata, and immediate incomplete-window alerting.
-- This is a containment decision, not an HTTPS migration.
-- Residual risk is limited by host restriction, payload validation, anomaly detection, and fail-closed execution, but not eliminated while the upstream default remains HTTP.
-- Accepted public-app residual risk: the app no longer has Cloud Armor rate limiting or load-balancer buffering in front of Cloud Run, so abusive traffic is mitigated mainly by the app's bounded query model and conservative Cloud Run scaling.
+## Accepted Limits
+
+The direct public endpoint has no active Cloud Armor/CDN layer. Static serving
+reduces work per visit but does not eliminate request, transfer, storage or job
+costs. A maximum-instance setting is not a hard budget cap. GDELT can be late or
+incomplete; retaining an older edition is preferable to publishing invalid data.
+Scores and headline/URL/syndication/fuzzy matching do not verify articles or identify every
+semantic duplicate. Monitoring configuration does not establish email delivery.

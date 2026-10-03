@@ -215,3 +215,15 @@ python3 scripts/daily_pipeline_report.py
 Cloud runtime note:
 
 - if Cloud Run shows source-fetch issues, review the configured base feed URL before reintroducing any SSL workaround
+
+## Public Serving Boundary
+
+The pipeline produces canonical Gold scores/eligibility and operational metrics.
+A separate [static publisher](../../scripts/README.md#publish_static_feedpy) reads
+those outputs after the daily run. Public search, filters, pagination, and Pulse
+do not execute Bruin or BigQuery queries. Publisher-side exact headline grouping
+is a presentation rule and does not replace Silver's canonical deduplication.
+
+Silver's 90-day input horizon constrains the history available to Gold, even
+though the Gold model has a 180-day cutoff. Bronze archival begins after 45 days;
+verified pruning retains at least 90 days to preserve Silver's inputs.

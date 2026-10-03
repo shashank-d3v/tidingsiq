@@ -70,7 +70,7 @@ The Bronze `raw_payload` now retains the additional upstream fields most relevan
 
 ## Verified Findings
 
-Latest verified warehouse state after the enrichment migration run on `2026-04-06`:
+Historical verification sample from the enrichment migration on `2026-04-06` (these are not current warehouse counts):
 
 - Bronze rows: `644`
 - Silver rows: `644`
@@ -104,12 +104,12 @@ Historical contrast from the old English-only Gold contract:
 ## Conclusions
 
 - The current `language` gap is not explained by an obvious parser bug.
-- The current landed GKG rows do not provide usable `TranslationInfo` values in the tested sample.
+- The historical sample did not provide usable `TranslationInfo` values; this finding does not establish coverage for every later ingestion.
 - `source_domain` is not a blocker; it is already fully derivable in Silver from the canonical URL.
 - article geography is available from `V2Locations` for a substantial subset of landed rows and is the right source-backed path for country enrichment
 - publisher country is still not a direct source field in the current Bronze path and should not be inferred from domains in this contract
 - The GDELT transport path should use HTTPS with normal certificate verification and strict redirect validation.
-- The current containment posture is to keep HTTP as the validated default while failing closed on suspicious payloads instead of accepting arbitrary endpoints or malformed source files.
+- The current default is HTTPS with certificate and redirect validation; payload checks still fail closed on suspicious or malformed source files.
 - The deployed Cloud Run pipeline path is now proven end to end; the remaining weakness is source-field completeness, not orchestration.
 - the Bronze and Silver contracts can now avoid blank language and country fields by using explicit sentinel values plus resolution-status columns
 

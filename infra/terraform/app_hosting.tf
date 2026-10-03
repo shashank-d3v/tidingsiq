@@ -41,7 +41,19 @@ resource "google_cloud_run_v2_service" "app" {
   }
 
   template {
-    service_account = google_service_account.app[0].email
+    service_account       = var.enable_static_dashboard ? google_service_account.static_reader[0].email : google_service_account.app[0].email
+    execution_environment = var.enable_static_dashboard ? "EXECUTION_ENVIRONMENT_GEN2" : null
+
+    dynamic "volumes" {
+      for_each = var.enable_static_dashboard ? [1] : []
+      content {
+        name = "static-feed"
+        gcs {
+          bucket    = google_storage_bucket.static_feed[0].name
+          read_only = true
+        }
+      }
+    }
 
     scaling {
       min_instance_count = var.app_min_instance_count
@@ -55,21 +67,29 @@ resource "google_cloud_run_v2_service" "app" {
         container_port = 8080
       }
 
-      env {
-        name  = "TIDINGSIQ_GCP_PROJECT"
-        value = var.project_id
+      dynamic "env" {
+        for_each = var.enable_static_dashboard ? {} : {
+          TIDINGSIQ_GCP_PROJECT = var.project_id
+          TIDINGSIQ_GOLD_TABLE  = local.app_gold_table
+        }
+        content {
+          name  = env.key
+          value = env.value
+        }
       }
-
-      env {
-        name  = "TIDINGSIQ_GOLD_TABLE"
-        value = local.app_gold_table
+      dynamic "volume_mounts" {
+        for_each = var.enable_static_dashboard ? [1] : []
+        content {
+          name       = "static-feed"
+          mount_path = "/usr/share/nginx/html/data"
+        }
       }
 
       resources {
         cpu_idle = true
         limits = {
           cpu    = "1"
-          memory = var.app_memory_limit
+          memory = var.enable_static_dashboard ? "512Mi" : var.app_memory_limit
         }
       }
     }
@@ -77,6 +97,7 @@ resource "google_cloud_run_v2_service" "app" {
 
   depends_on = [
     google_artifact_registry_repository_iam_member.app_cloud_run_service_agent_reader,
+    google_storage_bucket_iam_member.static_reader,
   ]
 }
 

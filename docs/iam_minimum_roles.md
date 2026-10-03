@@ -1,183 +1,75 @@
-# TidingsIQ Minimum IAM Roles
+# TidingsIQ Runtime IAM Roles
 
-This document describes the minimum runtime IAM model for TidingsIQ using placeholders instead of live operator identities.
+## Scope
 
-Replace these placeholders when applying the model to a real environment:
+This guide describes the roles provisioned by Terraform for the current static
+serving design. It distinguishes active runtime identities from the legacy app
+identity still present in the hosting module. It is not a claim that every
+project-level inherited grant has been independently audited.
 
-- `<GCP_PROJECT_ID>`
-- `<PIPELINE_SERVICE_ACCOUNT_EMAIL>`
-- `<REPORTING_SERVICE_ACCOUNT_EMAIL>`
-- `<APP_SERVICE_ACCOUNT_EMAIL>`
-- `<PIPELINE_SCHEDULER_SERVICE_ACCOUNT_EMAIL>`
-- `<REPORTING_SCHEDULER_SERVICE_ACCOUNT_EMAIL>`
-- `<ARCHIVE_SERVICE_ACCOUNT_EMAIL>`
-- `<ARCHIVE_SCHEDULER_SERVICE_ACCOUNT_EMAIL>`
-- `<SERVERLESS_SERVICE_AGENT_EMAIL>`
-- `<PIPELINE_JOB_NAME>`
-- `<REPORTING_JOB_NAME>`
-- `<ARCHIVE_JOB_NAME>`
-- `<PIPELINE_ARTIFACT_REPOSITORY>`
-- `<APP_ARTIFACT_REPOSITORY>`
-- `<ARCHIVE_BUCKET_URI>`
+Use the real project, dataset, bucket and service-account names from Terraform
+outputs/live resources. Do not grant broad roles simply to make a deployment pass.
 
-## Baseline Inventory
+## Runtime Access Model
 
-| Identity | Status | Purpose |
-|---|---|---|
-| `<PIPELINE_SERVICE_ACCOUNT_EMAIL>` | Required | Runs the Cloud Run Bruin pipeline job |
-| `<REPORTING_SERVICE_ACCOUNT_EMAIL>` | Optional | Runs the reporting Cloud Run job when reporting is enabled |
-| `<PIPELINE_SCHEDULER_SERVICE_ACCOUNT_EMAIL>` | Optional | Invokes the pipeline Cloud Run job from Cloud Scheduler |
-| `<REPORTING_SCHEDULER_SERVICE_ACCOUNT_EMAIL>` | Optional | Invokes the reporting Cloud Run job from Cloud Scheduler |
-| `<APP_SERVICE_ACCOUNT_EMAIL>` | Optional | Runs the Cloud Run app service when app hosting is enabled |
-| `<ARCHIVE_SERVICE_ACCOUNT_EMAIL>` | Optional | Runs the Bronze archive Cloud Run job when archive automation is enabled |
-| `<ARCHIVE_SCHEDULER_SERVICE_ACCOUNT_EMAIL>` | Optional | Invokes the archive Cloud Run job from Cloud Scheduler |
-| `<SERVERLESS_SERVICE_AGENT_EMAIL>` | Platform-managed | Pulls container images from Artifact Registry for deployed Cloud Run runtimes |
-
-## Exact Actions By Identity
-
-### `<PIPELINE_SERVICE_ACCOUNT_EMAIL>`
-
-Required actions:
-
-- submit BigQuery jobs for the Bruin pipeline
-- read and write the `bronze`, `bronze_staging`, `silver`, `gold`, and `gold_staging` datasets
-- fetch upstream GDELT payloads over HTTP
-- validate article URLs over outbound HTTP
-
-Not required:
-
-- Bronze archive bucket access
-- reporting-only or app-only query access patterns
-
-### `<REPORTING_SERVICE_ACCOUNT_EMAIL>`
-
-Required actions when reporting is enabled:
-
-- submit BigQuery query jobs
-- read `gold.positive_news_feed`
-- read `gold.pipeline_run_metrics`
-- read `gold.INFORMATION_SCHEMA`
-
-Not required:
-
-- dataset writes
-- GCS access
-- access to Bronze, Silver, or staging datasets
-
-### `<APP_SERVICE_ACCOUNT_EMAIL>`
-
-Required actions when app hosting is enabled:
-
-- submit BigQuery query jobs
-- read `gold.positive_news_feed`
-- read `gold.pipeline_run_metrics`
-- read `gold.INFORMATION_SCHEMA`
-
-Not required:
-
-- Bronze, Silver, or staging access
-- GCS access
-- any runtime presence when `enable_app_hosting = false`
-
-### `<PIPELINE_SCHEDULER_SERVICE_ACCOUNT_EMAIL>`
-
-Required actions:
-
-- invoke the pipeline Cloud Run job
-
-Not required:
-
-- BigQuery access
-- Storage access
-- reporting or archive job invocation
-
-### `<REPORTING_SCHEDULER_SERVICE_ACCOUNT_EMAIL>`
-
-Required actions:
-
-- invoke the reporting Cloud Run job
-
-Not required:
-
-- BigQuery access
-- Storage access
-- pipeline or archive job invocation
-
-### `<ARCHIVE_SERVICE_ACCOUNT_EMAIL>`
-
-Required actions when archive automation is enabled:
-
-- submit BigQuery jobs
-- count, export, validate, and optionally delete rows from `bronze.gdelt_news_raw`
-- write archive Parquet objects into the Bronze archive bucket
-- overwrite existing archive objects for a cutoff prefix during reruns
-
-Not required:
-
-- access to `silver`, `gold`, `bronze_staging`, or `gold_staging`
-- pipeline or reporting job invocation
-
-### `<ARCHIVE_SCHEDULER_SERVICE_ACCOUNT_EMAIL>`
-
-Required actions when archive automation is enabled:
-
-- invoke the Bronze archive Cloud Run job
-
-Not required:
-
-- BigQuery access
-- Storage access
-
-### `<SERVERLESS_SERVICE_AGENT_EMAIL>`
-
-Required actions:
-
-- read the specific Artifact Registry repository used by each deployed Cloud Run job or service
-
-Not required:
-
-- project-wide Artifact Registry access
-- any BigQuery or Storage access
-
-## Final Minimum Role Set
-
-| Identity | Scope | Role | Why it remains |
+| Identity | Scope | Provisioned role | Purpose |
 |---|---|---|---|
-| `<PIPELINE_SERVICE_ACCOUNT_EMAIL>` | Project `<GCP_PROJECT_ID>` | `roles/bigquery.jobUser` | BigQuery job submission stays project-scoped |
-| `<PIPELINE_SERVICE_ACCOUNT_EMAIL>` | Dataset `bronze` | `roles/bigquery.dataEditor` | Bronze merge writes |
-| `<PIPELINE_SERVICE_ACCOUNT_EMAIL>` | Dataset `bronze_staging` | `roles/bigquery.dataEditor` | Operational merge and staging tables |
-| `<PIPELINE_SERVICE_ACCOUNT_EMAIL>` | Dataset `silver` | `roles/bigquery.dataEditor` | Silver transforms |
-| `<PIPELINE_SERVICE_ACCOUNT_EMAIL>` | Dataset `gold` | `roles/bigquery.dataEditor` | Gold transforms and metrics writes |
-| `<PIPELINE_SERVICE_ACCOUNT_EMAIL>` | Dataset `gold_staging` | `roles/bigquery.dataEditor` | `dlt` merge staging for Gold Python assets |
-| `<REPORTING_SERVICE_ACCOUNT_EMAIL>` | Project `<GCP_PROJECT_ID>` | `roles/bigquery.jobUser` | BigQuery query job submission |
-| `<REPORTING_SERVICE_ACCOUNT_EMAIL>` | Dataset `gold` | `roles/bigquery.dataViewer` | Read-only reporting queries |
-| `<APP_SERVICE_ACCOUNT_EMAIL>` | Project `<GCP_PROJECT_ID>` | `roles/bigquery.jobUser` | Only when app hosting is enabled |
-| `<APP_SERVICE_ACCOUNT_EMAIL>` | Dataset `gold` | `roles/bigquery.dataViewer` | Only when app hosting is enabled |
-| `<PIPELINE_SCHEDULER_SERVICE_ACCOUNT_EMAIL>` | Cloud Run job `<PIPELINE_JOB_NAME>` | `roles/run.invoker` | Pipeline scheduler invocation only |
-| `<REPORTING_SCHEDULER_SERVICE_ACCOUNT_EMAIL>` | Cloud Run job `<REPORTING_JOB_NAME>` | `roles/run.invoker` | Reporting scheduler invocation only |
-| `<ARCHIVE_SERVICE_ACCOUNT_EMAIL>` | Project `<GCP_PROJECT_ID>` | `roles/bigquery.jobUser` | Only when archive automation is enabled |
-| `<ARCHIVE_SERVICE_ACCOUNT_EMAIL>` | Dataset `bronze` | `roles/bigquery.dataEditor` | Only when archive automation is enabled |
-| `<ARCHIVE_SERVICE_ACCOUNT_EMAIL>` | Bucket `<ARCHIVE_BUCKET_URI>` | `roles/storage.objectAdmin` | Only when archive automation is enabled |
-| `<ARCHIVE_SCHEDULER_SERVICE_ACCOUNT_EMAIL>` | Cloud Run job `<ARCHIVE_JOB_NAME>` | `roles/run.invoker` | Only when archive automation is enabled |
-| `<SERVERLESS_SERVICE_AGENT_EMAIL>` | Artifact Registry repo `<PIPELINE_ARTIFACT_REPOSITORY>` | `roles/artifactregistry.reader` | Required for pipeline and reporting image pulls |
-| `<SERVERLESS_SERVICE_AGENT_EMAIL>` | Artifact Registry repo `<APP_ARTIFACT_REPOSITORY>` | `roles/artifactregistry.reader` | Only when app hosting is enabled |
+| Pipeline | Project | `roles/bigquery.jobUser` | Submit warehouse jobs |
+| Pipeline | `bronze`, `bronze_staging`, `silver`, `gold`, `gold_staging` | `roles/bigquery.dataEditor` | Ingest, merge, transform and write metrics |
+| Reporting | Project | `roles/bigquery.jobUser` | Submit report queries |
+| Reporting | `gold` | `roles/bigquery.dataViewer` | Read summaries and run metrics |
+| Static publisher | Project | `roles/bigquery.jobUser` | Submit bounded export queries |
+| Static publisher | `gold` | `roles/bigquery.dataViewer` | Read eligible feed and freshness metrics |
+| Static publisher | Pipeline Cloud Run job | `roles/run.viewer` | Read execution outcomes; no invocation or mutation |
+| Static publisher | Private static feed bucket | `roles/storage.objectUser` | Write/read back feed objects; conditional manifest replacement |
+| Static reader | Private static feed bucket | `roles/storage.objectViewer` | Read files for the nginx mount |
+| Archive | Project | `roles/bigquery.jobUser` | Export/verify/prune queries |
+| Archive | `bronze` | `roles/bigquery.dataEditor` | Temporary snapshots, verification and guarded pruning |
+| Archive | Bronze archive bucket | `roles/storage.objectAdmin` | Immutable batches, manifests, checkpoint and generation lock |
+| Pipeline scheduler | Pipeline job | `roles/run.invoker` | Trigger pipeline only |
+| Reporting scheduler | Report job and static publisher job | `roles/run.invoker` | Trigger these two jobs |
+| Archive scheduler | Archive job | `roles/run.invoker` | Trigger archive only |
+| Cloud Run service agent | Relevant Artifact Registry repository | `roles/artifactregistry.reader` | Pull runtime images |
+| Public `allUsers` | Frontend Cloud Run service | `roles/run.invoker` | Read the public website |
 
-## Explicit Removals
+## Static Frontend Boundary
 
-These grants are intentionally excluded from the minimum model:
+With `enable_static_dashboard=true`, the Cloud Run service runs as
+`tidingsiq-static-reader`. Its GCS volume is read-only. The public bucket remains
+private with uniform bucket-level access and public access prevention; public
+website invocation does not make GCS or BigQuery public.
 
-- any project-wide runtime grants beyond `roles/bigquery.jobUser`
-- any Storage access for pipeline, reporting, app, or scheduler identities other than the dedicated archive runtime
-- any BigQuery or Storage grants on scheduler identities
-- any live app runtime IAM while `enable_app_hosting = false`
-- reuse of the pipeline service account for Bronze archive execution
+The frontend does not need BigQuery jobUser or dataset roles. Only the separate
+publisher can query Gold and write the static feed. Search and filters run in the
+browser, so a visitor action cannot submit a warehouse query through nginx.
 
-## Validation Expectations
+## Retained Legacy Identity
 
-After IAM changes:
+`main.tf` still provisions the legacy app service account and Gold read/jobUser
+bindings when `enable_app_hosting=true`, even in static mode. The active frontend
+uses the static-reader identity instead. These retained grants are not required
+for static serving; removing them is a separate reviewed infrastructure change,
+not an effect of this documentation cleanup.
 
-- the pipeline job must still rebuild Bronze, Silver, Gold, and `gold.pipeline_run_metrics`
-- the reporting job must still emit `DAILY_PIPELINE_SUMMARY`
-- the archive worker must succeed in dry-run mode with the scheduler still disabled
-- the pipeline service account must fail archive-bucket access after the split
-- the reporting identity must fail write attempts against `gold`
+## Archive Boundary
+
+The scheduled worker is `archive_bronze_incremental.py`. It verifies full rows in
+immutable Parquet batches before advancing a checkpoint. The bucket role also
+supports creating/removing a generation-conditional lock and updating checkpoint
+metadata. The legacy worker's overwrite-by-cutoff behavior is not the scheduled
+archive contract. Pipeline/reporting/frontend identities do not need archive-bucket
+access from the current role design.
+
+## Validation After IAM Changes
+
+- Inspect Cloud Run's actual service account, not just whether an identity exists.
+- Confirm pipeline transforms and report summaries still complete.
+- Run a controlled publisher canary and verify files through the public endpoint.
+- Confirm the static reader's scoped binding is read-only and the mount cannot write.
+- Confirm archive verification succeeds before enabling pruning or resuming its schedule.
+- Check schedulers have invocation rights only on their intended jobs.
+- Review inherited IAM separately before claiming a strict effective-permission boundary.
+
+Do not test denied writes by mutating live data. Use policy inspection or an
+isolated non-production check where needed. Deployment operators require separate
+resource-management permissions; runtime grants are not deployment permissions.

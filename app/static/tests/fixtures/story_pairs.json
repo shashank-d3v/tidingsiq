@@ -1,0 +1,1600 @@
+{
+  "description": "Headline-level manual review of October 2 live metadata, sampled from broad lexical candidates without tuning the fixed thresholds. This set measures supported and missed variants; it is not article-body ground truth.",
+  "pairs": [
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "41a5b245d04a8f1582856499287e052532c5f36ae2d656f87c29c952e643d9e9",
+        "serving_date": "2026-09-28",
+        "published_at": "2026-09-28T05:45:00+00:00",
+        "source_name": "nbclosangeles.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "Taylor Swift becomes the most-awarded artist in VMA history – NBC Los Angeles",
+        "url": "https://www.nbclosangeles.com/entertainment/entertainment-news/taylor-swift-becomes-most-awarded-artist-vma-history/3947395/",
+        "tone_score": 10.7368421052632,
+        "happy_factor": 100.0,
+        "ingested_at": "2026-09-28T07:54:54.108951+00:00"
+      },
+      "b": {
+        "article_id": "31ec6eadbec1a99b89f78a4e7c674c6731e67ed89a1eaaadb3e137c1384180b5",
+        "serving_date": "2026-09-28",
+        "published_at": "2026-09-28T05:45:00+00:00",
+        "source_name": "nbcchicago.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "Taylor Swift becomes the most-awarded artist in VMA history – NBC Chicago",
+        "url": "https://www.nbcchicago.com/entertainment/entertainment-news/taylor-swift-becomes-most-awarded-artist-vma-history/3993981/",
+        "tone_score": 10.7594936708861,
+        "happy_factor": 100.0,
+        "ingested_at": "2026-09-28T07:54:54.108951+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "9e45736de2c3b892955ce309c9f85fc10ecbb25251b56bab65686b3d2cc8cf02",
+        "serving_date": "2026-09-07",
+        "published_at": "2026-09-07T00:15:00+00:00",
+        "source_name": "dailygazette.com",
+        "language": "en",
+        "mentioned_country_name": "Romania",
+        "title": "Bucharest's Little Angels' Parade brings children to the streets, in photos | World",
+        "url": "https://www.dailygazette.com/leader_herald/ap/world/bucharest-s-little-angels-parade-brings-children-to-the-streets-in-photos/article_e4e86d0b-5059-509f-91a0-c7eece205b47.html",
+        "tone_score": 10.0,
+        "happy_factor": 100.0,
+        "ingested_at": "2026-09-28T11:17:44.402000+00:00"
+      },
+      "b": {
+        "article_id": "738f26468752e19de3dda56183066549e16ae751419b42e62b4cdf0957cce9e9",
+        "serving_date": "2026-09-07",
+        "published_at": "2026-09-07T00:00:00+00:00",
+        "source_name": "idahostatejournal.com",
+        "language": "en",
+        "mentioned_country_name": "Romania",
+        "title": "Bucharest's Little Angels' Parade brings children to the streets, in photos | National",
+        "url": "http://www.idahostatejournal.com/news/national/bucharest-s-little-angels-parade-brings-children-to-the-streets-in-photos/article_9d4c90c1-14bc-58f3-a56c-f11c55b7eb25.html",
+        "tone_score": 10.0,
+        "happy_factor": 100.0,
+        "ingested_at": "2026-09-28T11:17:44.402000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "a89e63348ef2bcbf5c574da704eb2747384b12205a506d07ff6c0193a9c555bc",
+        "serving_date": "2026-09-04",
+        "published_at": "2026-09-04T00:30:00+00:00",
+        "source_name": "malaysiasun.com",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "title": "KANEKA UBIQUINOL WINS NUTRAINGREDIENTS ASIA INGREDIENT OF THE YEAR: HEALTHSPAN AWARD 2026",
+        "url": "http://www.malaysiasun.com/news/279284795/kaneka-ubiquinol-wins-nutraingredients-asia-ingredient-of-the-year-healthspan-award-2026",
+        "tone_score": 10.5263157895,
+        "happy_factor": 100.0,
+        "ingested_at": "2026-09-28T11:16:12.150000+00:00"
+      },
+      "b": {
+        "article_id": "02f1ba1a7a8adc051b6adaca85f27383eaf176cddf956337ef73f1830b94af1c",
+        "serving_date": "2026-09-03",
+        "published_at": "2026-09-03T23:45:00+00:00",
+        "source_name": "prnewswire.com",
+        "language": "und",
+        "mentioned_country_name": "Thailand",
+        "title": "KANEKA UBIQUINOL™ WINS NUTRAINGREDIENTS ASIA INGREDIENT OF THE YEAR: HEALTHSPAN AWARD 2026",
+        "url": "http://www.prnewswire.com/news-releases/kaneka-ubiquinol-wins-nutraingredients-asia-ingredient-of-the-year-healthspan-award-2026-302868831.html",
+        "tone_score": 11.5107913669,
+        "happy_factor": 100.0,
+        "ingested_at": "2026-09-28T11:16:12.150000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "d0122176a1fa1c28b39304db4396b162c0d5b85ace30b79e3a2d9f443a7b644d",
+        "serving_date": "2026-10-01",
+        "published_at": "2026-10-01T23:00:00+00:00",
+        "source_name": "mix929.com",
+        "language": "und",
+        "mentioned_country_name": "France",
+        "title": "Jim Carrey marries Min Ah in small, private ceremony in Los Angeles",
+        "url": "https://mix929.com/2026/10/01/jim-carrey-marries-min-ah-in-small-private-ceremony-in-los-angeles/",
+        "tone_score": 10.5990783410138,
+        "happy_factor": 100.0,
+        "ingested_at": "2026-10-02T00:30:37.207565+00:00"
+      },
+      "b": {
+        "article_id": "9826b625f83d2ab48d8c6e83a40cc60ac12dc4feea2cf419d0cba766f550d2d8",
+        "serving_date": "2026-10-01",
+        "published_at": "2026-10-01T22:30:00+00:00",
+        "source_name": "wrmf.com",
+        "language": "und",
+        "mentioned_country_name": "France",
+        "title": "Jim Carrey marries Min Ah in small, private ceremony in Los Angeles – 97.9 WRMF",
+        "url": "https://www.wrmf.com/jim-carrey-marries-min-ah-in-small-private-ceremony-in-los-angeles/",
+        "tone_score": 9.79591836734694,
+        "happy_factor": 98.98,
+        "ingested_at": "2026-10-02T00:30:37.207565+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "b55008504acd61c65fb98c6414637af82c3ff60dc9c26a2a559ac43910346c46",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T11:45:00+00:00",
+        "source_name": "iheart.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "Cobain's Former Olympia Apartment Now on Airbnb",
+        "url": "https://kogo.iheart.com/content/2026-09-29-cobains-former-olympia-apartment-now-on-airbnb/",
+        "tone_score": 9.09090909090909,
+        "happy_factor": 95.45,
+        "ingested_at": "2026-09-29T13:22:54.052036+00:00"
+      },
+      "b": {
+        "article_id": "1cc504be71c9f45e6b7263c49531465af821fc70f9edf68a190df0f49df6eb0c",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T11:45:00+00:00",
+        "source_name": "iheart.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "Cobain's Former Olympia Apartment Now on Airbnb | NewsTalk WMEQ",
+        "url": "https://wmeq.iheart.com/content/2026-09-29-cobains-former-olympia-apartment-now-on-airbnb/",
+        "tone_score": 9.09090909090909,
+        "happy_factor": 95.45,
+        "ingested_at": "2026-09-29T13:22:54.052036+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "df0e6fb2bc885be00147e7344c4e62fd6221e7261b5550a40a9f508e4e232f5c",
+        "serving_date": "2026-09-28",
+        "published_at": "2026-09-28T06:15:00+00:00",
+        "source_name": "iheart.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "Taylor Swift Accepts First-Ever Artist Director Honors At The 2026 VMAs | Magic 107.7",
+        "url": "https://magic107.iheart.com/content/2026-09-27-taylor-swift-accepts-first-ever-artist-director-honors-at-the-2026-vmas/",
+        "tone_score": 9.04977375565611,
+        "happy_factor": 95.25,
+        "ingested_at": "2026-09-28T07:54:54.108951+00:00"
+      },
+      "b": {
+        "article_id": "d07edf0e9f4ae69fcb29ba1be65bd9571135208f62be16f4f4b5fcd603999e94",
+        "serving_date": "2026-09-28",
+        "published_at": "2026-09-28T06:15:00+00:00",
+        "source_name": "iheart.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "Taylor Swift Accepts First-Ever Artist Director Honors At The 2026 VMAs",
+        "url": "https://thetwister.iheart.com/content/2026-09-27-taylor-swift-accepts-first-ever-artist-director-honors-at-the-2026-vmas/",
+        "tone_score": 9.04977375565611,
+        "happy_factor": 95.25,
+        "ingested_at": "2026-09-28T07:54:54.108951+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "73a3e9d37f822feb89c75b3d10f3faa4198c53ce24ccf5f6485f1c6fa7b52681",
+        "serving_date": "2026-09-28",
+        "published_at": "2026-09-28T00:00:00+00:00",
+        "source_name": "chathamdailynews.ca",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "RalivON Makes Its Public Debut at American Dream, Bringing a New Approach to Beauty From Within to Consumers",
+        "url": "https://www.chathamdailynews.ca/press-releases/newsfile/ralivon-makes-its-public-debut-at-american-dream-bringing-a-new-approach-to-beauty-from-within-to-consumers/",
+        "tone_score": 9.2369477912,
+        "happy_factor": 96.18,
+        "ingested_at": "2026-09-28T11:26:38.338000+00:00"
+      },
+      "b": {
+        "article_id": "a8bd3caff10d95d08e9f3b64b50b3d58d9e81b524293bd8b923a474661d01d8a",
+        "serving_date": "2026-09-27",
+        "published_at": "2026-09-27T23:45:00+00:00",
+        "source_name": "finanznachrichten.de",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "Press Release News: RalivON Makes Its Public Debut at American Dream, Bringing a New Approach to Beauty From Within to Consumers",
+        "url": "https://www.finanznachrichten.de/nachrichten-2026-09/69686045-press-release-news-ralivon-makes-its-public-debut-at-american-dream-bringing-a-new-approach-to-beauty-from-within-to-consumers-296.htm",
+        "tone_score": 8.1272084806,
+        "happy_factor": 90.64,
+        "ingested_at": "2026-09-28T11:26:38.338000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "6565e43c200a2ac45a738d855d9eb2e3716c328a0e9e38183911517828d27374",
+        "serving_date": "2026-09-02",
+        "published_at": "2026-09-02T00:15:00+00:00",
+        "source_name": "wsmv.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "Dolly Parton's star vandalized on Hollywood Walk of Fame",
+        "url": "https://www.wsmv.com/2026/09/01/dolly-partons-star-vandalized-hollywood-walk-fame/",
+        "tone_score": 8.3333333333,
+        "happy_factor": 91.67,
+        "ingested_at": "2026-09-28T11:14:48.221000+00:00"
+      },
+      "b": {
+        "article_id": "41b8914fc664faa7dfec36d7730075c56bbeb4f2e5830bbee02d8c625e92b2af",
+        "serving_date": "2026-09-02",
+        "published_at": "2026-09-02T00:30:00+00:00",
+        "source_name": "sgvtribune.com",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "title": "Dolly Parton star vandalized on Hollywood Walk of Fame",
+        "url": "https://www.sgvtribune.com/2026/09/01/dolly-parton-star-vandalized-on-hollywood-walk-of-fame/",
+        "tone_score": 7.8461538462,
+        "happy_factor": 89.23,
+        "ingested_at": "2026-09-28T11:14:48.221000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "b78bc68c4973b858d379b6374233be712a8f2b0784fa93ba74c8703962565839",
+        "serving_date": "2026-09-09",
+        "published_at": "2026-09-09T00:00:00+00:00",
+        "source_name": "gdnonline.com",
+        "language": "und",
+        "mentioned_country_name": "Qatar",
+        "title": "Qatar Business: Meeza inks major IT sector deal worth over QAR1bn",
+        "url": "https://www.gdnonline.com:443/Details/1405786/Meeza-inks-major-IT-sector-deal-worth-over-QAR1bn",
+        "tone_score": 7.8590785908,
+        "happy_factor": 89.3,
+        "ingested_at": "2026-09-28T11:18:22.497000+00:00"
+      },
+      "b": {
+        "article_id": "e2f7e0f881ac952c4e3eb0b2a67ad361b25f5e61562a57efbf82761b3ca0584f",
+        "serving_date": "2026-09-09",
+        "published_at": "2026-09-09T00:15:00+00:00",
+        "source_name": "tradearabia.com",
+        "language": "und",
+        "mentioned_country_name": "Qatar",
+        "title": "Meeza inks major IT sector deal worth over QAR1bn",
+        "url": "https://tradearabia.com:443/News/485850/Meeza-inks-major-IT-sector-deal-worth-over-QAR1bn/IND",
+        "tone_score": 7.671957672,
+        "happy_factor": 88.36,
+        "ingested_at": "2026-09-28T11:18:22.497000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "3bb71c02230077cbbd46dedf3cbbdd8cad1da1be5108a808741db0f81148a4be",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T00:15:00+00:00",
+        "source_name": "scoop.co.nz",
+        "language": "en",
+        "mentioned_country_name": "New Zealand",
+        "title": "Auckland.Scoop » Nelson Tasman Dominates National Business Innovation Awards",
+        "url": "https://auckland.scoop.co.nz/2026/09/nelson-tasman-dominates-national-business-innovation-awards/",
+        "tone_score": 7.66609880749574,
+        "happy_factor": 88.33,
+        "ingested_at": "2026-09-29T02:32:48.334641+00:00"
+      },
+      "b": {
+        "article_id": "b804a74c03c09ddec3cce0e7f49b1877e4361a4917b4fc0bcad5184b6e0ee993",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T00:15:00+00:00",
+        "source_name": "scoop.co.nz",
+        "language": "en",
+        "mentioned_country_name": "New Zealand",
+        "title": "Nelson Tasman Dominates National Business Innovation Awards",
+        "url": "https://www.scoop.co.nz/stories/BU2609/S00339/nelson-tasman-dominates-national-business-innovation-awards.htm",
+        "tone_score": 7.27272727272727,
+        "happy_factor": 86.36,
+        "ingested_at": "2026-09-29T02:32:48.334641+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "f4cc8d7fd4d104cc95b268f03dd3bdf522029968e562e45ab9b6090ce238cac0",
+        "serving_date": "2026-09-12",
+        "published_at": "2026-09-12T00:30:00+00:00",
+        "source_name": "iheart.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "Mariska Hargitay Shares Her 'Favorite' Moment From Taylor Swift's Wedding",
+        "url": "https://1047kissfm.iheart.com/content/2026-09-11-mariska-hargitay-shares-her-favorite-moment-from-taylor-swifts-wedding/",
+        "tone_score": 6.6945606695,
+        "happy_factor": 83.47,
+        "ingested_at": "2026-09-28T11:19:56.653000+00:00"
+      },
+      "b": {
+        "article_id": "a5a14d65c2a0bdea9ce518cfde79d4617aeca52d81eef9255ac1a6e48814456b",
+        "serving_date": "2026-09-12",
+        "published_at": "2026-09-12T00:30:00+00:00",
+        "source_name": "iheart.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "Mariska Hargitay Shares Her 'Favorite' Moment From Taylor Swift's Wedding | Magic 107.7",
+        "url": "https://magic107.iheart.com/content/2026-09-11-mariska-hargitay-shares-her-favorite-moment-from-taylor-swifts-wedding/",
+        "tone_score": 6.6945606695,
+        "happy_factor": 83.47,
+        "ingested_at": "2026-09-28T11:19:56.653000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "0a795b6fc822e704a3cff1a09331fb45c22153d08c6794ac130040ed0527d070",
+        "serving_date": "2026-09-14",
+        "published_at": "2026-09-14T23:45:00+00:00",
+        "source_name": "finanznachrichten.de",
+        "language": "en",
+        "mentioned_country_name": "Malaysia",
+        "title": "Plantations International Holdings PTE. LTD.: Plantations International Subsidiary Wins Malaysia's Best Durian Nursery Award",
+        "url": "https://www.finanznachrichten.de/nachrichten-2026-09/69577728-plantations-international-holdings-pte-ltd-plantations-international-subsidiary-wins-malaysia-s-best-durian-nursery-award-200.htm",
+        "tone_score": 5.7788944724,
+        "happy_factor": 82.89,
+        "ingested_at": "2026-09-28T11:21:02.772000+00:00"
+      },
+      "b": {
+        "article_id": "c019f87bfdea02c436f11dbe424c35815ad1e8b4b91ca702c4dac32031a56e72",
+        "serving_date": "2026-09-15",
+        "published_at": "2026-09-15T00:30:00+00:00",
+        "source_name": "tennesseedaily.com",
+        "language": "en",
+        "mentioned_country_name": "Malaysia",
+        "title": "Plantations International Subsidiary Wins Malaysia's Best Durian Nursery Award",
+        "url": "http://www.tennesseedaily.com/news/279306314/plantations-international-subsidiary-wins-malaysia-best-durian-nursery-award",
+        "tone_score": 5.5844155844,
+        "happy_factor": 81.92,
+        "ingested_at": "2026-09-28T11:21:02.772000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "f4d2d72fae03e0efdbcc96f8f397d1cffddea6eb2206fe26a2a61603ef5dfe79",
+        "serving_date": "2026-09-07",
+        "published_at": "2026-09-07T23:45:00+00:00",
+        "source_name": "webindia123.com",
+        "language": "en",
+        "mentioned_country_name": "Luxembourg",
+        "title": "Piyush Goyal meets Luxembourgs Trade Minister Xavier Bettel; discusses bilateral economic ties",
+        "url": "https://news.webindia123.com/news/Articles/World/20260908/4495969.html",
+        "tone_score": 6.3569682152,
+        "happy_factor": 81.78,
+        "ingested_at": "2026-09-28T11:18:02.098000+00:00"
+      },
+      "b": {
+        "article_id": "ba2ba71d87521c924d18311ecbcba22a31d6d1972d5caf80e4b2b151987c37d9",
+        "serving_date": "2026-09-08",
+        "published_at": "2026-09-08T00:30:00+00:00",
+        "source_name": "europesun.com",
+        "language": "en",
+        "mentioned_country_name": "India",
+        "title": "Piyush Goyal meets Luxembourg's Trade Minister Xavier Bettel; discusses bilateral economic ties",
+        "url": "http://www.europesun.com/news/279292655/piyush-goyal-meets-luxembourg-trade-minister-xavier-bettel-discusses-bilateral-economic-ties",
+        "tone_score": 6.2801932367,
+        "happy_factor": 81.4,
+        "ingested_at": "2026-09-28T11:18:02.098000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "b5e7bc155c4ad5cc28bf01d22bf1d0098825bea7279265e865fa01601118a262",
+        "serving_date": "2026-09-28",
+        "published_at": "2026-09-28T06:15:00+00:00",
+        "source_name": "iheart.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "Kacey Musgraves Honors Dolly Parton With Emotional VMAs Performance",
+        "url": "https://mix999fm.iheart.com/content/2026-09-27-kacey-musgraves-honors-dolly-parton-with-emotional-i-will-always-love-you-2026-vmas-performance/",
+        "tone_score": 6.13207547169811,
+        "happy_factor": 80.66,
+        "ingested_at": "2026-09-28T07:54:54.108951+00:00"
+      },
+      "b": {
+        "article_id": "24aa0b11a33fb89d4d8262fefb94b98a22896bacd146f33f9703c58fdff9d561",
+        "serving_date": "2026-09-28",
+        "published_at": "2026-09-28T06:15:00+00:00",
+        "source_name": "iheart.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "Kacey Musgraves Honors Dolly Parton With Emotional VMAs Performance | Magic 107.7",
+        "url": "https://magic107.iheart.com/content/2026-09-27-kacey-musgraves-honors-dolly-parton-with-emotional-i-will-always-love-you-2026-vmas-performance/",
+        "tone_score": 6.13207547169811,
+        "happy_factor": 80.66,
+        "ingested_at": "2026-09-28T07:54:54.108951+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "6572356ae90c2beb2da237ae28b555e90349e7ff699e8fb04c233325a1dc80c9",
+        "serving_date": "2026-09-28",
+        "published_at": "2026-09-28T06:00:00+00:00",
+        "source_name": "en.tempo.co",
+        "language": "en",
+        "mentioned_country_name": "Indonesia",
+        "title": "Taylor Swift Becomes Most-Awarded Artist in MTV VMAs History",
+        "url": "https://en.tempo.co/read/2120440/taylor-swift-becomes-most-awarded-artist-in-mtv-vmas-history",
+        "tone_score": 7.98548094373866,
+        "happy_factor": 91.93,
+        "ingested_at": "2026-09-28T07:54:54.108951+00:00"
+      },
+      "b": {
+        "article_id": "81fde8344f72f4a8a27ea698ac9f640f9cb6f937917035a8a729165c2af4e401",
+        "serving_date": "2026-09-28",
+        "published_at": "2026-09-28T06:15:00+00:00",
+        "source_name": "arabnews.com",
+        "language": "en",
+        "mentioned_country_name": "Thailand",
+        "title": "Arab News | Taylor Swift becomes most-awarded artist in MTV VMAs history",
+        "url": "https://www.arabnews.com/entertainment/taylor-swift-becomes-most-awarded-artist-in-mtv-vmas-history-3003505",
+        "tone_score": 5.7,
+        "happy_factor": 80.5,
+        "ingested_at": "2026-09-28T07:54:54.108951+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "29fff53509b5ed7f80c3acd9c301ab32bb9ca902388ca5b12d58910dcce945c1",
+        "serving_date": "2026-09-12",
+        "published_at": "2026-09-12T00:00:00+00:00",
+        "source_name": "webindia123.com",
+        "language": "en",
+        "mentioned_country_name": "India",
+        "title": "50 years of ICARICRISAT partnership celebrated at Dryland Congress 2026",
+        "url": "https://news.webindia123.com/news/Articles/India/20260912/4497600.html",
+        "tone_score": 6.1349693252,
+        "happy_factor": 80.67,
+        "ingested_at": "2026-09-28T11:19:56.653000+00:00"
+      },
+      "b": {
+        "article_id": "98b24d71b53a4384d4d4c88f1cffe90604feeaa07e3efe049bdd0d3e4aecd9c1",
+        "serving_date": "2026-09-11",
+        "published_at": "2026-09-11T23:45:00+00:00",
+        "source_name": "calcuttanews.net",
+        "language": "en",
+        "mentioned_country_name": "India",
+        "title": "50 years of ICAR-ICRISAT partnership celebrated at Dryland Congress 2026",
+        "url": "http://www.calcuttanews.net/news/279301963/50-years-of-icar-icrisat-partnership-celebrated-at-dryland-congress-2026",
+        "tone_score": 6.0606060606,
+        "happy_factor": 80.3,
+        "ingested_at": "2026-09-28T11:19:56.653000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "21868a096f7fd805300e290430aa019b91515b49f057c1f6113bbbc672b2773a",
+        "serving_date": "2026-09-05",
+        "published_at": "2026-09-05T00:30:00+00:00",
+        "source_name": "plymouthherald.co.uk",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "Your chance to win a Caribbean fly-cruise holiday for two",
+        "url": "https://www.plymouthherald.co.uk/special-features/your-chance-win-caribbean-fly-11141269",
+        "tone_score": 6.0240963855,
+        "happy_factor": 82.12,
+        "ingested_at": "2026-09-28T11:16:52.118000+00:00"
+      },
+      "b": {
+        "article_id": "11017757973dcc13d0a072a52c457306d995dac27230701ce6f442e5e2f545e5",
+        "serving_date": "2026-09-05",
+        "published_at": "2026-09-05T00:00:00+00:00",
+        "source_name": "mirror.co.uk",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "Your chance to win a Caribbean fly-cruise holiday for two with P&O Cruises",
+        "url": "https://www.mirror.co.uk/partner-stories/your-chance-win-caribbean-fly-37597061",
+        "tone_score": 5.4830287206,
+        "happy_factor": 79.42,
+        "ingested_at": "2026-09-28T11:16:52.118000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "edc78f981598f7f05d78da956d5ffd13d96c756a8d3151f5c29b259e9f761c17",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T11:30:00+00:00",
+        "source_name": "aol.co.uk",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "title": "UK care home builds wrestling ring in garden so fan's dream can come true",
+        "url": "https://www.aol.co.uk/articles/uk-care-home-builds-wrestling-110000000.html",
+        "tone_score": 6.25,
+        "happy_factor": 81.25,
+        "ingested_at": "2026-09-29T13:22:54.052036+00:00"
+      },
+      "b": {
+        "article_id": "68abefa2f108a624a8127c8715732ad1aca738f06a61ccc60026337a51f98a71",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T11:30:00+00:00",
+        "source_name": "express.co.uk",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "title": "Care home builds wrestling ring in garden so fan's dream can come true | UK | News",
+        "url": "https://www.express.co.uk/news/uk/2252151/wrestling-ring-built-care-home",
+        "tone_score": 5.51330798479087,
+        "happy_factor": 77.57,
+        "ingested_at": "2026-09-29T13:22:54.052036+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "e4aa09606d5cdabc9019777b4ad068d2db058397e9f53b9c63b04ab005469255",
+        "serving_date": "2026-09-11",
+        "published_at": "2026-09-11T23:45:00+00:00",
+        "source_name": "mix929.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "Travis Kelce says marrying Taylor Swift 'was the best night of my life' | Mix 92.9 | Your Life, Your Music",
+        "url": "https://mix929.com/2026/09/11/travis-kelce-says-marrying-taylor-swift-was-the-best-night-of-my-life/",
+        "tone_score": 5.9701492537,
+        "happy_factor": 79.85,
+        "ingested_at": "2026-09-28T11:19:56.653000+00:00"
+      },
+      "b": {
+        "article_id": "927756df4a4715bcca5ec3061b0f1ae222c73835bd2acd57c3f0f54c66cc7a08",
+        "serving_date": "2026-09-11",
+        "published_at": "2026-09-11T23:45:00+00:00",
+        "source_name": "y101.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "Travis Kelce says marrying Taylor Swift 'was the best night of my life'",
+        "url": "https://y101.com/music-news/2026-09-11-travis-kelce-says-marrying-taylor-swift-was-the-best-night-of-my-life/",
+        "tone_score": 5.4982817869,
+        "happy_factor": 77.49,
+        "ingested_at": "2026-09-28T11:19:56.653000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "e78954f6019f45a1246f81fa587ef769ad9e0d564353abd7a29cbdd1bb7cd568",
+        "serving_date": "2026-09-17",
+        "published_at": "2026-09-17T23:45:00+00:00",
+        "source_name": "nbcnewyork.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "'Elf' movie immersive experience coming to Rockefeller Center – NBC New York",
+        "url": "https://www.nbcnewyork.com/news/local/elf-experience-coming-to-rockefeller-center/6549059/",
+        "tone_score": 5.3921568627,
+        "happy_factor": 76.96,
+        "ingested_at": "2026-09-28T11:22:22.975000+00:00"
+      },
+      "b": {
+        "article_id": "314827bad977ce6872e2bfd9290e5fe0c3c4e71fe41ad13e76cf2caacbd8db53",
+        "serving_date": "2026-09-18",
+        "published_at": "2026-09-18T00:30:00+00:00",
+        "source_name": "nbclosangeles.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "'Elf' movie immersive experience coming to Rockefeller Center – NBC Los Angeles",
+        "url": "https://www.nbclosangeles.com/news/local/elf-experience-coming-to-rockefeller-center/3943968/",
+        "tone_score": 5.3571428571,
+        "happy_factor": 76.79,
+        "ingested_at": "2026-09-28T11:22:22.975000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "46fbf74cebd250bb65face1dd15af43e9dab6133301c7a823517a62b5ea37675",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T23:00:00+00:00",
+        "source_name": "union-bulletin.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "White Sox receive a letter from Pope Leo XIV on day of playoff opener",
+        "url": "https://www.union-bulletin.com/news/national/white-sox-receive-a-letter-from-pope-leo-xiv-on-day-of-playoff-opener/article_c1db2a1e-7aca-55a2-8068-1ea725fc511c.html",
+        "tone_score": 5.55555555555556,
+        "happy_factor": 77.78,
+        "ingested_at": "2026-09-30T00:30:22.637576+00:00"
+      },
+      "b": {
+        "article_id": "ad3704c5990f538d0c96a46cfc7ceb0778d283629d19e6bc0f138a43496d7f52",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T22:45:00+00:00",
+        "source_name": "winnipegfreepress.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "White Sox receive a letter from Pope Leo XIV on day of playoff opener – Winnipeg Free Press",
+        "url": "https://www.winnipegfreepress.com/arts-and-life/life/faith/2026/09/29/white-sox-receive-a-letter-from-pope-leo-xiv-on-day-of-playoff-opener",
+        "tone_score": 4.91803278688525,
+        "happy_factor": 76.59,
+        "ingested_at": "2026-09-30T00:30:22.637576+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "c69d5c21b2af3fbdd1c5182bc944b8844afffc3709ab18bcd027f4d11b873de5",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T00:15:00+00:00",
+        "source_name": "scoop.co.nz",
+        "language": "en",
+        "mentioned_country_name": "New Zealand",
+        "title": "Auckland.Scoop » Surf Lifesavers Set To Make A Splash At The Aon New Zealand Pool Rescue Championships",
+        "url": "https://auckland.scoop.co.nz/2026/09/surf-lifesavers-set-to-make-a-splash-at-the-aon-new-zealand-pool-rescue-championships/",
+        "tone_score": 5.02645502645503,
+        "happy_factor": 77.13,
+        "ingested_at": "2026-09-29T02:32:48.334641+00:00"
+      },
+      "b": {
+        "article_id": "e9a90ca8fa2ed8f4afc894998e785783e4c98eb3438c52ce234b2110ff9ea774",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T00:15:00+00:00",
+        "source_name": "scoop.co.nz",
+        "language": "en",
+        "mentioned_country_name": "New Zealand",
+        "title": "Surf Lifesavers Set To Make A Splash At The Aon New Zealand Pool Rescue Championships",
+        "url": "https://www.scoop.co.nz/stories/CU2609/S00212/surf-lifesavers-set-to-make-a-splash-at-the-aon-new-zealand-pool-rescue-championships.htm",
+        "tone_score": 4.91606714628297,
+        "happy_factor": 76.58,
+        "ingested_at": "2026-09-29T02:32:48.334641+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "58f44a1311d2ab2fe4ed58b723fa4aa9bcd1a69e0027be9b9cf628212e74305b",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T11:45:00+00:00",
+        "source_name": "parisguardian.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "U.S. Polo Assn. Brings 'Game On' to Life with the 2026 Fall-Winter Global Collection",
+        "url": "http://www.parisguardian.com/news/279339943/us-polo-assn-brings-game-on-to-life-with-the-2026-fall-winter-global-collection",
+        "tone_score": 5.16129032258065,
+        "happy_factor": 75.81,
+        "ingested_at": "2026-09-29T13:22:54.052036+00:00"
+      },
+      "b": {
+        "article_id": "7d57835cadb47e039afe77c501679c2b3d6cc8762ca0e5b3978f8b4c60d0e46a",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T11:30:00+00:00",
+        "source_name": "finanznachrichten.de",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "USPA Global: U.S. Polo Assn. Brings 'Game On' to Life with the 2026 Fall-Winter Global Collection",
+        "url": "https://www.finanznachrichten.de/nachrichten-2026-09/69703999-uspa-global-u-s-polo-assn-brings-game-on-to-life-with-the-2026-fall-winter-global-collection-200.htm",
+        "tone_score": 5.11013215859031,
+        "happy_factor": 75.55,
+        "ingested_at": "2026-09-29T13:22:54.052036+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "35e060374a3303211fdc1eec37c8cea595001e4f5cf5e9175c1ae2f37ef6f6e1",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T11:30:00+00:00",
+        "source_name": "manilatimes.net",
+        "language": "en",
+        "mentioned_country_name": "France",
+        "title": "ProductLife Group completes its transformation into a single, unified group with an end-to-end set of human and digital capabilities across life sciences",
+        "url": "https://www.manilatimes.net/2026/09/29/tmt-newswire/globenewswire/productlife-group-completes-its-transformation-into-a-single-unified-group-with-an-end-to-end-set-of-human-and-digital-capabilities-across-life-sciences/2434918",
+        "tone_score": 5.41353383458647,
+        "happy_factor": 77.07,
+        "ingested_at": "2026-09-29T13:22:54.052036+00:00"
+      },
+      "b": {
+        "article_id": "d127d1b29ff4e783d403a60642a51635c0e4747c3cd11e4c03a0fae453bea066",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T11:30:00+00:00",
+        "source_name": "finanznachrichten.de",
+        "language": "en",
+        "mentioned_country_name": "France",
+        "title": "ProductLife Group (PLG): ProductLife Group completes its transformation into a single, unified group with an end-to-end set of human and digital capabilities across life sciences",
+        "url": "https://www.finanznachrichten.de/nachrichten-2026-09/69704150-productlife-group-plg-productlife-group-completes-its-transformation-into-a-single-unified-group-with-an-end-to-end-set-of-human-and-digital-capab-399.htm",
+        "tone_score": 5.00807754442649,
+        "happy_factor": 75.04,
+        "ingested_at": "2026-09-29T13:22:54.052036+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "e8b728b024bdb0a38f7a2c4836bcf0ef9cfa8ee8ef6df32f13bedddaa27f23ee",
+        "serving_date": "2026-09-04",
+        "published_at": "2026-09-04T00:30:00+00:00",
+        "source_name": "verdenews.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "Maryland's top court allows a Democratic-backed congressional districting amendment to appear on the November ballot | National",
+        "url": "https://www.verdenews.com/news/national/maryland-s-top-court-allows-a-democratic-backed-congressional-districting-amendment-to-appear-on-the/article_bb1e23b1-33a3-52d2-8ec7-625ea7d1315f.html",
+        "tone_score": 4.7619047619,
+        "happy_factor": 73.81,
+        "ingested_at": "2026-09-28T11:16:12.150000+00:00"
+      },
+      "b": {
+        "article_id": "531d53e1dab2e929d5bb2e3f0e1dcbbcf6d9f75f8c81c99020787334b1563482",
+        "serving_date": "2026-09-04",
+        "published_at": "2026-09-04T00:15:00+00:00",
+        "source_name": "leadertelegram.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "Maryland's top court allows a Democratic-backed congressional districting amendment to appear on the November ballot | Nation & World",
+        "url": "http://www.leadertelegram.com/news/nation-world/maryland-s-top-court-allows-a-democratic-backed-congressional-districting-amendment-to-appear-on-the/article_7dbe944a-32e8-577e-a87f-3e3e7d8d8243.html",
+        "tone_score": 4.7619047619,
+        "happy_factor": 73.81,
+        "ingested_at": "2026-09-28T11:16:12.150000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "a3d811bcfb0f0a8f4a7e292b0086c5a3c7774abbf4fb542c8cb40b4a8933df12",
+        "serving_date": "2026-09-09",
+        "published_at": "2026-09-09T00:15:00+00:00",
+        "source_name": "grandforksgazette.ca",
+        "language": "en",
+        "mentioned_country_name": "Canada",
+        "title": "3 Okanagan grad students win big for wildlife contributions",
+        "url": "https://grandforksgazette.ca/2026/09/08/3-okanagan-grad-students-win-big-for-wildlife-contributions/",
+        "tone_score": 4.280155642,
+        "happy_factor": 73.4,
+        "ingested_at": "2026-09-28T11:18:22.497000+00:00"
+      },
+      "b": {
+        "article_id": "9d0c6259ddd3908a5fc82ef6764c826f265f692f3b7c4dd6dc1610a45689ec42",
+        "serving_date": "2026-09-09",
+        "published_at": "2026-09-09T00:00:00+00:00",
+        "source_name": "interior-news.com",
+        "language": "en",
+        "mentioned_country_name": "Canada",
+        "title": "3 Okanagan grad students win big for wildlife contributions | The Interior News",
+        "url": "https://interior-news.com/2026/09/08/3-okanagan-grad-students-win-big-for-wildlife-contributions/",
+        "tone_score": 4.280155642,
+        "happy_factor": 73.4,
+        "ingested_at": "2026-09-28T11:18:22.497000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "1ad1a8d740ec7a484d86745ada5c19e14b3a68784a12b42d8dd51ea07f05368e",
+        "serving_date": "2026-09-21",
+        "published_at": "2026-09-21T00:15:00+00:00",
+        "source_name": "eonline.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "Meg Ryan, Son Jack Quaid Make Rare Joint Appearance at Lucas Museum Opening",
+        "url": "https://www.eonline.com/news/1436273/meg-ryan-son-jack-quaid-make-rare-joint-appearance-at-lucas-museum-opening",
+        "tone_score": 5.2770448549,
+        "happy_factor": 76.39,
+        "ingested_at": "2026-09-28T11:23:32.117000+00:00"
+      },
+      "b": {
+        "article_id": "029172e6e034a1880f2e1172f5aa9aaeeb5f183ca0f75444971c990f14d4a551",
+        "serving_date": "2026-09-21",
+        "published_at": "2026-09-21T23:45:00+00:00",
+        "source_name": "justjared.com",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "title": "Meg Ryan & Son Jack Quaid Make Rare Appearance Together at Lucas Museum Opening",
+        "url": "https://www.justjared.com/2026/09/21/meg-ryan-son-jack-quaid-make-rare-appearance-together-at-lucas-museum-opening/",
+        "tone_score": 3.4615384615,
+        "happy_factor": 67.31,
+        "ingested_at": "2026-09-28T11:23:51.901000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "7695a3bacab6e501fa643fe029b798dc78a6ae464814ce31d71c132552f3788d",
+        "serving_date": "2026-09-22",
+        "published_at": "2026-09-22T00:00:00+00:00",
+        "source_name": "dailypolitical.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "iShares 1-3 Year Treasury Bond ETF $SHY Shares Bought by Silicon Valley Capital Partners",
+        "url": "https://www.dailypolitical.com/2026/09/21/ishares-1-3-year-treasury-bond-etf-shy-shares-bought-by-silicon-valley-capital-partners.html",
+        "tone_score": 3.5242290749,
+        "happy_factor": 67.62,
+        "ingested_at": "2026-09-28T11:23:51.901000+00:00"
+      },
+      "b": {
+        "article_id": "19e29b05786520fc6ce10b75d965ba061a0b07c53d91e8e8ca7b579008c724df",
+        "serving_date": "2026-09-21",
+        "published_at": "2026-09-21T23:45:00+00:00",
+        "source_name": "tickerreport.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "iShares 1-3 Year Treasury Bond ETF $SHY Shares Acquired by Silicon Valley Capital Partners",
+        "url": "https://www.tickerreport.com/banking-finance/13591457/ishares-1-3-year-treasury-bond-etf-shy-shares-acquired-by-silicon-valley-capital-partners.html",
+        "tone_score": 3.4236804565,
+        "happy_factor": 67.12,
+        "ingested_at": "2026-09-28T11:23:51.901000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "926067e1e62b3c68ab73ce354309f68037354b255ad13856c1a187b8c932b740",
+        "serving_date": "2026-09-16",
+        "published_at": "2026-09-16T23:45:00+00:00",
+        "source_name": "aol.co.uk",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "Wicked's 20th birthday in London celebrated with Royal Mint coins",
+        "url": "https://www.aol.co.uk/articles/wicked-20th-birthday-london-celebrated-230151000.html",
+        "tone_score": 3.2911392405,
+        "happy_factor": 66.46,
+        "ingested_at": "2026-09-28T11:21:55.551000+00:00"
+      },
+      "b": {
+        "article_id": "4f2b858ab3cfff0e8be4eb92489950316e531cddf125a522f0abefc61c8c7ccb",
+        "serving_date": "2026-09-16",
+        "published_at": "2026-09-16T23:45:00+00:00",
+        "source_name": "aol.co.uk",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "Spellbinding: Wicked's 20th birthday in London celebrated with Royal Mint coins",
+        "url": "https://www.aol.co.uk/articles/spellbinding-wicked-20th-birthday-london-230100000.html",
+        "tone_score": 3.274559194,
+        "happy_factor": 66.37,
+        "ingested_at": "2026-09-28T11:21:55.551000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "b85e696494333aa04329f247199f2e5199e8debb49b7ce89990632a584494e94",
+        "serving_date": "2026-09-02",
+        "published_at": "2026-09-02T00:30:00+00:00",
+        "source_name": "juniorminingnetwork.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "Hycroft Mining Strengthens Board for Its Next Phase of Growth",
+        "url": "https://www.juniorminingnetwork.com/junior-miner-news/press-releases/2800-nasdaq/hymc/210183-hycroft-strengthens-board-for-its-next-phase-of-growth.html",
+        "tone_score": 3.1775700935,
+        "happy_factor": 65.89,
+        "ingested_at": "2026-09-28T11:14:48.221000+00:00"
+      },
+      "b": {
+        "article_id": "f399a78ef6d91c1ca87cc3ee9f64c8899b1d747877f5195cc06250b802135b1e",
+        "serving_date": "2026-09-02",
+        "published_at": "2026-09-02T00:00:00+00:00",
+        "source_name": "vietnamtribune.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "Hycroft Strengthens Board for Its Next Phase of Growth",
+        "url": "http://www.vietnamtribune.com/news/279280144/hycroft-strengthens-board-for-its-next-phase-of-growth",
+        "tone_score": 3.0798845043,
+        "happy_factor": 65.4,
+        "ingested_at": "2026-09-28T11:14:48.221000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "8cd33b0c9cc80035ba6a7dab4a19e6fd96311860e35c62db84221bae8c4932ee",
+        "serving_date": "2026-09-04",
+        "published_at": "2026-09-04T00:00:00+00:00",
+        "source_name": "pentictonherald.ca",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "Kamala Harris, Hillary Clinton, Oprah Winfrey and others pay tribute to Gloria Steinem",
+        "url": "https://www.pentictonherald.ca/entertainment/national_entertainment/article_c66c9052-f627-5244-813e-72109a464b87.html",
+        "tone_score": 3.0612244898,
+        "happy_factor": 65.31,
+        "ingested_at": "2026-09-28T11:16:12.150000+00:00"
+      },
+      "b": {
+        "article_id": "dc889374ed0d94260e286f636ba46168409f7bc4d5c8fe0490931f94108cec70",
+        "serving_date": "2026-09-04",
+        "published_at": "2026-09-04T00:30:00+00:00",
+        "source_name": "republicanherald.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "Kamala Harris, Hillary Clinton, others pay tribute to Gloria Steinem",
+        "url": "https://www.republicanherald.com/2026/09/03/gloria-steinem-tributes/",
+        "tone_score": 3.0474040632,
+        "happy_factor": 65.24,
+        "ingested_at": "2026-09-28T11:16:12.150000+00:00"
+      }
+    },
+    {
+      "same_story": true,
+      "a": {
+        "article_id": "fd958b6e96f926dd3312193dda2ec10d6be6b3835abc89bc6ea5a3130c5aac1d",
+        "serving_date": "2026-09-18",
+        "published_at": "2026-09-18T00:30:00+00:00",
+        "source_name": "iheart.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "MGK & Dakota Johnson Reportedly 'Smitten' After They 'Hit It Off' At Taylor Swift's Wedding",
+        "url": "https://alt1047.iheart.com/content/2026-09-17-mgk-dakota-johnson-reportedly-smitten-after-they-hit-it-off-at-taylor-swifts-wedding/",
+        "tone_score": 3.0303030303,
+        "happy_factor": 65.15,
+        "ingested_at": "2026-09-28T11:22:22.975000+00:00"
+      },
+      "b": {
+        "article_id": "d8e49b1d26143eb69011bb5ffc7ce94a69b81541b38fb78dc1c60a8ce78e98a3",
+        "serving_date": "2026-09-17",
+        "published_at": "2026-09-17T23:45:00+00:00",
+        "source_name": "iheart.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "MGK & Dakota Johnson Reportedly 'Smitten' After They 'Hit It Off' At Taylor Swift's Wedding | Magic 107.7",
+        "url": "https://magic107.iheart.com/content/2026-09-17-mgk-dakota-johnson-reportedly-smitten-after-they-hit-it-off-at-taylor-swifts-wedding/",
+        "tone_score": 3.0303030303,
+        "happy_factor": 65.15,
+        "ingested_at": "2026-09-28T11:22:22.975000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "c2cc2046762d582801d23fb0e8af98835bbbb83f71a01177789ec04fc46de124",
+        "serving_date": "2026-09-30",
+        "published_at": "2026-09-30T22:45:00+00:00",
+        "source_name": "azbigmedia.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "Most Admired Companies of 2026: RTX",
+        "url": "https://azbigmedia.com/business/most-admired-companies-of-2026/most-admired-companies-of-2026-rtx/",
+        "tone_score": 11.8705035971223,
+        "happy_factor": 100.0,
+        "ingested_at": "2026-10-01T00:30:36.397497+00:00"
+      },
+      "b": {
+        "article_id": "32bd6fd7c37ce11c2cb427ca83f6cda81acd3c845b4d08224f08cde284dc42e2",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T22:45:00+00:00",
+        "source_name": "azbigmedia.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "Most Admired Companies of 2026: Prologis",
+        "url": "https://azbigmedia.com/business/most-admired-companies-of-2026/most-admired-companies-of-2026-prologis/",
+        "tone_score": 12.565445026178,
+        "happy_factor": 100.0,
+        "ingested_at": "2026-09-30T00:30:22.637576+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "1fd5b837fe7ee7431ccd7844168d5b95823c9ad173f021910920789212ee1da7",
+        "serving_date": "2026-09-16",
+        "published_at": "2026-09-16T00:00:00+00:00",
+        "source_name": "iberkshires.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "98 Bryan St Pittsfield, MA 01201 / iBerkshires.com - The Berkshires online guide to events, news and Berkshire County community information.",
+        "url": "https://www.iberkshires.com/realestate/new/listing/73029/98-Bryan-St-Pittsfield.html",
+        "tone_score": 10.0840336134,
+        "happy_factor": 100.0,
+        "ingested_at": "2026-09-28T11:21:33.538000+00:00"
+      },
+      "b": {
+        "article_id": "ce768ea8b96cb16e7360d2bc1eb8fea4c9ab49b53aef459111c9d285df1be51a",
+        "serving_date": "2026-09-14",
+        "published_at": "2026-09-14T00:15:00+00:00",
+        "source_name": "iberkshires.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "8 Velma Ave Pittsfield, MA 01201 / iBerkshires.com - The Berkshires online guide to events, news and Berkshire County community information.",
+        "url": "https://www.iberkshires.com/realestate/new/listing/73188/8-Velma-Ave-Pittsfield.html",
+        "tone_score": 11.0236220472,
+        "happy_factor": 100.0,
+        "ingested_at": "2026-09-28T11:20:45.453000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "e296bc43d3de35aa33af03cb1a3d502ccdd159145a66737a4b5ee48c47596675",
+        "serving_date": "2026-09-08",
+        "published_at": "2026-09-08T23:45:00+00:00",
+        "source_name": "prnewswire.com",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "title": "The Inner Circle acknowledges Daniel Beer as a Pinnacle Professional Member Inner Circle of Excellence",
+        "url": "http://www.prnewswire.com/news-releases/the-inner-circle-acknowledges-daniel-beer-as-a-pinnacle-professional-member-inner-circle-of-excellence-302872896.html",
+        "tone_score": 9.4674556213,
+        "happy_factor": 97.34,
+        "ingested_at": "2026-09-28T11:18:22.497000+00:00"
+      },
+      "b": {
+        "article_id": "7a6727e162e69afac6d2e58ecb34b93e2c5f0098902066055f720f53ab5d7f7e",
+        "serving_date": "2026-09-08",
+        "published_at": "2026-09-08T23:45:00+00:00",
+        "source_name": "prnewswire.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "The Inner Circle acknowledges Michelle Bishop as a Pinnacle Professional Member Inner Circle of Excellence",
+        "url": "http://www.prnewswire.com/news-releases/the-inner-circle-acknowledges-michelle-bishop-as-a-pinnacle-professional-member-inner-circle-of-excellence-302872904.html",
+        "tone_score": 6.4285714286,
+        "happy_factor": 82.14,
+        "ingested_at": "2026-09-28T11:18:22.497000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "be101099e53b7b06820807c45fabcf549c1fba4ba7d1283f6fe889350e5430cc",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T22:15:00+00:00",
+        "source_name": "archinect.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "Senior Project Architect - Culver City, CA, US | Jobs",
+        "url": "https://archinect.com/jobs/entry/150567869/senior-project-architect",
+        "tone_score": 6.86274509803922,
+        "happy_factor": 84.31,
+        "ingested_at": "2026-09-30T00:30:22.637576+00:00"
+      },
+      "b": {
+        "article_id": "a61eb59da6fb42ea374065796b8c6a772e6122d0c3a8a2b58d6f4da219db92d8",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T22:15:00+00:00",
+        "source_name": "archinect.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "Project Architect - Culver City, CA, US | Jobs",
+        "url": "https://archinect.com/jobs/entry/150567871/project-architect",
+        "tone_score": 6.33484162895928,
+        "happy_factor": 81.67,
+        "ingested_at": "2026-09-30T00:30:22.637576+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "b11dcefd377a1faeb268c15801161a293c9dc18e97914bb4ae3c2d35aa1c95b8",
+        "serving_date": "2026-09-25",
+        "published_at": "2026-09-25T00:15:00+00:00",
+        "source_name": "timesfreepress.com",
+        "language": "und",
+        "mentioned_country_name": "Serbia",
+        "title": "The Press Pass | Chattanooga Times Free Press",
+        "url": "https://www.timesfreepress.com/news/2026/sep/24/the-press-pass/",
+        "tone_score": 5.7522123894,
+        "happy_factor": 80.76,
+        "ingested_at": "2026-09-28T11:25:23.504000+00:00"
+      },
+      "b": {
+        "article_id": "7749f851963317e967c73ce9016411d86c1c924fafa8c61e0324f254c61fa8f2",
+        "serving_date": "2026-09-22",
+        "published_at": "2026-09-22T00:15:00+00:00",
+        "source_name": "timesfreepress.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "The Press Corps | Chattanooga Times Free Press",
+        "url": "https://www.timesfreepress.com/news/2026/sep/21/the-press-corps/",
+        "tone_score": 5.7522123894,
+        "happy_factor": 80.76,
+        "ingested_at": "2026-09-28T11:23:51.901000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "e42aa4cfe09a73994bb14fc31f2ab2ae1010c594b024aa80a2e56ef4d5b7a550",
+        "serving_date": "2026-09-19",
+        "published_at": "2026-09-19T00:30:00+00:00",
+        "source_name": "democracynow.org",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "Amy Goodman at Steal This Story, Please! Lewes Screening/Q&A",
+        "url": "https://www.democracynow.org/events/2026/9/amy_goodman_at_steal_this_story_please_lewes_screeningq_and_a_1680",
+        "tone_score": 5.9340659341,
+        "happy_factor": 79.67,
+        "ingested_at": "2026-09-28T11:22:50.915000+00:00"
+      },
+      "b": {
+        "article_id": "c38f166763592dd80c171599e7ae3478c61dcaf3610f5aa05130e63ffe280ab1",
+        "serving_date": "2026-09-19",
+        "published_at": "2026-09-19T00:30:00+00:00",
+        "source_name": "democracynow.org",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "Amy Goodman at Steal This Story, Please! Copenhagen Screening/Q&A",
+        "url": "https://www.democracynow.org/events/2026/9/amy_goodman_at_steal_this_story_please_copenhagen_screeningq_and_a_1681",
+        "tone_score": 5.9340659341,
+        "happy_factor": 79.67,
+        "ingested_at": "2026-09-28T11:22:50.915000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "cd0054d8110d1c207c1e1e3e5535623c957f9454c20636e55f22e5dafe46a801",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T22:30:00+00:00",
+        "source_name": "pembinavalleyonline.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "Event: Pattern Dance - PembinaValleyOnline.com - Local news, Weather, Sports, Free Classifieds and Business Listings for the Pembina Valley, Manitoba",
+        "url": "https://pembinavalleyonline.com/events/234670",
+        "tone_score": 10.7142857142857,
+        "happy_factor": 100.0,
+        "ingested_at": "2026-09-30T00:30:22.637576+00:00"
+      },
+      "b": {
+        "article_id": "7db0bbc5c9012b1193138905ceda55efdcba567ce9d1a80259029d49566a3d3a",
+        "serving_date": "2026-09-29",
+        "published_at": "2026-09-29T22:30:00+00:00",
+        "source_name": "pembinavalleyonline.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "Event: Morning Coffee Time - PembinaValleyOnline.com - Local news, Weather, Sports, Free Classifieds and Business Listings for the Pembina Valley, Manitoba",
+        "url": "https://pembinavalleyonline.com/events/233641",
+        "tone_score": 5.40540540540541,
+        "happy_factor": 79.03,
+        "ingested_at": "2026-09-30T00:30:22.637576+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "e1fc3643a1a20ad7228659c44b2597b98b8765e2db182567b6cfe09984d9d3b4",
+        "serving_date": "2026-09-11",
+        "published_at": "2026-09-11T00:30:00+00:00",
+        "source_name": "sentinelassam.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "Today's Horoscope Prediction – 11th September, 2026: Leo, Libra, etc Zodiac Sunshine Birthday Forecast",
+        "url": "https://www.sentinelassam.com/more-news/horoscope/todays-horoscope-prediction-11th-september-2026-leo-libra-etc-zodiac-sunshine-birthday-forecast",
+        "tone_score": 7.4906367041,
+        "happy_factor": 87.45,
+        "ingested_at": "2026-09-28T11:19:29.327000+00:00"
+      },
+      "b": {
+        "article_id": "3fdd4f8627123e0902850d334039a884bd8b5d34645cd08433b41a10ed004bf7",
+        "serving_date": "2026-09-10",
+        "published_at": "2026-09-10T00:30:00+00:00",
+        "source_name": "sentinelassam.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "Today's Horoscope Prediction – 10th September, 2026: Leo, Libra, etc Zodiac Sunshine Birthday Forecast",
+        "url": "https://www.sentinelassam.com/more-news/horoscope/todays-horoscope-prediction-10th-september-2026-leo-libra-etc-zodiac-sunshine-birthday-forecast",
+        "tone_score": 5.6939501779,
+        "happy_factor": 78.47,
+        "ingested_at": "2026-09-28T11:18:56.238000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "ce24d40b8b345bf2865b6d992ab500bf2893e98a9c3cf8b5bff6b61df4a5141d",
+        "serving_date": "2026-09-26",
+        "published_at": "2026-09-26T23:45:00+00:00",
+        "source_name": "ghanamma.com",
+        "language": "und",
+        "mentioned_country_name": "Ghana",
+        "title": "VILLAGE KRAKYE EPISODE 8 // Ghanaian movies #foryoubage #foryou – Watch Full Ghana Movie – Ghanamma.com",
+        "url": "https://www.ghanamma.com/2026/09/26/village-krakye-episode-8-ghanaian-movies-foryoubage-foryou-watch-full-ghana-movie-14/",
+        "tone_score": 5.5555555556,
+        "happy_factor": 77.78,
+        "ingested_at": "2026-09-28T11:26:22.983000+00:00"
+      },
+      "b": {
+        "article_id": "9917f61ad738512e1bf730a180ae4d390013e2c08c610f07748ea8148d33777f",
+        "serving_date": "2026-09-26",
+        "published_at": "2026-09-26T23:45:00+00:00",
+        "source_name": "ghanamma.com",
+        "language": "und",
+        "mentioned_country_name": "Ghana",
+        "title": "VILLAGE KRAKYE EPISODE 7 // Ghanaian movies #foryoubage #foryou – Watch Full Ghana Movie – Ghanamma.com",
+        "url": "https://www.ghanamma.com/2026/09/26/village-krakye-episode-7-ghanaian-movies-foryoubage-foryou-watch-full-ghana-movie-15/",
+        "tone_score": 5.5555555556,
+        "happy_factor": 77.78,
+        "ingested_at": "2026-09-28T11:26:22.983000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "e296bc43d3de35aa33af03cb1a3d502ccdd159145a66737a4b5ee48c47596675",
+        "serving_date": "2026-09-08",
+        "published_at": "2026-09-08T23:45:00+00:00",
+        "source_name": "prnewswire.com",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "title": "The Inner Circle acknowledges Daniel Beer as a Pinnacle Professional Member Inner Circle of Excellence",
+        "url": "http://www.prnewswire.com/news-releases/the-inner-circle-acknowledges-daniel-beer-as-a-pinnacle-professional-member-inner-circle-of-excellence-302872896.html",
+        "tone_score": 9.4674556213,
+        "happy_factor": 97.34,
+        "ingested_at": "2026-09-28T11:18:22.497000+00:00"
+      },
+      "b": {
+        "article_id": "49121bd62b7d3b396e5a0e45f3416845517c854790d1315764d086c701424177",
+        "serving_date": "2026-09-08",
+        "published_at": "2026-09-08T23:45:00+00:00",
+        "source_name": "prnewswire.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "The Inner Circle acknowledges Dr. Angie Paccione as a Pinnacle Professional Member Inner Circle of Excellence",
+        "url": "http://www.prnewswire.com/news-releases/the-inner-circle-acknowledges-dr-angie-paccione-as-a-pinnacle-professional-member-inner-circle-of-excellence-302872913.html",
+        "tone_score": 5.2453468697,
+        "happy_factor": 76.23,
+        "ingested_at": "2026-09-28T11:18:22.497000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "821f25214f95e3759c946c8783235cc8f130fa8e913ea52fa40212657d9258e2",
+        "serving_date": "2026-09-02",
+        "published_at": "2026-09-02T00:00:00+00:00",
+        "source_name": "discoverestevan.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "Home Page - DiscoverEstevan.com - Local news, Weather, Sports, Free Classifieds and Business Listings for the Estevan, Saskatchewan",
+        "url": "https://discoverestevan.com/articles?page=2713",
+        "tone_score": 9.5238095238,
+        "happy_factor": 99.62,
+        "ingested_at": "2026-09-28T11:14:48.221000+00:00"
+      },
+      "b": {
+        "article_id": "5309e0e26af0df6ee0af8888d604c5964125041e9f7996a23a3080029e3e4089",
+        "serving_date": "2026-09-03",
+        "published_at": "2026-09-03T00:00:00+00:00",
+        "source_name": "discoverestevan.com",
+        "language": "en",
+        "mentioned_country_name": "Canada",
+        "title": "Event: Tom Wiggett Turns 90 - DiscoverEstevan.com - Local news, Weather, Sports, Free Classifieds and Business Listings for the Estevan, Saskatchewan",
+        "url": "https://discoverestevan.com/events/229734",
+        "tone_score": 4.6153846154,
+        "happy_factor": 75.08,
+        "ingested_at": "2026-09-28T11:15:26.221000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "80d8c4ca1b87d96d1e90f6c535c6a9a39c3c87b148124f99c6cacdc1f757bce9",
+        "serving_date": "2026-09-12",
+        "published_at": "2026-09-12T00:00:00+00:00",
+        "source_name": "capjournal.com",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "title": "John Lamb - InForum | Fargo, Moorhead and West Fargo news, weather and sports",
+        "url": "https://www.capjournal.com/john-lamb",
+        "tone_score": 8.9108910891,
+        "happy_factor": 94.55,
+        "ingested_at": "2026-09-28T11:19:56.653000+00:00"
+      },
+      "b": {
+        "article_id": "46d3a4360f75305835dfcf9925c768197b8eee6c05d9abf06f75486cb771bfaa",
+        "serving_date": "2026-09-10",
+        "published_at": "2026-09-10T00:15:00+00:00",
+        "source_name": "inforum.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "Joel Baer - InForum | Fargo, Moorhead and West Fargo news, weather and sports",
+        "url": "https://www.inforum.com/obituaries/obits/joel-baer-4krobsbivmjtkqaqljul",
+        "tone_score": 4.9019607843,
+        "happy_factor": 74.51,
+        "ingested_at": "2026-09-28T11:18:56.238000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "955b733eb5bbb6cee57b912c9b14d54d94a95755ab7ff31d0709c5efbb9c619a",
+        "serving_date": "2026-09-14",
+        "published_at": "2026-09-14T23:45:00+00:00",
+        "source_name": "miragenews.com",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "title": "Award-winning Architects Continue Australian Tour In Adelaide",
+        "url": "https://www.miragenews.com/award-winning-architects-continue-australian-1744040/",
+        "tone_score": 4.6666666667,
+        "happy_factor": 75.33,
+        "ingested_at": "2026-09-28T11:21:02.772000+00:00"
+      },
+      "b": {
+        "article_id": "2e3650d62fc9cfca363a708f82155ed29bd29886b59f36e8116a9710b5c29375",
+        "serving_date": "2026-09-17",
+        "published_at": "2026-09-17T00:15:00+00:00",
+        "source_name": "miragenews.com",
+        "language": "en",
+        "mentioned_country_name": "American Samoa",
+        "title": "Award-winning Architects Continue Australian Tour In Melbourne",
+        "url": "https://www.miragenews.com/award-winning-architects-continue-australian-1745780/",
+        "tone_score": 4.3918918919,
+        "happy_factor": 73.96,
+        "ingested_at": "2026-09-28T11:21:55.551000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "7d048f9600a68a86f0980a89e4ea0b78aaa4dab6a8620b468e4dd2cae90b1d0c",
+        "serving_date": "2026-09-28",
+        "published_at": "2026-09-28T00:00:00+00:00",
+        "source_name": "rrr.org.au",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "title": "Programs: Maps – 28 September 2026, Maps — Triple R 102.7FM, Melbourne Independent Radio",
+        "url": "https://www.rrr.org.au/explore/programs/maps/episodes/39727-maps-28-september-2026",
+        "tone_score": 5.5555555556,
+        "happy_factor": 77.78,
+        "ingested_at": "2026-09-28T11:26:38.338000+00:00"
+      },
+      "b": {
+        "article_id": "77908a11522267d22ee6225e7acd82d890c0ee58fbd73d08643d51c493bf8184",
+        "serving_date": "2026-09-28",
+        "published_at": "2026-09-28T00:00:00+00:00",
+        "source_name": "rrr.org.au",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "title": "Programs: Young At Art – 28 September 2026, Young At Art — Triple R 102.7FM, Melbourne Independent Radio",
+        "url": "https://www.rrr.org.au/explore/programs/young-at-art/episodes/39733-young-at-art-28-september-2026",
+        "tone_score": 4.7619047619,
+        "happy_factor": 73.81,
+        "ingested_at": "2026-09-28T11:26:38.338000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "39a6c54935c3817d3433e1843923586acb6c069e8b81d5c06cd7197ffb416470",
+        "serving_date": "2026-09-09",
+        "published_at": "2026-09-09T00:00:00+00:00",
+        "source_name": "theusnews.com",
+        "language": "en",
+        "mentioned_country_name": "Indonesia",
+        "title": "Super88 Launches New Online Entertainment Gaming Platform Across Indonesia",
+        "url": "http://www.theusnews.com/news/279294654/super88-launches-new-online-entertainment-gaming-platform-across-indonesia",
+        "tone_score": 7.9479768786,
+        "happy_factor": 89.74,
+        "ingested_at": "2026-09-28T11:18:22.497000+00:00"
+      },
+      "b": {
+        "article_id": "bfabe8382e4bc7a947874f5313a9c69289780139e5c076e83557e8fdf53b591c",
+        "serving_date": "2026-09-09",
+        "published_at": "2026-09-09T00:30:00+00:00",
+        "source_name": "londonmercury.com",
+        "language": "en",
+        "mentioned_country_name": "Indonesia",
+        "title": "Legend88 Launches Online Entertainment Gaming Platform Across Indonesia",
+        "url": "http://www.londonmercury.com/news/279294715/legend88-launches-online-entertainment-gaming-platform-across-indonesia",
+        "tone_score": 4.641350211,
+        "happy_factor": 73.21,
+        "ingested_at": "2026-09-28T11:18:22.497000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "e6111e53e03cd6c50b3f82a57f034cf6f9c3ad5236f64a05f574100715e33c7b",
+        "serving_date": "2026-09-11",
+        "published_at": "2026-09-11T23:45:00+00:00",
+        "source_name": "sheknows.com",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "title": "J.Crew Coupon Codes & Discounts for September 2026",
+        "url": "https://www.sheknows.com/living/articles/1235076170/jcrew-coupon-promo-code-sept-2026/",
+        "tone_score": 4.3933054393,
+        "happy_factor": 71.97,
+        "ingested_at": "2026-09-28T11:19:56.653000+00:00"
+      },
+      "b": {
+        "article_id": "7bcf851f13f0dce811ce084d98f968727571d1ab5ecfb7b2ee3866e07d84e56d",
+        "serving_date": "2026-09-10",
+        "published_at": "2026-09-10T23:45:00+00:00",
+        "source_name": "sheknows.com",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "title": "SKIMS Coupon Codes & Discounts for September 2026",
+        "url": "https://www.sheknows.com/living/articles/1235075973/skims-rewards-coupon-code-sept-2026/",
+        "tone_score": 3.4865293185,
+        "happy_factor": 67.43,
+        "ingested_at": "2026-09-28T11:19:29.327000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "ec5b585bd7d0b78b6cffedc9972a763ecd2cab7fbca5fa11e1a46a46c082e7a1",
+        "serving_date": "2026-09-12",
+        "published_at": "2026-09-12T00:15:00+00:00",
+        "source_name": "iberkshires.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "986 Church St North Adams, MA 01247 / iBerkshires.com - The Berkshires online guide to events, news and Berkshire County community information.",
+        "url": "https://www.iberkshires.com/realestate/new/listing/73283/986-Church-St-North-Adams.html",
+        "tone_score": 6.4,
+        "happy_factor": 84.0,
+        "ingested_at": "2026-09-28T11:19:56.653000+00:00"
+      },
+      "b": {
+        "article_id": "b9d71f22d0a2f765595763f833448c12df623f46bb6b8725d760281a80e24473",
+        "serving_date": "2026-09-11",
+        "published_at": "2026-09-11T00:00:00+00:00",
+        "source_name": "iberkshires.com",
+        "language": "en",
+        "mentioned_country_name": "Unknown",
+        "title": "427 State St North Adams, MA 01247 / iBerkshires.com - The Berkshires online guide to events, news and Berkshire County community information.",
+        "url": "https://www.iberkshires.com/realestate/new/listing/73189/427-State-St-North-Adams.html",
+        "tone_score": 3.0534351145,
+        "happy_factor": 67.27,
+        "ingested_at": "2026-09-28T11:19:29.327000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "a42ce923c815865037eeec2fd43b48709047150995284d2f7beedb9dd5ebc1a0",
+        "serving_date": "2026-09-24",
+        "published_at": "2026-09-24T00:15:00+00:00",
+        "source_name": "brooklyneagle.com",
+        "language": "und",
+        "mentioned_country_name": "Gambia",
+        "title": "Our world in photos: September 21",
+        "url": "https://brooklyneagle.com/416632/our-world-in-photos-sept-21-2026/",
+        "tone_score": 5.4054054054,
+        "happy_factor": 77.03,
+        "ingested_at": "2026-09-28T11:24:52.016000+00:00"
+      },
+      "b": {
+        "article_id": "7faf897b83f169ef782725eb4f81907b48d673272b955707d3c11e65715ee952",
+        "serving_date": "2026-09-24",
+        "published_at": "2026-09-24T00:15:00+00:00",
+        "source_name": "brooklyneagle.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "Our world in photos: September 17",
+        "url": "https://brooklyneagle.com/416146/our-world-in-photos-sept-17-2026/",
+        "tone_score": 3.3613445378,
+        "happy_factor": 66.81,
+        "ingested_at": "2026-09-28T11:24:52.016000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "eed9e36efc17e6a779ef3013c3a8ac6ed238038e946fe83eb60d9ea37fbf4e91",
+        "serving_date": "2026-09-09",
+        "published_at": "2026-09-09T00:30:00+00:00",
+        "source_name": "channel3000.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "151 confirmed, 6 probable measles cases in southwest Wisconsin",
+        "url": "https://www.channel3000.com/news/151-confirmed-6-probable-measles-cases-in-southwest-wisconsin/article_d52db70c-c981-42bc-994a-c310a1090305.html",
+        "tone_score": 3.29218107,
+        "happy_factor": 66.46,
+        "ingested_at": "2026-09-28T11:18:22.497000+00:00"
+      },
+      "b": {
+        "article_id": "0234045ba908fbfca9a8619d3e5a121f183bc5a5baa5cfe0265303b93ab11898",
+        "serving_date": "2026-09-11",
+        "published_at": "2026-09-11T23:45:00+00:00",
+        "source_name": "channel3000.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "155 confirmed, 6 probable measles cases in southwest Wisconsin",
+        "url": "https://www.channel3000.com/news/155-confirmed-6-probable-measles-cases-in-southwest-wisconsin/article_2a6aa9eb-575a-4f38-8cf9-278a086e8151.html",
+        "tone_score": 3.2653061224,
+        "happy_factor": 66.33,
+        "ingested_at": "2026-09-28T11:19:56.653000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "5cc4f22c733aa8b3631707ca9edecccfa8437e1f2fa5e0b55d656c095b330721",
+        "serving_date": "2026-09-24",
+        "published_at": "2026-09-24T00:15:00+00:00",
+        "source_name": "iheart.com",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "title": "Mike Jones Minute-Con 9/23/26 | ALT 107.3",
+        "url": "https://alt1073.iheart.com/featured/mike-jones/content/2026-09-23-457-its-mike-jones-mike-jones-minute-con-92326/",
+        "tone_score": 6.6666666667,
+        "happy_factor": 83.33,
+        "ingested_at": "2026-09-28T11:24:52.016000+00:00"
+      },
+      "b": {
+        "article_id": "2eee2385a45f585d2b7327a9b2c0bfdbe043b772549dd412c02c13f9c3dae825",
+        "serving_date": "2026-09-22",
+        "published_at": "2026-09-22T00:00:00+00:00",
+        "source_name": "iheart.com",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "title": "Mike Jones Minute-Con 9/21/26 | ALT 107.3",
+        "url": "https://alt1073.iheart.com/featured/mike-jones/content/2026-09-21-457-its-mike-jones-mike-jones-minute-con-92126/",
+        "tone_score": 3.2258064516,
+        "happy_factor": 66.13,
+        "ingested_at": "2026-09-28T11:23:51.901000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "24303dfa7edb8ba67fa9bbbe1e6bbd1c4384c1deb131d37f3cacba1dbbe56231",
+        "serving_date": "2026-09-16",
+        "published_at": "2026-09-16T00:30:00+00:00",
+        "source_name": "americansongwriter.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "3 Country Songs From 1972 That Every 70s Kid Still Knows Today",
+        "url": "https://americansongwriter.com/3-country-songs-from-1972-that-every-70s-kid-still-knows-today/",
+        "tone_score": 9.604519774,
+        "happy_factor": 98.02,
+        "ingested_at": "2026-09-28T11:21:33.538000+00:00"
+      },
+      "b": {
+        "article_id": "f6882056def3015265d9a761f65ad4490a703803cb65fd311093f2298b601d86",
+        "serving_date": "2026-09-17",
+        "published_at": "2026-09-17T00:30:00+00:00",
+        "source_name": "americansongwriter.com",
+        "language": "en",
+        "mentioned_country_name": "United States",
+        "title": "3 Country Songs From 1971 That Every 70s Kid Still Knows Today",
+        "url": "https://americansongwriter.com/3-country-songs-from-1971-that-every-70s-kid-still-knows-today/",
+        "tone_score": 3.1830238727,
+        "happy_factor": 65.92,
+        "ingested_at": "2026-09-28T11:21:55.551000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "a3798a7cdaae3eac3193e47fb7beb656df1e32c2aacfcf146db36c4a9c76a0c8",
+        "serving_date": "2026-09-24",
+        "published_at": "2026-09-24T00:00:00+00:00",
+        "source_name": "tvovermind.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "'Matlock' Cast Net Worth Rankings: Who Is the Richest? – TVovermind",
+        "url": "https://tvovermind.com/matlock-cast-net-worth-rankings-who-is-the-richest/",
+        "tone_score": 3.6626916525,
+        "happy_factor": 68.31,
+        "ingested_at": "2026-09-28T11:24:52.016000+00:00"
+      },
+      "b": {
+        "article_id": "2ddaf23938d405706b7e6dd2a3ba38d9501e53b6c84ac1af7d3d17073024b536",
+        "serving_date": "2026-09-25",
+        "published_at": "2026-09-25T00:15:00+00:00",
+        "source_name": "tvovermind.com",
+        "language": "und",
+        "mentioned_country_name": "United States",
+        "title": "'His & Hers' Cast Net Worth Rankings: Who Is the Richest? – TVovermind",
+        "url": "https://tvovermind.com/his-hers-cast-net-worth-rankings-who-is-the-richest/",
+        "tone_score": 3.1554343592,
+        "happy_factor": 65.78,
+        "ingested_at": "2026-09-28T11:25:23.504000+00:00"
+      }
+    },
+    {
+      "same_story": false,
+      "a": {
+        "article_id": "c89779a93a3a958b58b558260a6236cd9b08e08f7006fd72e9d853daba80d727",
+        "serving_date": "2026-09-21",
+        "published_at": "2026-09-21T23:45:00+00:00",
+        "source_name": "mcla.edu",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "title": "Art Major and Minor Information",
+        "url": "https://www.mcla.edu/academics/academic-departments/art/art-major-and-minor-information/",
+        "tone_score": 16.6666666667,
+        "happy_factor": 100.0,
+        "ingested_at": "2026-09-28T11:23:51.901000+00:00"
+      },
+      "b": {
+        "article_id": "e22d29f424ce74cab65489b4cdab88e51e0a6613b776abb3484c151777574b2a",
+        "serving_date": "2026-09-21",
+        "published_at": "2026-09-21T23:45:00+00:00",
+        "source_name": "mcla.edu",
+        "language": "und",
+        "mentioned_country_name": "Unknown",
+        "title": "Major and Minor Information",
+        "url": "https://www.mcla.edu/academics/academic-departments/philosophy/major-and-minor/",
+        "tone_score": 3.0651340996,
+        "happy_factor": 65.33,
+        "ingested_at": "2026-09-28T11:23:51.901000+00:00"
+      }
+    }
+  ]
+}

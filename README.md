@@ -1,75 +1,89 @@
 # TidingsIQ: Positive News Intelligence Pipeline
 
-Live dashboard: [https://tidingsiq-app-eglccrtc7q-el.a.run.app/](https://tidingsiq-app-eglccrtc7q-el.a.run.app/)
+Live dashboard: [TidingsIQ](https://tidingsiq-app-eglccrtc7q-el.a.run.app/)
 
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)
 ![Google Cloud](https://img.shields.io/badge/Google%20Cloud-Cloud%20Run%20%26%20BigQuery-4285F4?style=flat-square&logo=googlecloud&logoColor=white)
 ![BigQuery](https://img.shields.io/badge/BigQuery-Warehouse-669DF6?style=flat-square&logo=googlebigquery&logoColor=white)
 ![Terraform](https://img.shields.io/badge/Terraform-IaC-844FBA?style=flat-square&logo=terraform&logoColor=white)
 ![Bruin](https://img.shields.io/badge/Bruin-Orchestration-111827?style=flat-square)
-![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![Static Dashboard](https://img.shields.io/badge/Dashboard-Static%20HTML%20%26%20JavaScript-087F5B?style=flat-square)
 ![Docker](https://img.shields.io/badge/Docker-Containers-2496ED?style=flat-square&logo=docker&logoColor=white)
 
-TidingsIQ is a data engineering project that ingests bounded GDELT news metadata, models it in BigQuery with Bruin, provisions cloud infrastructure with Terraform, and serves a reviewer-accessible positive-news dashboard through Streamlit.
+TidingsIQ ingests bounded GDELT news metadata, models it in BigQuery with Bruin,
+and publishes a daily positive-news feed through a static dashboard. Terraform
+manages the cloud infrastructure. Visitors can search, filter, and explore the
+published edition without triggering warehouse queries.
 
-The project focuses on a practical problem: broad news feeds skew toward noise and negative headlines, while many consumers still want a credible way to discover more constructive coverage. TidingsIQ addresses that by building a warehouse-centric pipeline that scores recent articles with an explainable `happy_factor`, applies explicit title guardrails, and publishes the resulting feed through a simple cloud-hosted dashboard.
+The project makes constructive coverage easier to discover with an explainable
+`happy_factor` and explicit title guardrails. Scores are ranking signals, not
+editorial endorsements or verification of the linked reporting.
 
 ## Architecture
 
-Data flow:
+```mermaid
+flowchart LR
+    GDELT["GDELT GKG 2.1"] --> Bronze["BigQuery Bronze"]
+    Bronze --> Silver["Silver: normalize and deduplicate"]
+    Silver --> Gold["Gold: score and apply eligibility rules"]
+    Gold --> Publisher["Daily static publisher"]
+    Publisher --> GCS["Private GCS feed files"]
+    GCS --> Web["Cloud Run: nginx static dashboard"]
+    Web --> Browser["Browser: search, filters, pagination, Pulse"]
+    Bronze --> Archive["Verified Parquet archive in GCS"]
+```
 
-`GDELT GKG 2.1 -> Bruin Bronze ingestion -> BigQuery bronze -> BigQuery silver -> BigQuery gold -> Streamlit dashboard`
+Bruin runs ingestion and transformations in a scheduled Cloud Run Job. The
+publisher is a separate job; the public frontend has read-only feed-bucket access
+and no warehouse query path. See [Architecture](docs/architecture.md).
 
 Serving contract:
 
-- canonical serving table: `gold.positive_news_feed`
-- default dashboard feed: rows where `is_positive_feed_eligible = true`
-- current score version: `happy_factor_version = 'v2_1_guardrailed_tone'`
-- current title-rule version: `positive_guardrail_version = 'v1_1_title_rules'`
-- current eligibility floor: `happy_factor >= 65`
-
-Warehouse layout:
-
-- `bronze`: landed source records plus ingestion metadata
-- `silver`: normalized, deduplicated article rows
-- `gold`: scored serving rows and operational metrics
-- `bronze_staging` and `gold_staging`: operational merge/staging datasets used by the current load paths
+- canonical warehouse table: `gold.positive_news_feed`
+- publisher selects only `is_positive_feed_eligible = true`
+- score version: `v2_1_guardrailed_tone`; title rules: `v1_1_title_rules`
+- eligibility floor: `happy_factor >= 65`
+- published files retain all eligible variants with a derived `story_id`
+- browser filters run before selecting one representative per story
+- public payload contains 11 approved source fields plus `story_id`
 
 ## Stack
 
-- Source: GDELT GKG 2.1
-- Cloud: Google Cloud
-- Warehouse and compute: BigQuery
-- Orchestration and checks: Bruin
-- Infrastructure as code: Terraform
-- Dashboard: Streamlit on Cloud Run
-- Containers: Docker
-- Language: Python and SQL
+| Responsibility | Implementation |
+|---|---|
+| Source | GDELT GKG 2.1 metadata |
+| Warehouse and transformations | BigQuery, Python, SQL |
+| Pipeline orchestration and checks | Bruin |
+| Infrastructure | Terraform on Google Cloud |
+| Scheduled compute | Cloud Run Jobs and Cloud Scheduler |
+| Public dashboard | HTML/CSS/JavaScript, nginx on Cloud Run |
+| Data delivery | Private GCS bucket, content-hashed JSON and gzip |
 
 ## What Is Implemented
 
-- Terraform-managed datasets, IAM, archive bucket, pipeline automation, reporting resources, and app-hosting path
-- Bruin-managed Bronze ingestion, Silver normalization/deduplication, Gold scoring, and warehouse checks
-- Retention posture captured in code and docs:
-  - Bronze retained 45 days in BigQuery, then archived to GCS
-  - Silver retained 90 days in-model
-  - Gold retained 180 days in-model
-  - archived Bronze objects retained 365 days in GCS
-- Public Streamlit dashboard backed only by Gold-layer tables
-- Cloud Run deployment path for the pipeline, reporting jobs, and dashboard
-- Operational `Pulse` view backed by `gold.pipeline_run_metrics` and Gold summary queries
+- Bounded ingestion with source-attempt tracking, retries, and completeness checks
+- Silver normalization and URL-first deduplication; Gold scoring and title rules
+- Daily publication with pipeline-success and freshness checks, verified uploads,
+  and atomic manifest replacement
+- Request-based frontend billing, zero minimum instances, maximum two instances
+- Checkpointed Bronze archival after 45 days, with verified and capped pruning
+  outside the 90-day serving horizon; archived objects retained for 365 days
+- Silver's 90-day and Gold's 180-day model cutoffs; Gold availability also depends
+  on the upstream Silver horizon, so 180 days is not guaranteed history
+- Separate pipeline reports and failure alerts; operational metrics remain in Gold
 
 ## Dashboard
 
-Live dashboard: [https://tidingsiq-app-eglccrtc7q-el.a.run.app/](https://tidingsiq-app-eglccrtc7q-el.a.run.app/)
-
-The dashboard exposes three reviewer-relevant surfaces:
-
-- `The Brief`: the application-facing positive-news feed served from eligible Gold rows only
-- `Pulse`: warehouse-wide operational visibility for ingestion freshness, row counts, eligibility mix, and score distribution
-- `Methodology`: an explainer for the scoring and serving logic
+- **The Brief:** eligible, deduplicated stories with date/language/geography
+  filters, headline/source search, score sorting, and ten-card pages.
+- **Pulse:** daily counts, geographies, and score bands for the **current filtered
+  public feed**. It is not the former warehouse-wide operational dashboard.
+- **Methodology:** scoring, eligibility, score colours, date semantics, and limits.
 
 ### Product Walkthrough
+
+Screenshots captured from production on **2 October 2026**, using that day's
+published edition. Story counts and content change with each successful publication.
 
 **The Brief Overview**
 
@@ -84,19 +98,36 @@ The dashboard exposes three reviewer-relevant surfaces:
 **Pulse**
 
 <p align="center">
-  <img src="docs/screenshots/dashboard-pulse.png" alt="TidingsIQ Pulse" width="72%">
+  <img src="docs/screenshots/dashboard-pulse.png" alt="Pulse charts for the selected eligible feed" width="72%">
 </p>
 
-The dashboard remains intentionally bounded for a public portfolio deployment:
+**Mobile**
 
-- fixed lookback windows
-- fixed page size
-- no unbounded free-form search
-- Gold-only reads from the app layer
+<p align="center">
+  <img src="docs/screenshots/dashboard-mobile.png" alt="TidingsIQ Brief on a 390-pixel mobile viewport" width="300">
+</p>
+
+See [screenshot provenance](docs/screenshots/README.md) for capture settings.
+
+The default 7-day range loads first; 30 days loads only when selected. Dates use
+an inclusive UTC cutoff: “7 days” covers the edition date and seven preceding
+calendar dates. Open tabs keep their loaded edition until refreshed. No polling,
+WebSockets, external fonts, or third-party scripts are used.
 
 ## Reproducibility
 
-### 1. Provision or validate infrastructure
+### 1. Run the static dashboard locally
+
+Follow the [static dashboard guide](app/static/README.md) to download the already
+public feed or build one from an eligible export, then run:
+
+```bash
+python3 app/static/serve.py
+```
+
+Open <http://127.0.0.1:4173>. The local server requires no Google credentials.
+
+### 2. Provision or validate infrastructure
 
 ```bash
 cd infra/terraform
@@ -106,91 +137,75 @@ terraform validate
 terraform plan
 ```
 
-### 2. Configure Bruin locally
+Fill the placeholders before planning. Review the plan; a plan is not a deploy.
+Keep credentials, local variables, and Terraform state out of Git. See the
+[Terraform guide](infra/terraform/README.md) and [deployment guide](docs/deployment_plan.md).
 
-Create a local `.bruin.yml` at the repository root and point the default connection at your BigQuery project and location.
+### 3. Configure and run Bruin
 
-Minimal example:
-
-```yaml
-default_environment: default
-environments:
-  default:
-    connections:
-      google_cloud_platform:
-        - name: "bigquery-default"
-          project_id: "<GCP_PROJECT_ID>"
-          location: "<BIGQUERY_LOCATION>"
-          use_application_default_credentials: true
-```
-
-### 3. Run the pipeline locally
+Create a local, ignored `.bruin.yml` with a `bigquery-default` connection using
+application default credentials, your project, and BigQuery location. Then:
 
 ```bash
 bruin validate pipeline/bruin/pipeline.yml
-bruin run pipeline/bruin/assets/bronze/gdelt_news_raw.py
-bruin run pipeline/bruin/assets/silver/gdelt_news_refined.sql
-bruin run pipeline/bruin/assets/gold/positive_feed_guardrail_terms.sql
-bruin run pipeline/bruin/assets/gold/positive_news_feed.sql
-bruin run pipeline/bruin/assets/gold/pipeline_run_metrics.sql
+bruin run pipeline/bruin/pipeline.yml
 ```
 
-### 4. Run the dashboard locally
-
-```bash
-python3 -m pip install -r app/streamlit/requirements.txt
-export TIDINGSIQ_GCP_PROJECT=<GCP_PROJECT_ID>
-streamlit run app/streamlit/app.py
-```
-
-Or with the repository `Makefile`:
-
-```bash
-TIDINGSIQ_GCP_PROJECT=<GCP_PROJECT_ID> make streamlit
-```
+These commands use the warehouse and can incur costs. The [pipeline guide](pipeline/bruin/README.md)
+documents configuration, individual assets, bounded source windows, and checks.
+The [legacy Streamlit app](app/streamlit/README.md) is retained for development;
+it is not the public production frontend.
 
 ## Repository Structure
 
 ```text
 .
-├── app/streamlit/          # Streamlit dashboard
-├── docs/                   # Architecture, scoring, runbook, and roadmap docs
-├── infra/terraform/        # GCP infrastructure as code
-├── pipeline/bruin/         # Bruin pipeline assets and container path
-└── scripts/                # Operational helpers and reporting utilities
+├── app/static/             # Public frontend, feed builder, local server, tests
+├── app/streamlit/          # Legacy warehouse-backed app
+├── docs/                   # Maintained guides, screenshots, dated history
+├── infra/terraform/        # Datasets, IAM, jobs, schedules, hosting
+├── pipeline/bruin/         # Ingestion, SQL models, checks, container
+└── scripts/                # Publisher, archive, reporting, repair helpers
 ```
 
 ## Documentation Index
 
-- [Architecture](docs/architecture.md): system boundaries, responsibilities, and runtime flow
-- [Data Contract](docs/data_contract.md): Bronze, Silver, Gold, and operational schemas
-- [Happy Factor](docs/happy_factor.md): current scoring and feed-eligibility logic
-- [GDELT Findings](docs/gdelt_findings.md): upstream field-mapping evidence and source findings
-- [Bruin Pipeline](pipeline/bruin/README.md): local setup, asset behavior, validation, and container path
-- [Streamlit App](app/streamlit/README.md): dashboard behavior, local run instructions, and Gold query contract
-- [Terraform Foundation](infra/terraform/README.md): provisioned GCP resources and variables
-- [Operations Scripts](scripts/README.md): archive, reporting, and warehouse-reset helpers
-- [Operations Runbook](docs/operations_runbook.md): smoke tests, scheduler operations, and deployment debugging
-- [Roadmap](docs/roadmap.md): current state, deployment posture, and remaining work
-- [Deployment Plan](docs/deployment_plan.md): cloud runtime posture for pipeline and dashboard
+Start with the [documentation map](docs/README.md).
+
+- [Architecture](docs/architecture.md): components, data flow, retention, boundaries
+- [Data Contract](docs/data_contract.md): warehouse fields and public export contract
+- [Happy Factor](docs/happy_factor.md): formula, title rules, interpretation limits
+- [Static Dashboard](app/static/README.md): local setup, behavior, build isolation
+- [Deployment](docs/deployment_plan.md): current schedules, release steps, verification
+- [Operations Runbook](docs/operations_runbook.md): recovery, publishing, archival, shutdown
+- [IAM](docs/iam_minimum_roles.md): separate runtime identities and scoped access
+- [Roadmap](docs/roadmap.md): completed work and actual remaining work
+- [Historical Evidence](docs/history/README.md): incident, sizing, rollout, and cost estimates
 
 ## Current Deployment Posture
 
-- The public dashboard is live on Cloud Run at the URL linked above.
-- The pipeline Cloud Run Job path, reporting job path, and app-hosting path are implemented in the repository.
-- The current public app posture is direct public Cloud Run serving on the `run.app` URL rather than a load-balancer-hardened edge.
-- The optional AppEdge hardening path remains available in Terraform for future traffic or branding needs.
+Live state verified **2 October 2026** in `tidingsiq-dev`, `asia-south1`:
+
+| Workload | Schedule, Asia/Kolkata | State |
+|---|---|---|
+| Pipeline | Daily 06:00 | Enabled; October 2 execution succeeded |
+| Report | Daily 06:20 | Enabled; October 2 execution succeeded |
+| Static publisher | Daily 06:30 | Enabled; October 1 and 2 executions succeeded |
+| Bronze archive | Daily 03:15 and 15:15 | Enabled; latest inspected execution succeeded |
+
+The public endpoint is direct Cloud Run; no load balancer/CDN/Cloud Armor is active.
+Restricted egress is disabled. Optional networking and edge modules remain in code.
+The [dated billing estimate](docs/history/static_dashboard_cost_estimate_20260930.md)
+contains assumptions, not a current invoice or guaranteed spending cap.
 
 ## Known Limitations
 
-- The scoring model is explainable and deterministic, but it is not a claim of full-article sentiment understanding or factual verification.
-- `TranslationInfo` remains sparse in sampled GDELT rows, so language metadata is still native-first with deterministic inference as fallback and remains informational rather than a serving gate.
-- The Bronze archive path is implemented, but repeated export-only operation should remain transitional until a persisted archival boundary is introduced.
-- The dashboard currently favors bounded, reviewer-friendly browsing over a richer search experience.
-
-## Submission Notes
-
-- This repository is documented to be reviewable from the root README first.
-- The canonical serving table is `gold.positive_news_feed`.
-- The public dashboard and the GitHub repository website field should point to the same live URL.
-- Supporting docs are kept aligned to current implementation state; future work is called out explicitly rather than mixed into current-state sections.
+- Metadata and title rules do not establish factual accuracy or full-article sentiment.
+- Language can be unknown; mentioned geography is not publisher country.
+- Headline, URL, syndication and bounded fuzzy matching can miss rewrites or merge
+  similar headlines; it does not establish article-body equivalence.
+- The complete selected range occupies browser memory, though only ten cards render.
+- Failed publishing retains the last good edition; a stale-data notice appears
+  after 36 hours. Live feed files have no automatic age expiry, so storage grows
+  until unreferenced editions are safely cleaned up.
+- Public traffic still incurs transfer/compute costs. Instance limits are not a rupee cap.

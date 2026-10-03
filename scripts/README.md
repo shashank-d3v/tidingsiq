@@ -1,56 +1,44 @@
 # TidingsIQ Operations Scripts
 
-This directory contains manual operational helpers that sit outside the Bruin pipeline itself.
+This directory contains scheduled workers and manual operational helpers outside the Bruin asset graph.
 
-## `archive_bronze.py`
+## Traffic and engagement reporting
 
-Exports Bronze rows older than the retention window to GCS and can optionally delete those rows after a successful export.
+`analyse_traffic.py` summarizes bounded Cloud Run request/event JSON exports into
+aggregate page-load, engagement, click and legacy-client metrics without exposing
+addresses. `verify_engagement_frontend.py` checks routes, feed row counts and
+reserved QA events on a staged/public frontend. See
+[measurement definitions and the scheduled review](../docs/engagement_rollout_20261002.md).
 
-The script is intentionally explicit:
+## `publish_static_feed.py`
 
-- it counts eligible rows first
-- it normalizes the cutoff to a stable daily boundary unless an explicit cutoff override is provided
-- it writes to an idempotent archive path partitioned by `cutoff_date=YYYY-MM-DD`
-- it validates exported parquet row count before any delete phase
-- it deletes rows only when `--delete-after-export` is set and `--max-delete-rows` is not exceeded
-- it emits both a JSON summary payload and a compact `BRONZE_ARCHIVE_SUMMARY` line for Cloud Logging and alerting
-
-Example dry run:
-
-```bash
-python3 scripts/archive_bronze.py \
-  --project-id <GCP_PROJECT_ID> \
-  --archive-uri-prefix <ARCHIVE_BUCKET_URI>/manual \
-  --run-date <YYYY-MM-DD> \
-  --dry-run
-```
-
-Example export without deletion:
+Daily public-feed publisher. Reads eligible Gold rows and run metrics using the
+publisher identity, requires the latest Cloud Run pipeline execution to have
+succeeded, and verifies its time interval contains the metrics audit timestamp.
+It validates freshness/completeness, assigns stories while retaining all variants
+in 7/30-day JSON/gzip files, and verifies uploaded bytes. Before the generation-
+conditional manifest switch it rechecks the execution; a failed, active or changed
+execution leaves the previous manifest intact.
 
 ```bash
-python3 scripts/archive_bronze.py \
-  --project-id <GCP_PROJECT_ID> \
-  --archive-uri-prefix <ARCHIVE_BUCKET_URI>/manual \
-  --max-delete-rows 20000
+python3 scripts/publish_static_feed.py \
+  --project <GCP_PROJECT_ID> --bucket <STATIC_FEED_BUCKET> --location <BIGQUERY_LOCATION> \
+  --pipeline-region <CLOUD_RUN_REGION> --pipeline-job <PIPELINE_JOB_NAME>
 ```
 
-Example export and cleanup:
+This is a production write operation, not a local preview command. Use the
+[static app guide](../app/static/README.md) for a credential-free local preview and
+the [deployment guide](../docs/deployment_plan.md#publisher-release) for its image.
+Each query has a 500 MB billed-byte cap; success/failure logs start with
+`STATIC_FEED_PUBLISH`. Tests are in `tests/test_publish_static_feed.py`.
 
-```bash
-python3 scripts/archive_bronze.py \
-  --project-id <GCP_PROJECT_ID> \
-  --archive-uri-prefix <ARCHIVE_BUCKET_URI>/manual \
-  --max-delete-rows 20000 \
-  --delete-after-export
-```
+## `archive_bronze.py` (Legacy Recovery Helper)
 
-Requirements:
-
-- Google Application Default Credentials or equivalent auth
-- `google-cloud-bigquery` available in the active Python environment
-- pipeline service account or operator identity with access to the Bronze archive bucket
-
-This script is the canonical Bronze archive worker for both manual runs and the scheduled Cloud Run job path.
+Retained for explicitly scoped recovery exports. It is **not** the scheduled
+worker and does not implement the current checkpoint/full-row verification
+contract. Do not use its legacy deletion option as a substitute for guarded
+90-day pruning. Scheduled archival uses `archive_bronze_incremental.py`, described
+below and in the [runbook](../docs/operations_runbook.md#bronze-archive-operations).
 
 ## `daily_pipeline_report.py`
 
@@ -140,4 +128,4 @@ for every window, stages JSON load jobs, and executes a single capped merge only
 after all windows pass. It preserves newer versions, retains staging for two days,
 and must be followed by one full pipeline run. It is not a continuous-day backfill.
 
-See `docs/incident_20260928.md` for migration prerequisites and verified recovery.
+See `docs/history/incident_20260928.md` for migration prerequisites and verified recovery.

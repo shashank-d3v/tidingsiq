@@ -20,6 +20,10 @@ Replace the placeholders in each command before use:
 - `<RESTRICTED_EGRESS_METRIC_NAME>`
 - `<APP_SERVICE_NAME>`
 - `<APP_RUN_APP_URL>`
+- `<STATIC_PUBLISHER_JOB_NAME>`
+- `<STATIC_PUBLISHER_SCHEDULER_NAME>`
+- `<STATIC_FEED_BUCKET>`
+- `<ARCHIVE_IMAGE_URI>`
 
 Operational dataset assumptions:
 
@@ -254,7 +258,7 @@ separately reviewed repair scoped by its recorded ingestion ID and archive list.
 Rollout note:
 
 - pausing `<PIPELINE_SCHEDULER_NAME>` pauses only the main Bruin pipeline cadence
-- it does not pause `<REPORTING_SCHEDULER_NAME>` or `<ARCHIVE_SCHEDULER_NAME>`
+- it does not pause `<REPORTING_SCHEDULER_NAME>`, `<ARCHIVE_SCHEDULER_NAME>`, or `<STATIC_PUBLISHER_SCHEDULER_NAME>`
 - pause those separate schedulers only when their own job image, runtime config, or downstream contract is being changed
 
 Describe the current pipeline scheduler:
@@ -315,59 +319,118 @@ gcloud compute networks vpc-access connectors describe tiq-eg-<ENVIRONMENT> \
 
 ## Public App Operations
 
-Describe the hosted app service:
+The public runtime is nginx serving static assets and a read-only GCS feed mount.
+It does not run Streamlit or query Gold. Inspect the actual image, identity,
+traffic, and scaling before changing any setting:
 
 ```bash
 gcloud run services describe <APP_SERVICE_NAME> \
-  --region=<REGION> \
-  --project=<GCP_PROJECT_ID>
-```
-
-Fetch the direct public `run.app` URL:
-
-```bash
-gcloud run services describe <APP_SERVICE_NAME> \
-  --region=<REGION> \
-  --project=<GCP_PROJECT_ID> \
-  --format='value(status.url)'
-```
-
-Confirm the app is publicly reachable on the direct Cloud Run URL:
-
-```bash
+  --region=<REGION> --project=<GCP_PROJECT_ID> --format=json
 curl -I <APP_RUN_APP_URL>
+curl -fsS <APP_RUN_APP_URL>/healthz
+curl -fsS <APP_RUN_APP_URL>/data/manifest.json
 ```
 
-Confirm the service is not restricted to a load-balancer-only ingress path:
+Expected configuration: direct `run.app` ingress, static-reader identity,
+request-based billing (`cpu-throttling=true`), min=0, max=2, and all traffic on the
+intended static revision. A previously imposed manual-zero stop must not be
+silently overridden by a rollout or Terraform refresh.
+
+Use the manifest's actual filename to verify compression and caching:
 
 ```bash
-gcloud run services describe <APP_SERVICE_NAME> \
-  --region=<REGION> \
-  --project=<GCP_PROJECT_ID> \
-  --format='json(metadata.annotations,status.url)'
+curl -sS -D - -o /dev/null -H 'Accept-Encoding: gzip' \
+  <APP_RUN_APP_URL>/data/<HASHED_FEED_FILENAME>
+curl -sS -o /dev/null -w '%{http_code}\n' <APP_RUN_APP_URL>/.env
+curl -sS -o /dev/null -w '%{http_code}\n' <APP_RUN_APP_URL>/serve.py
 ```
 
-Smoke test the app root:
+Expect gzip and immutable caching for feed data, a short manifest cache, and 404
+for development paths. Verify row counts, field allowlist, bytes/hashes and browser
+behavior through the [release checklist](public_release_checklist.md). See the
+[deployment guide](deployment_plan.md) for isolated frontend/publisher builds.
+
+### Static Publisher and Stale Feed
 
 ```bash
-curl -L <APP_RUN_APP_URL> | head -n 20
+gcloud scheduler jobs describe <STATIC_PUBLISHER_SCHEDULER_NAME> \
+  --location=<REGION> --project=<GCP_PROJECT_ID>
+gcloud run jobs executions list --job=<STATIC_PUBLISHER_JOB_NAME> \
+  --region=<REGION> --project=<GCP_PROJECT_ID> --limit=5
+gcloud logging read \
+  'resource.type="cloud_run_job" AND resource.labels.job_name="<STATIC_PUBLISHER_JOB_NAME>" AND textPayload:"STATIC_FEED_PUBLISH"' \
+  --project=<GCP_PROJECT_ID> --freshness=24h --order=desc --limit=20
 ```
 
-Inspect recent Cloud Run request logs:
+If the date is stale, inspect pipeline completion and latest Gold metrics before
+retrying. The publisher rejects stale/incomplete inputs and keeps the last good
+manifest. The frontend warns when its loaded edition exceeds 36 hours. A
+successful job can precede visible changes briefly because of manifest/mount
+caches; reload the page and compare the manifest before repeatedly rerunning jobs.
+
+The publisher requires the latest configured pipeline execution to have succeeded,
+with the metrics audit timestamp inside its start/completion interval. It checks
+the same execution again immediately before manifest replacement. Missing API
+access, an active/failed run, unmatched metrics, or a changed execution blocks
+publication. Use `--pipeline-region` for Cloud Run independently of the BigQuery
+`--location`; `--pipeline-job` identifies the job whose full checks must pass.
+
+Live hashed feed files have no automatic age expiry. Private audits expire after
+45 days; archived object versions are removed after seven newer versions. Monitor
+feed storage growth. Any future cleanup must exclude the current manifest files
+and their gzip companions, and coordinate with publishers before deleting other
+editions. Verify referenced objects during recovery.
+
+After the underlying issue is resolved, a manual publish is:
+
+```bash
+gcloud run jobs execute <STATIC_PUBLISHER_JOB_NAME> \
+  --region=<REGION> --project=<GCP_PROJECT_ID> --wait
+```
+
+This reads BigQuery and writes public feed files; it is not a read-only health
+check. Never upload a manifest before all its referenced files are verified.
+For rollback, select a verified prior manifest version only if its referenced
+objects still exist. Live feed files are retained without age expiry. Do not recover by exposing
+local fixtures or the private bucket.
+
+### Emergency Stop
+
+Stop the frontend without routing back to Streamlit:
+
+```bash
+gcloud run services update <APP_SERVICE_NAME> \
+  --region=<REGION> --project=<GCP_PROJECT_ID> --scaling=0
+```
+
+Publication is independent. To pause it too:
+
+```bash
+gcloud scheduler jobs pause <STATIC_PUBLISHER_SCHEDULER_NAME> \
+  --location=<REGION> --project=<GCP_PROJECT_ID>
+```
+
+Set `static_publish_schedule_paused=true` in local Terraform inputs. A paused
+frontend does not pause pipeline, report, or archive jobs. Resume only after
+checking the intended static revision, feed, and reason for shutdown:
+
+```bash
+gcloud run services update <APP_SERVICE_NAME> \
+  --region=<REGION> --project=<GCP_PROJECT_ID> --scaling=auto --min=0 --max=2
+```
+
+### Request Logs
 
 ```bash
 gcloud logging read \
   'resource.type="cloud_run_revision" AND resource.labels.service_name="<APP_SERVICE_NAME>"' \
-  --project=<GCP_PROJECT_ID> \
-  --limit=50 \
+  --project=<GCP_PROJECT_ID> --freshness=24h --order=desc --limit=50 \
   --format='value(timestamp,httpRequest.requestMethod,httpRequest.requestUrl,httpRequest.status)'
 ```
 
-Current expected posture:
-
-- Cloud Run serves the app directly on the reported `run.app` URL.
-- No load balancer, Cloud Armor policy, forwarding rules, or custom-domain DNS should be required for the active deployment.
-- If future traffic warrants stricter protection, the optional AppEdge Terraform slice can be re-enabled.
+No load balancer or Cloud Armor is active. Instance caps limit capacity, not total
+spend. Review actual transfer and billed runtime when investigating costs; a
+public request does not necessarily identify a human visitor.
 
 ## Bronze Archive Operations
 
@@ -375,7 +438,7 @@ The active worker is `scripts/archive_bronze_incremental.py`. It uses a GCS
 checkpoint, generation-conditional lock, immutable export paths, and full-row
 Parquet reconciliation. The legacy `scripts/archive_bronze.py` remains available
 for explicit recovery exports; do not schedule that legacy export-only path.
-See [September recovery](incident_20260928.md) for the verified cutover and rollback.
+See [September recovery](history/incident_20260928.md) for the verified cutover and rollback.
 
 Normal archival exports data after 45 days. Optional `--prune-after-days 90`
 removes only checkpoint-covered rows outside both the ingestion and publication
@@ -486,13 +549,13 @@ gcloud run jobs update <REPORTING_JOB_NAME> \
   --image=<PIPELINE_IMAGE_URI>
 ```
 
-Update the Bronze archive job to the same image:
+Update the Bronze archive job only when its separately reviewed image changes:
 
 ```bash
 gcloud run jobs update <ARCHIVE_JOB_NAME> \
   --region=<REGION> \
   --project=<GCP_PROJECT_ID> \
-  --image=<PIPELINE_IMAGE_URI>
+  --image=<ARCHIVE_IMAGE_URI>
 ```
 
 Run the reporting job manually:
@@ -562,4 +625,4 @@ If restricted egress is enabled:
 - capture a `gold.url_validation_results` status mix before and after rollout so unexpected increases in `unavailable`, `timeout`, or `redirect_loop` are visible
 - treat denied firewall logs as rollout signals; private, internal, and metadata destinations are expected, while legitimate public publisher redirects may indicate the rules need tuning or the source URL needs review
 
-The checkpointed worker supports export-only scheduling without repeated completed-window exports. Enable 90-day hot retention only after archive verification and a rollback snapshot; retain the configured daily deletion cap.
+The checkpointed worker supports export-only scheduling without repeated completed-window exports. Enable 90-day hot retention only after archive verification and a rollback snapshot; retain the configured per-execution deletion cap.

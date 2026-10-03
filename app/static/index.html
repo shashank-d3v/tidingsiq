@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="A quieter way to explore positive news from around the world.">
+  <title>TidingsIQ | A little more perspective</title>
+  <link rel="icon" href="./favicon.png"><link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="header">
+  <a class="brand" href="#brief" aria-label="TidingsIQ home"><span class="brand-icon">t<span>✦</span></span><span>Tidings<span class="brand-iq">IQ</span><small>POSITIVE INTEL</small></span></a>
+  <nav aria-label="Main navigation"><a href="#brief" data-view="brief" aria-current="page">The Brief</a><a href="#pulse" data-view="pulse">Pulse</a><a href="#methodology" data-view="methodology">Methodology</a></nav>
+</header>
+<main id="main">
+  <div class="edition"><span>THE WORLD, THROUGH A BRIGHTER LENS</span><span id="edition-date">Loading data…</span></div>
+  <section class="hero"><div><p class="eyebrow" id="hero-kicker">YOUR DAILY DOSE OF PERSPECTIVE</p><h1 id="hero-title">Good things are<br>happening<span class="green">.</span></h1><p id="hero-description">Discover the stories that bring a little more optimism.<br>Thoughtfully ranked. Yours to explore.</p></div><div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="sun">✳</div><span class="art-caption">A WIDER WORLD.<br>A BRIGHTER OUTLOOK.</span></div></section>
+  <div id="freshness-status" class="notice" role="status" hidden></div>
+  <div id="load-status" class="notice" role="status">Preparing your brief…</div>
+  <div id="data-views" hidden>
+    <section class="stats" aria-label="Current selection summary" id="stats"></section>
+    <section class="workspace">
+      <aside class="filters" aria-label="Filter stories"><div class="filter-heading"><h2>Your perspective</h2><button class="text-button" id="reset">Reset</button></div>
+        <label for="range">TIME WINDOW</label><select id="range"><option value="1">1 day</option><option value="3">3 days</option><option value="7" selected>7 days</option><option value="30">30 days</option></select>
+        <label for="language">LANGUAGE</label><select id="language"><option value="">All languages</option></select>
+        <label for="country">MENTIONED GEOGRAPHY</label><select id="country"><option value="">All geographies</option></select>
+        <p class="filter-note">Geography refers to places mentioned in a story, not the publisher’s location.</p>
+        <div class="filter-divider"></div><div class="small-spark">✦</div><h3>Curiosity looks good on you.</h3><p class="filter-note">A different place. A different language. A new reason to feel hopeful.</p>
+        <a class="method-link" href="#methodology">How we choose stories <span>↗</span></a>
+      </aside>
+      <div class="results">
+        <div class="section-heading"><div><p class="eyebrow">THE READING ROOM</p><h2 id="results-title">Worth a little of your time.</h2></div><span class="pill">POSITIVE PICKS</span></div>
+        <div class="toolbar"><label class="search-shell"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search headlines or sources" aria-label="Search headlines or sources"></label><label class="sort-shell"><span>Sort</span><select id="sort" aria-label="Sort stories"><option value="high">Most optimistic</option><option value="low">Least optimistic</option></select></label></div>
+        <p class="result-caption" id="result-count" aria-live="polite"></p>
+        <section id="brief-view" aria-label="News stories"><div id="cards" class="cards"></div><nav class="pagination" aria-label="Story pages"><button id="previous">← Previous</button><span id="page-label"></span><button id="next">Next →</button></nav></section>
+        <section id="pulse-view" aria-label="Feed insights" hidden></section>
+      </div>
+    </section>
+  </div>
+  <section id="methodology-view" class="methodology" hidden>
+    <div class="method-intro"><p class="eyebrow">A LITTLE TRANSPARENCY</p><h2>Optimism, with context.</h2><p>Happy Factor helps you explore the feed. It is a ranking signal, not an objective measure of truth, quality, or how a story will make you feel.</p></div>
+    <div class="method-grid"><article><span class="step">01</span><h3>Find the signals</h3><p>GDELT supplies news metadata and tone signals. TidingsIQ refines those records into an explorable feed and links you to the original publisher.</p></article><article><span class="step">02</span><h3>Rank with care</h3><p>The tone score is normalized to 0–100. Positive title terms can add a bonus; title guardrails penalize or exclude certain negative topics.</p></article><article><span class="step">03</span><h3>Keep your judgment</h3><p>Eligible stories need a headline, a source link, and a Happy Factor of at least 65, and must pass the title rules. Automated rules can still miss context.</p></article></div>
+    <div class="method-detail"><h3>Reading the Happy Factor colours</h3><p>Badge colours use soft amber and sage tones, with stronger green accents as the optimism score increases. The number remains visible so colour is never the only signal. These bands describe the ranking score, not an editorial rating.</p><div class="score-guide" aria-label="Happy Factor colour bands"><span class="score score-amber">65–69 · Amber</span><span class="score score-sage">70–79 · Sage</span><span class="score score-green">80–89 · Green</span><span class="score score-deep">90–100 · Deep green</span></div></div>
+    <div class="method-detail"><h3>The data behind your feed</h3><p id="snapshot-explanation"></p><p>“7 days” preserves the existing dashboard’s inclusive UTC date cutoff, so it covers the data date and the previous seven calendar dates. Pulse summarizes eligible stories in your current selection; it does not describe the entire news landscape.</p><p>Language may be unknown. Mentioned geography is not necessarily the publisher’s country. Follow the source link for the original reporting.</p></div>
+  <div class="method-detail"><h3>Simple, private measurement</h3><p>We count page loads, engagement, and story-link clicks to improve TidingsIQ. Measurement uses a random identifier that lasts only until you reload or close this page. We use no analytics cookies or persistent visitor identifiers, and do not collect your searches or the story links you click. Browser Do Not Track and Global Privacy Control signals disable measurement. Our hosting provider also records standard request logs, including network addresses.</p></div>
+  </section>
+  <footer><span class="footer-brand">Tidings<span>IQ</span></span><p>A little more perspective. A little more possibility.</p><span id="footer-date">Loading data date…</span></footer>
+</main>
+<noscript><p class="notice">Enable JavaScript to explore this news feed.</p></noscript>
+</body></html>

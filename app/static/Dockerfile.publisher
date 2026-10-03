@@ -1,0 +1,6 @@
+FROM asia-south1-docker.pkg.dev/tidingsiq-dev/tidingsiq-pipeline/tidingsiq-bruin@sha256:2c30b9a37ed94baaa72776f8e8aa1485476c6a9097388a5842d744b53ceef15c
+COPY --chown=tidingsiq:tidingsiq publish_static_feed.py /workspace/scripts/publish_static_feed.py
+COPY --chown=tidingsiq:tidingsiq build_snapshot.py /workspace/app/static/build_snapshot.py
+COPY --chown=tidingsiq:tidingsiq story_matcher.py /workspace/app/static/story_matcher.py
+ENTRYPOINT ["python3", "/workspace/scripts/publish_static_feed.py"]
+CMD []
